@@ -177,8 +177,8 @@
             "expected": "File exists with substantial content (100+ lines)"
           },
           "status": "completed",
-          "notes": "Written outputs/155.md with 1558 lines covering all 9 required sections: (1) Overview with scope (227 DocTypes across 7 apps) and known issues from Phase 1 analysis, (2) Systematic audit methodology (5-step process, test matrix, static analysis checklist, automated scanning script), (3) Error detection tools (browser console with capture protocol, Frappe Error Log patterns, bench --verbose), (4) Common error source catalogue (broken Link fields, missing permissions, invalid fetch_from, bad depends_on, JS errors, server-side hook errors, Dynamic Link errors, child table errors), (5) Error logging format specification (20-field schema, error type registry with 20 error codes, tracking spreadsheet template), (6) Priority tier definitions (Critical=form won't open/4h SLA, High=can't save/1 day SLA, Medium=field error/2 week SLA, Low=cosmetic, with decision matrix), (7) Complete DocType audit checklist for all 227 DocTypes across 7 apps with per-DocType priority and risk areas, (8) Fix ordering strategy (4 waves: Critical Day 1-2, High Day 3-7, Medium Week 2-3, Low ongoing; batch fix patterns; dependency-aware ordering), (9) Regression prevention plan (pre-commit hooks, automated test suite, CI/CD pipeline, code review checklist, monitoring/alerting, periodic re-audit schedule). Also includes 2 appendices: error-to-fix quick reference and estimated error distribution by app (130-270 total estimated).",
-          "updated_at": "2026-03-05T20:55:00.000000+00:00"
+          "notes": "Written outputs/155.md with 1558 lines covering all 9 required sections: (1) Overview with scope (227 DocTypes across 7 apps) and known issues from Phase 1 analysis, (2) Systematic audit methodology (5-step process, test matrix, static analysis checklist, automated scanning script), (3) Error detection tools (browser console with capture protocol, Frappe Error Log patterns, bench --verbose), (4) Common error source catalogue (8 error categories with 20 error type codes), (5) Error logging format specification (20-field JSON schema, error type registry, tracking spreadsheet template), (6) Priority tier definitions (Critical=form won't open/4h SLA, High=can't save/1 day SLA, Medium=field error/2 week SLA, Low=cosmetic, with decision matrix), (7) Complete DocType audit checklist for all 227 DocTypes across 7 apps with per-DocType priority and risk areas, (8) Fix ordering strategy (4 waves: Critical Day 1-2, High Day 3-7, Medium Week 2-3, Low ongoing; batch fix patterns; dependency-aware ordering), (9) Regression prevention plan (pre-commit hooks, automated test suite, CI/CD pipeline, code review checklist, monitoring/alerting, periodic re-audit schedule). Also includes 2 appendices: error-to-fix quick reference and estimated error distribution by app (130-270 total estimated). Committed as 605566f.",
+          "updated_at": "2026-03-05T17:56:04.280300+00:00"
         }
       ]
     },
@@ -209,7 +209,9 @@
             "command": "test -f outputs/157.md && wc -l outputs/157.md",
             "expected": "File exists with substantial content (200+ lines)"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Written outputs/157.md with 1760 lines covering all 9 required sections plus post-implementation notes. Complete audit of 737 Link fields across 7 TradeHub apps (139 filtered, 598 unfiltered, ~407 editable unfiltered). Includes: per-app inventory tables, 7 filter rule categories (P0-P3), implementation method assignment per field, 5 JS code sample patterns, 60+ child table field mappings with cascading examples, 6 edge case analyses, 12-case manual test matrix, automated Python test script, and 4-wave rollout plan. Committed as 08efb9b.",
+          "updated_at": "2026-03-05T18:04:49.802780+00:00"
         }
       ]
     },
@@ -240,7 +242,9 @@
             "command": "test -f outputs/158.md && wc -l outputs/158.md",
             "expected": "File exists with substantial content (200+ lines)"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Written outputs/158.md Part 1 with 1282 lines covering 6 core sections: Overview with reference platforms (Amazon/Alibaba/eBay), system architecture (14 DocTypes), Ad Campaign (132 fields, 10-state workflow, admin approval), Ad Campaign Item (16 fields, per-item bids), Ad Keyword (14 fields, Broad/Phrase/Exact match, negatives), Ad Creative (60 fields, 6 types, media rules, approval flow), Ad Placement (74 fields, 9 types, CPC/CPM/CPT pricing, seed data). All follow Campaign and Seller Balance patterns. Committed as 57527e0.",
+          "updated_at": "2026-03-05T18:11:56.186950+00:00"
         },
         {
           "id": "subtask-6-2",
@@ -258,7 +262,9 @@
             "command": "test -f outputs/158.md && wc -l outputs/158.md",
             "expected": "File exists with substantial content (500+ lines)"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Appended Part 2 to outputs/158.md (sections 9-22). Total file now 4141 lines. Covers: Banner Booking (CPT model with conflict detection SQL), Ad Event Log (62 fields, 5 custom indexes), Ad Wallet (66 fields, full Python API mirroring Seller Balance with get_or_create/add_funds/deduct_balance/reserve/refund/auto-pause), Ad Wallet Transaction (exact mirror of Seller Balance Transaction child table), Ad Invoice (60 fields, submittable, monthly generation scheduled task), Ad Invoice Item (12-field child table), Ad Quality Score (30 fields, 5 weighted components: CTR 35%, Relevance 25%, Creative 15%, Landing Page 15%, Seller 10%), Ad Fraud Rule (50 fields, 7 rule types with configurable parameters and actions), Auction Engine (second-price auction with Ad Rank = bid x QS multiplier, full Python implementation), Fraud Detection (4 core rules: IP dedup <60s, bot UA/speed detection, click flooding, coordinated fraud pattern analysis), Billing Flow (per-click deduction, zero-balance auto-pause, low-balance alerts, Seller Balance transfer API), Seller Dashboard (5 widgets: wallet summary, campaign table, key metrics CTR/ACoS/ROAS, spend chart, top keywords), Admin Panel (5 widgets: revenue summary, approval queue, creative queue, fraud monitoring, system health; 3 reports; API endpoints), Post-Implementation (bench migrate, 5 scheduled tasks, 10 DB indexes, roles/permissions matrix, seed data for 9 placements and 6 fraud rules, monitoring alerts, future enhancements).",
+          "updated_at": "2026-03-05T18:30:00.000000+00:00"
         }
       ]
     },
@@ -407,7 +413,7 @@
   },
   "qa_signoff": null,
   "created_at": "2026-03-05T12:41:43.008Z",
-  "updated_at": "2026-03-05T17:47:12.823Z",
+  "updated_at": "2026-03-05T18:12:26.157Z",
   "status": "in_progress",
   "planStatus": "in_progress",
   "xstateState": "coding",
@@ -418,5 +424,5 @@
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-05T17:16:46.846635+00:00"
   },
-  "last_updated": "2026-03-05T17:46:28.864029+00:00"
+  "last_updated": "2026-03-05T18:11:56.186958+00:00"
 }
