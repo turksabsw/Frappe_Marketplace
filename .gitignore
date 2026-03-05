@@ -30,3 +30,6 @@ Thumbs.db
 
 # Worktrees (bunlar local kalmalı)
 .worktrees/
+
+# Auto Claude data directory
+.auto-claude/
