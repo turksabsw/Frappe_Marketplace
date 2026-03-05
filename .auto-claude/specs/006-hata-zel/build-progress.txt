@@ -366,3 +366,122 @@ JS files with set_query implementations:
 | Active required fields needing filters | ~95 | CRITICAL - user must select, needs guidance |
 
 === END subtask-1-2 ===
+
+=== SESSION 4 (subtask-1-3: VKN/TCKN Fields & Admin Queue Patterns) ===
+
+## VKN/TCKN FIELD INVENTORY ACROSS ALL DOCTYPES
+
+### A. TAX ID FIELD PATTERNS BY DOCTYPE
+
+| DocType | Field | Type | Options/Default | Required | Description | Notes |
+|---------|-------|------|-----------------|----------|-------------|-------|
+| KYC Profile | tckn | Data | - | No | "Turkish Citizenship Number (11 digits)" | Dedicated TCKN field |
+| KYC Profile | tax_id_individual | Data | - | No | "Personal Tax ID for sole proprietors/freelancers" | Separate individual tax field |
+| KYC Profile | tax_id | Data | - | No | Generic Tax ID | Added outside field_order (late addition) |
+| KYC Profile | tax_id_type | Select | "\nTC Kimlik No\nVergi No\nPassport" | No | Tax ID type selector | INCONSISTENT: Uses Turkish labels |
+| Seller Profile | tax_id | Data | - | No | "VKN (10 digits) or TCKN (11 digits)" | Combined VKN/TCKN field |
+| Seller Profile | tax_id_type | Select | "TCKN\nVKN" (default TCKN) | No | Tax ID type selector | INCONSISTENT: Uses abbreviations |
+| Seller Application | tax_id | Data | - | mandatory_depends_on non-Individual | "VKN (10 digits) or TCKN (11 digits)" | Same as Seller Profile |
+| Seller Application | tax_id_type | Select | "TCKN\nVKN" (default TCKN) | No | Tax ID type selector | Matches Seller Profile format |
+| Organization | tax_id | Data | - | reqd=1 | "VKN - 10 digit Tax Identification Number" | Always VKN (organizations) |
+| Organization | (none) | - | - | - | No tax_id_type field | Organization always uses VKN |
+
+### B. TAX_ID_TYPE INCONSISTENCY (CRITICAL BUG)
+
+**KYC Profile uses different option labels than Seller Profile/Application:**
+
+| DocType | TCKN Option | VKN Option | Extra Options |
+|---------|-------------|------------|---------------|
+| KYC Profile | "TC Kimlik No" | "Vergi No" | "Passport" (+ empty first option) |
+| Seller Profile | "TCKN" | "VKN" | (none) |
+| Seller Application | "TCKN" | "VKN" | (none) |
+| Organization | N/A | N/A | No tax_id_type field (always VKN) |
+
+This means KYC Profile's tax_id_type values ("TC Kimlik No", "Vergi No") won't match Seller Profile values ("TCKN", "VKN") when comparing or migrating data. Task 131 MUST standardize these options.
+
+### C. VERIFICATION STATUS FIELDS
+
+| DocType | Field | Options | Default | permlevel |
+|---------|-------|---------|---------|-----------|
+| KYC Profile | status | Draft/Pending Review/In Review/Documents Required/Verified/Rejected/Expired/Suspended | Draft | 0 |
+| KYC Profile | verification_status | Pending/In Progress/Completed/Failed/Manual Review Required | Pending | 0 (read_only) |
+| Seller Profile | status | Pending/Under Review/Active/Suspended/Blocked/Inactive/Vacation | Pending | 0 |
+| Seller Profile | verification_status | Pending/In Review/Documents Requested/Verified/Rejected | Pending | 1 |
+| Seller Application | status | Draft/Submitted/Under Review/Documents Requested/Revision Required/Approved/Rejected/Cancelled | Draft | 0 (read_only) |
+| Seller Application | workflow_state | Draft/Pending Review/In Review/Documents Requested/Revision Required/Approved/Rejected/Cancelled | Draft | 0 (read_only) |
+| Seller Application | review_status | Not Started/In Progress/Pending Documents/Pending Verification/Completed | (empty) | 0 |
+| Organization | status | Pending Verification/Active/Suspended/Blocked/Inactive | Pending Verification | 0 |
+| Organization | verification_status | Pending/In Review/Documents Requested/Verified/Rejected | Pending | 1 |
+
+**Pattern: Dual status + verification_status is common. verification_status at permlevel 1 (admin-only write) is the standard approach.**
+
+### D. VERIFICATION CHECKLIST FIELDS
+
+| DocType | Check Fields | Notes |
+|---------|-------------|-------|
+| KYC Profile | id_verified, address_verified, liveness_verified | Identity verification granularity |
+| Seller Profile | identity_verified, business_verified, bank_verified | Seller verification granularity |
+| Organization | documents_verified, tax_documents_verified, trade_registry_verified | KYB verification granularity |
+
+### E. REVIEW WORKFLOW FIELDS (Seller Application as model)
+
+- assigned_to: Link -> User (reviewer)
+- review_started_at: Datetime (read_only)
+- review_deadline: Date
+- review_status: Select (Not Started/In Progress/Pending Documents/Pending Verification/Completed)
+- review_notes: Text (internal)
+- rejection_reason: Select (Incomplete Documents/Invalid Tax ID/Failed Verification/Prohibited Category/Previous Violations/Duplicate Application/Suspicious Activity/Other)
+- reviewed_at: Datetime (read_only)
+- reviewed_by: Link -> User (read_only)
+- revision_requested: Check (read_only)
+- revision_notes: Small Text
+
+### F. MODERATION CASE ADMIN QUEUE PATTERN (reference for Identity Verification)
+
+**Key patterns to replicate:**
+
+1. **Autoname**: MOD-.YYYY.-.##### (year-based sequential)
+2. **Status workflow with color-coded states**: Open(blue) -> Assigned(yellow) -> In Review(orange) -> Pending Info(gray) -> Escalated(red) -> Resolved(green) -> Closed(gray) / Appealed(purple) / Reopened(orange)
+3. **Priority**: Critical/High/Medium/Low (Select, reqd)
+4. **Assignment**: assigned_to (User), assigned_at (Datetime read_only)
+5. **Review timing**: review_started_at, review_completed_at, review_time_seconds (all read_only)
+6. **Decision**: decision (Select with multiple options), decision_reason (Small Text), decision_notes (Text Editor)
+7. **Appeal workflow**: is_appealable, appeal_status, appeal_submitted_at, appeal_reason, appeal_evidence, appeal_decision, appeal_decided_by, appeal_decided_at, appeal_response
+8. **Escalation**: is_escalated, escalation_level (5 levels), escalated_to, escalation_reason, escalated_at, escalated_by
+9. **SLA tracking**: sla_target_hours, sla_status (On Track/At Risk/Breached/Exempt), queue_position, wait_time_hours, resolution_time_hours
+10. **Dynamic content link**: content_type (Link->DocType) + content_id (Dynamic Link) - allows any DocType to be reviewed
+11. **Notification tracking**: owner_notified, reporter_notified, decision_notification_sent (Check fields)
+12. **History table**: Moderation Action Log (child table)
+13. **Permissions**: System Manager (full), Marketplace Admin (create/read/write), Marketplace Moderator (create/read/write, no delete/export)
+
+### G. BUSINESS DOCUMENT REQUIREMENTS (Seller Application)
+
+| Document | Required For | Field |
+|----------|-------------|-------|
+| Identity Document | All | identity_document_attachment (Attach, reqd) |
+| Trade Registry (Ticaret Sicil Gazetesi) | Business, Enterprise | trade_registry_attachment |
+| Tax Certificate (Vergi Levhasi) | Business, Enterprise | tax_certificate_attachment |
+| Signature Circular (Imza Sirkuleri) | Enterprise only | signature_circular_attachment |
+| Activity Certificate (Faaliyet Belgesi) | Optional | activity_certificate_attachment |
+| Bank Statement | Optional | bank_statement_attachment |
+| Additional Documents | Optional | additional_documents (Table -> Seller Application Document) |
+
+### H. KEY FINDINGS FOR TASK 131 (Identity Verification Plan)
+
+1. **tax_id_type inconsistency** is the most critical finding - KYC Profile uses "TC Kimlik No/Vergi No/Passport" while Seller Profile/Application use "TCKN/VKN". Must standardize.
+
+2. **No algorithmic validation exists** - All tax_id fields are plain Data type with no format enforcement or checksum validation.
+
+3. **No uniqueness check** - tax_id is not marked unique in any DocType. Multiple sellers could register with the same VKN/TCKN.
+
+4. **Organization always VKN** - Organization.tax_id is always VKN (10 digits, required). No tax_id_type selector needed since organizations are always companies.
+
+5. **Seller Application -> Seller Profile pipeline** - Application approval creates Seller Profile, so tax_id data flows from Application to Profile. Identity Verification Request should integrate into this pipeline.
+
+6. **Dual status pattern** - Use separate status (overall) and verification_status (identity-specific). Verification_status at permlevel 1 (admin-only write) is the established pattern.
+
+7. **Moderation Case is the blueprint** for admin review queue - replicate: priority, status workflow with colors, assignment, review timing, decision/appeal/escalation, SLA tracking, notification tracking, and history table patterns.
+
+8. **Missing "Invalid Tax ID" validation** - Seller Application has "Invalid Tax ID" as a rejection_reason option but no automated validation to detect it before manual review.
+
+=== END subtask-1-3 ===
