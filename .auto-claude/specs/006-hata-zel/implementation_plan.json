@@ -263,8 +263,8 @@
             "expected": "File exists with substantial content (500+ lines)"
           },
           "status": "completed",
-          "notes": "Appended Part 2 to outputs/158.md (sections 9-22). Total file now 4141 lines. Covers: Banner Booking (CPT model with conflict detection SQL), Ad Event Log (62 fields, 5 custom indexes), Ad Wallet (66 fields, full Python API mirroring Seller Balance with get_or_create/add_funds/deduct_balance/reserve/refund/auto-pause), Ad Wallet Transaction (exact mirror of Seller Balance Transaction child table), Ad Invoice (60 fields, submittable, monthly generation scheduled task), Ad Invoice Item (12-field child table), Ad Quality Score (30 fields, 5 weighted components: CTR 35%, Relevance 25%, Creative 15%, Landing Page 15%, Seller 10%), Ad Fraud Rule (50 fields, 7 rule types with configurable parameters and actions), Auction Engine (second-price auction with Ad Rank = bid x QS multiplier, full Python implementation), Fraud Detection (4 core rules: IP dedup <60s, bot UA/speed detection, click flooding, coordinated fraud pattern analysis), Billing Flow (per-click deduction, zero-balance auto-pause, low-balance alerts, Seller Balance transfer API), Seller Dashboard (5 widgets: wallet summary, campaign table, key metrics CTR/ACoS/ROAS, spend chart, top keywords), Admin Panel (5 widgets: revenue summary, approval queue, creative queue, fraud monitoring, system health; 3 reports; API endpoints), Post-Implementation (bench migrate, 5 scheduled tasks, 10 DB indexes, roles/permissions matrix, seed data for 9 placements and 6 fraud rules, monitoring alerts, future enhancements).",
-          "updated_at": "2026-03-05T18:30:00.000000+00:00"
+          "notes": "Appended Part 2 to outputs/158.md (sections 9-22, 2867 new lines, total 4141 lines). All 22 sections verified present. Key deliverables: Banner Booking with CPT conflict detection, Ad Event Log (62 fields + indexes), Ad Wallet mirroring Seller Balance (full Python API), Ad Wallet Transaction (exact child table mirror), Ad Invoice + Item (monthly generation), Ad Quality Score (5 weighted components), Ad Fraud Rule (7 types), Auction Engine (second-price Ad Rank formula), Fraud Detection (4 rules), Billing Flow (per-click deduction + auto-pause), Seller Dashboard (CTR/ACoS/ROAS), Admin Panel (approval + fraud + revenue), Post-Implementation (migration, indexes, seed data, scheduled tasks). Committed as af24cdb.",
+          "updated_at": "2026-03-05T19:00:20.595072+00:00"
         }
       ]
     },
@@ -294,7 +294,9 @@
             "command": "ls -la outputs/122.md outputs/131.md outputs/155.md outputs/157.md outputs/158.md 2>&1",
             "expected": "All 5 files exist with non-zero size"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Full QA verification completed. All 5 files exist with substantial content (122.md: 1066 lines/36KB, 131.md: 1811 lines/68KB, 155.md: 1558 lines/79KB, 157.md: 1760 lines/89KB, 158.md: 4141 lines/190KB). Checks passed: (1) All required sections present per spec, (2) VKN 10-digit checksum algorithm mathematically correct with Python/JS code and worked example, (3) TC 11-digit checksum algorithm mathematically correct - fixed digit table in worked example, (4) All 158.md DocType field references use valid Frappe fieldtypes (Link, Data, Select, Currency, Int, Float, Check, etc.), (5) 13 DocTypes defined (exceeds 10+ requirement), (6) No code files modified (only .md files in outputs/ and spec metadata), (7) All code blocks properly closed (even fence counts), (8) All tables have header/separator/data rows, (9) Post-implementation notes (bench migrate + bench clear-cache) present in all applicable docs (122, 131, 155, 157, 158), (10) Second-price auction with Ad Rank formula correctly documented, (11) Fraud detection rules include IP dedup window, bot UA detection, click speed check, click flooding.",
+          "updated_at": "2026-03-05T22:05:00.000000+00:00"
         }
       ]
     }
@@ -413,7 +415,7 @@
   },
   "qa_signoff": null,
   "created_at": "2026-03-05T12:41:43.008Z",
-  "updated_at": "2026-03-05T18:12:26.157Z",
+  "updated_at": "2026-03-05T19:01:05.349Z",
   "status": "in_progress",
   "planStatus": "in_progress",
   "xstateState": "coding",
@@ -424,5 +426,5 @@
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-05T17:16:46.846635+00:00"
   },
-  "last_updated": "2026-03-05T18:11:56.186958+00:00"
+  "last_updated": "2026-03-05T19:00:20.595080+00:00"
 }
