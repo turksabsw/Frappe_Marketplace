@@ -82,8 +82,8 @@
             "instructions": "Wallet pattern and campaign structure fully understood and documented for Task 158 reference"
           },
           "status": "completed",
-          "notes": "Analyzed all 4 reference DocTypes: Seller Balance (wallet parent with 8 tabs, balance tiers, status workflow, color-coded states, permissions), Seller Balance Transaction (child table with transaction_date, type Credit/Debit/Hold/Release, amount, running_balance, reference_type/name, description), Campaign (9 tabs: details/validity/discount/applicability/budget/targeting/display/analytics/system, status Draft→Scheduled→Active→Paused→Ended→Cancelled, seller/tenant fetch_from pattern, budget tracking, coupon integration, analytics counters), Coupon (8 tabs, autoname by coupon_code, discount types Percentage/Fixed/Free Shipping/BOGO, Table MultiSelect child tables for products/categories via Coupon Product Item and Coupon Category Item, usage tracking, campaign link). Python class analysis: Seller Balance uses db_set() for atomic balance mutations, get_or_create factory pattern, transaction logging to both child table and deprecated JSON field, permission checks in API endpoints. KEY PATTERNS FOR TASK 158: (1) Ad Wallet mirrors Seller Balance but reversed (spends not earns) - needs add_funds/deduct_ad_spend/reserve_for_campaign methods, (2) Ad Campaign mirrors Campaign but adds approval workflow, bid amounts, real-time budget checks, auction integration, (3) Child tables use minimal Link + fetch_from pattern, (4) Wallet-Campaign relationship: auto-pause campaigns on zero balance.",
-          "updated_at": "2026-03-05T17:35:00.000000+00:00"
+          "notes": "Analyzed all 4 reference DocTypes: Seller Balance (wallet parent with 8 tabs, balance tiers, status workflow, color-coded states, permissions), Seller Balance Transaction (child table with transaction_date, type Credit/Debit/Hold/Release, amount, running_balance, reference_type/name, description), Campaign (9 tabs: details/validity/discount/applicability/budget/targeting/display/analytics/system, status Draft→Scheduled→Active→Paused→Ended→Cancelled, seller/tenant fetch_from pattern, budget tracking, coupon integration, analytics counters), Coupon (8 tabs, autoname by coupon_code, discount types Percentage/Fixed/Free Shipping/BOGO, Table MultiSelect child tables for products/categories via Coupon Product Item and Coupon Category Item, usage tracking, campaign link). Python class analysis: Seller Balance uses db_set() for atomic balance mutations, get_or_create factory pattern, transaction logging to both child table and deprecated JSON field, permission checks in API endpoints. KEY PATTERNS FOR TASK 158: (1) Ad Wallet mirrors Seller Balance but reversed (spends not earns) - needs add_funds/deduct_ad_spend/reserve_for_campaign methods, (2) Ad Campaign mirrors Campaign but adds approval workflow, bid amounts, real-time budget checks, auction integration, (3) Child tables use minimal Link + fetch_from pattern, (4) Wallet-Campaign relationship: auto-pause campaigns on zero balance. Committed as bec49c0.",
+          "updated_at": "2026-03-05T17:33:00.737658+00:00"
         }
       ]
     },
@@ -113,7 +113,9 @@
             "command": "test -f outputs/122.md && wc -l outputs/122.md",
             "expected": "File exists with substantial content (100+ lines)"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Written outputs/122.md with 1066 lines covering all 8 required sections: Overview, DocType/field inventory (34 UOM fields across 4 apps), UOM category definitions (Mass/Length/Volume/Area/Unit/Other), migration plan (Select->Link for Marketplace Shipment, Data->Link for Shipment volume_uom), set_query filter JS code for all contexts, UOM Conversion Factor integration plan, edge cases, and post-implementation notes. Also identified 4 critical bugs: wrong field refs in marketplace_shipment.js, wrong fieldtype for volume_uom, inconsistent defaults, missing filters on 28+ fields. Committed as 69f3558.",
+          "updated_at": "2026-03-05T17:38:48.174036+00:00"
         }
       ]
     },
@@ -144,7 +146,9 @@
             "command": "test -f outputs/131.md && wc -l outputs/131.md",
             "expected": "File exists with substantial content (150+ lines)"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Written outputs/131.md with 1811 lines covering all 12 required sections: Overview (current state analysis, critical issues), VKN validation algorithm (10-digit checksum with Python/JS implementations), TC Kimlik No validation algorithm (11-digit checksum with worked example using test TCKN 10000000146), GIB API integration research with tiered fallback strategy, Identity Verification Request DocType design (7 tabs, 60+ fields, IDVR-.YYYY.-.##### autoname), Workflow definition (7 states, 11 transitions), Admin review queue (following Moderation Case pattern with priority rules, SLA targets, dashboard widget), Visual status badges (6 verification statuses, 3 identity type badges with CSS/JS), Unverified user restriction matrix (10 actions x 4 verification levels), Integration points (KYC Profile + Seller Profile propagation, tax_id_type standardization migration), Edge cases (duplicate submissions, expiry, resubmission, concurrent submissions, name change, VKN transfer), Post-implementation notes (bench migrate + clear-cache, scheduled tasks, indexes).",
+          "updated_at": "2026-03-05T20:45:00.000000+00:00"
         }
       ]
     },
@@ -401,7 +405,7 @@
   },
   "qa_signoff": null,
   "created_at": "2026-03-05T12:41:43.008Z",
-  "updated_at": "2026-03-05T17:30:11.756Z",
+  "updated_at": "2026-03-05T17:39:30.655Z",
   "status": "in_progress",
   "planStatus": "in_progress",
   "xstateState": "coding",
@@ -412,5 +416,5 @@
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-05T17:16:46.846635+00:00"
   },
-  "last_updated": "2026-03-05T17:29:27.443837+00:00"
+  "last_updated": "2026-03-05T17:38:48.174043+00:00"
 }
