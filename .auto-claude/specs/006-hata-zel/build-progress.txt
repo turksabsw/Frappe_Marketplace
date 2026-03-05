@@ -485,3 +485,216 @@ This means KYC Profile's tax_id_type values ("TC Kimlik No", "Vergi No") won't m
 8. **Missing "Invalid Tax ID" validation** - Seller Application has "Invalid Tax ID" as a rejection_reason option but no automated validation to detect it before manual review.
 
 === END subtask-1-3 ===
+
+=== SESSION 5 (subtask-1-4: Wallet Pattern & Campaign Structure Analysis) ===
+
+## SELLER BALANCE (WALLET) PATTERN ANALYSIS
+
+### A. SELLER BALANCE DOCTYPE - ARCHITECTURE
+
+**Key Metadata:**
+- autoname: "field:seller" (1:1 relationship - one balance per seller)
+- naming_rule: "By fieldname"
+- module: "TradeHub Seller"
+- allow_rename: 0
+- track_changes: 1
+- engine: InnoDB
+
+**Tab-Based Layout (8 tabs):**
+1. Details - Basic info (seller link, seller_name fetch_from, status, tenant, currency, last_updated)
+2. Balance - Current balances (available, pending, held, reserved, total) + Lifetime statistics
+3. Payout - Payout settings (method, IBAN, bank) + Schedule (frequency, dates) + Pending payout info
+4. Orders & Transactions - Order statistics + Transaction Records (child table: Seller Balance Transaction) + Recent Transactions (deprecated JSON)
+5. Tax - Tax withholding, tax ID, certificate validity
+6. Alerts - Payment issues, suspension status
+7. System - Audit trail (created_at, created_by, modified_at, modified_by_user, notes)
+
+**Balance Fields (all Currency, read_only, options="currency"):**
+- available_balance: Funds ready for payout (default 0)
+- pending_balance: Awaiting escrow release (default 0)
+- held_balance: Under dispute/review (default 0)
+- reserved_balance: Reserved for pending payouts (default 0)
+- total_balance: Sum of all (default 0, read_only)
+- minimum_payout_threshold: Min for payout (default 100, NOT read_only)
+
+**Status field:** Select with "Active\nPending Verification\nSuspended\nClosed" (default Active)
+**Color-coded states:** Active(green), Pending Verification(orange), Suspended(red), Closed(gray)
+
+**Permissions:**
+- System Manager: full CRUD + email/export/print/report/share
+- All: read + print only (no create/write/delete)
+
+**Links:**
+- Seller Profile (via seller_balance)
+- Escrow Account (via seller)
+
+### B. SELLER BALANCE TRANSACTION (CHILD TABLE)
+
+**Key Metadata:**
+- istable: 1 (child table - embedded in parent)
+- naming_rule: "Random"
+- module: "TradeHub Seller"
+- editable_grid: 1
+- track_changes: 0
+- sort_field: "transaction_date", sort_order: "DESC"
+
+**Fields:**
+- transaction_date: Datetime (reqd, in_list_view) - "Date and time of the transaction"
+- transaction_type: Select (reqd, in_list_view) - Options: "\nCredit\nDebit\nHold\nRelease"
+- amount: Currency (reqd, in_list_view, options="currency") - "Transaction amount"
+- running_balance: Currency (read_only, in_list_view, options="currency") - "Balance after this transaction"
+- reference_type: Data - "DocType of the referenced document"
+- reference_name: Data - "Name/ID of the referenced document"
+- description: Data - "Brief description of the transaction"
+
+**Layout:** 2 columns + collapsible Reference section
+**No permissions** (inherits from parent)
+
+### C. SELLER BALANCE PYTHON CLASS - KEY PATTERNS
+
+**Balance Operations (all use db_set for atomic updates):**
+1. add_earnings(amount, order_name, description) → pending_balance += amount
+2. release_to_available(amount, escrow_name, description) → pending -= amount, available += amount
+3. deduct_commission(amount, order_name, description) → lifetime_commissions += amount
+4. process_refund(amount, order_name, description) → available -= amount (then pending if insufficient)
+5. hold_funds(amount, reason) → available -= amount, held += amount
+6. release_held_funds(amount, release_to, description) → held -= amount, available += amount
+7. apply_adjustment(amount, reason, adjustment_type) → available += amount, lifetime_adjustments += amount
+
+**Payout Lifecycle:**
+1. can_payout() → checks status, suspension, payment issues, threshold, IBAN
+2. request_payout(amount) → available -= amount, reserved += amount
+3. complete_payout(amount, reference) → reserved -= amount, lifetime_payouts += amount
+4. fail_payout(amount, reason) → reserved -= amount, available += amount + sets payment issue flag
+
+**Validation:** validate_seller, validate_balances (no negative), validate_iban (TR format + MOD-97), validate_payout_settings
+**Transaction logging:** _log_transaction() writes to JSON field (recent_transactions) - keeps last 100 entries
+**Cache:** clear_cache on update (seller_balance:{name} and seller_balance_seller:{seller})
+**Factory:** get_or_create_seller_balance(seller) - auto-creates from Seller Profile data
+**Scheduled job:** process_scheduled_payouts() - finds eligible balances and requests payouts
+
+**KEY INSIGHT FOR AD WALLET:**
+- The wallet uses BOTH a child table (transaction_records → Seller Balance Transaction) AND a JSON field (recent_transactions) for transaction history
+- The JSON field is deprecated in favor of the child table but both exist
+- All balance mutations use db_set() for atomic single-field updates (not save())
+- get_or_create pattern is essential - wallet auto-creates on first access
+- Permission checks in API endpoints: session.user == seller.user OR has_permission
+
+### D. CAMPAIGN DOCTYPE - ARCHITECTURE
+
+**Key Metadata:**
+- autoname: "field:campaign_name" (named by campaign name)
+- naming_rule: "By fieldname"
+- module: "TradeHub Marketing"
+- allow_rename: 1
+- track_changes: 1
+- index_web_pages_for_search: 1
+
+**Tab-Based Layout (9 tabs):**
+1. Details - Basic info (campaign_name unique/reqd, campaign_type Select, status, priority Int, is_featured Check) + Description (Text Editor + banner_image Attach Image)
+2. Validity - Period (start_date/end_date Datetime reqd) + timezone (default "Europe/Istanbul") + auto_activate/auto_deactivate (Check, both default 1)
+3. Discount - Configuration (discount_type Select, discount_value Float, max_discount_amount Currency with depends_on Percentage, min_order_amount Currency)
+4. Applicability - Target (applies_to Select: All Products/Specific Categories/Specific Sellers/Specific Products) + conditional fields (Small Text comma-separated) + excluded_products + Coupon Integration section
+5. Budget & Limits - Budget (budget_enabled Check, total_budget/spent_amount/remaining_budget Currency) + Usage (usage_limit/usage_per_customer/total_usage/unique_users Int)
+6. Targeting - Customer segment (target_audience Select, buyer_levels, new_customers_only, min/max_previous_orders, geographic_regions)
+7. Display - Settings (show_on_homepage/show_in_category/show_countdown Check, display_order Int, highlight_color Color, highlight_text Data) + Seller & Tenant section
+8. Analytics - Stats (views_count/clicks_count/orders_count Int read_only, revenue_generated Currency read_only)
+9. System - Notes & Terms (internal_notes Text, terms_and_conditions Text Editor)
+
+**Campaign Types:** Discount, Flash Sale, Seasonal, Clearance, Buy X Get Y, Free Shipping, Bundle Deal, Loyalty, Referral, New Customer, Holiday, Other
+
+**Status Workflow:** Draft(gray) → Scheduled(blue) → Active(green) → Paused(yellow) → Ended(red) / Cancelled(red)
+
+**Seller/Tenant Pattern:**
+- seller: Link → Seller Profile (optional, blank = platform-wide)
+- seller_name: fetch_from seller.seller_name (read_only)
+- tenant: fetch_from seller.tenant, Link → Tenant (read_only)
+- tenant_name: fetch_from tenant.tenant_name (read_only)
+
+**Permissions:**
+- System Manager: full CRUD + email/export/print/report/share
+- Seller: create/read/write + email/print/report (no delete/export/share)
+- Buyer: read only
+
+**Links:** Coupon (via linked_coupons), Seller Profile (via seller)
+**Sort:** priority DESC (higher priority first)
+**Search fields:** campaign_name, campaign_type, status, seller
+
+### E. COUPON DOCTYPE - ARCHITECTURE
+
+**Key Metadata:**
+- autoname: "field:coupon_code" (named by code)
+- naming_rule: "By fieldname"
+- module: "TradeHub Marketing"
+- allow_rename: 0
+- track_changes: 1
+- index_web_pages_for_search: 1
+
+**Tab-Based Layout (8 tabs):**
+1. Details - Coupon code (unique/reqd), title (reqd), is_active (Check default 1), status (Select read_only: Draft/Active/Expired/Used Up/Deactivated)
+2. Seller - seller (Link → Seller Profile optional, blank = platform-wide), tenant (fetch_from seller.tenant read_only)
+3. Discount - discount_type (Select reqd: Percentage/Fixed Amount/Free Shipping/Buy X Get Y), discount_value (Float reqd), max_discount_amount (depends_on Percentage), min_order_amount
+4. BOGO - Conditional on Buy X Get Y: buy_quantity, get_quantity, get_discount_percent, same_product_only + Product selection tables (bogo_buy_products/bogo_get_products → Coupon Product Item, bogo_categories → Coupon Category Item)
+5. Validity - valid_from/valid_until (Datetime reqd), usage_limit/used_count/usage_per_customer (Int)
+6. Applicability - applies_to (Select: All Products/Specific Categories/Specific Products) + Table MultiSelect child tables (Coupon Category Item, Coupon Product Item) + Exclusions
+7. Restrictions - new_customers_only, requires_minimum_items/minimum_items, buyer_levels (Small Text), max_uses_per_order, stackable
+8. System - Campaign link (Link → Campaign optional) + Description/Terms
+
+**Child Tables (Table MultiSelect):**
+- Coupon Product Item: listing (Link → Listing reqd) + listing_title (fetch_from listing.title read_only) — istable: 1, naming_rule: Random
+- Coupon Category Item: category (Link → Category reqd) + category_name (fetch_from category.category_name read_only) — istable: 1, naming_rule: Random
+
+**Permissions:** System Manager (full CRUD), All (create/read/write - NOTE: very permissive!)
+**Links:** Seller Profile (via seller), Campaign (via campaign)
+
+### F. KEY PATTERNS FOR TASK 158 (AD WALLET & AD CAMPAIGN)
+
+**AD WALLET should mirror Seller Balance:**
+1. One-to-one with Seller Profile (autoname: "field:seller")
+2. Balance tiers: available_balance (for ad spend), reserved_balance (committed to active campaigns), total_balance
+3. No pending/held needed for ad context (simpler than seller balance)
+4. Currency field with TRY default
+5. Child table for transaction history (Ad Wallet Transaction) with: transaction_date, transaction_type (Credit/Debit/Hold/Release/Ad Spend/Refund), amount, running_balance, reference_type, reference_name, description
+6. Python class with: add_funds(), deduct_ad_spend(), reserve_for_campaign(), release_reserved(), get_or_create pattern
+7. Auto-pause campaigns when balance depletes (zero-balance handling)
+8. Minimum balance alerts (like minimum_payout_threshold)
+9. API endpoints with permission checks (seller user OR admin)
+10. Atomic balance updates via db_set()
+
+**AD CAMPAIGN should mirror Campaign:**
+1. Tab-based layout with 8-10 tabs
+2. Status workflow: Draft → Pending Approval → Scheduled → Active → Paused → Ended → Cancelled
+3. Seller/tenant pattern: seller (Link → Seller Profile reqd for ads), tenant (fetch_from)
+4. Budget management: daily_budget, total_budget, spent_amount, remaining_budget
+5. Validity: start_date/end_date Datetime, auto_activate/auto_deactivate
+6. Analytics tab: impressions, clicks, conversions, CTR, ACoS, ROAS (all read_only)
+7. Targeting: categories, keywords, placements
+8. Priority/bid amount determines ad rank
+9. Permissions: System Manager (full), Seller (create/read/write), Buyer (none - ads are backend only)
+10. Color-coded status states
+
+**COUPON CHILD TABLE PATTERN for Ad Campaign Items:**
+- Minimal child table: Link to target entity + fetch_from display name
+- istable: 1, naming_rule: Random, editable_grid: 1
+- Table MultiSelect for product/category selection in applicability
+
+**CAMPAIGN-COUPON RELATIONSHIP for Ad Campaign-Ad Creative:**
+- Campaign links to Coupons via linked_coupons field
+- Coupon links back via campaign Link field
+- Mirror this: Ad Campaign links to Ad Creatives, Ad Creative links back to Ad Campaign
+
+### G. CRITICAL DIFFERENCES FOR AD SYSTEM
+
+1. **Wallet direction reversed:** Seller Balance receives money (earnings), Ad Wallet spends money (ad costs). Flow is: seller deposits → ad spend deducts → balance decreases.
+
+2. **No payout needed:** Ad Wallet doesn't need payout methods/IBAN/scheduling. Instead needs: deposit/top-up methods, auto-pause on zero balance, minimum balance warnings.
+
+3. **Campaign requires approval:** Unlike marketing Campaigns (seller can create freely), Ad Campaigns should require admin approval before going Active (fraud prevention).
+
+4. **Real-time budget tracking:** Ad Campaigns need real-time budget checks per click/impression, not just aggregate tracking like marketing Campaigns.
+
+5. **Auction integration:** Ad Campaign Items need bid amounts and quality scores, which marketing Campaign doesn't have.
+
+6. **No discount mechanics:** Ad Campaigns don't have discount_type/discount_value. Instead they have bid_amount, pricing_model (CPC/CPM/CPT), and placement targeting.
+
+=== END subtask-1-4 ===
