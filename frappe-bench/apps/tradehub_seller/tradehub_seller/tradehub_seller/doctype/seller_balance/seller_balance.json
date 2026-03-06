@@ -114,7 +114,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "unique": 1
+   "unique": 1,
+   "set_only_once": 1
   },
   {
    "description": "Seller's display name",
@@ -133,7 +134,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nPending Verification\nSuspended\nClosed",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -155,7 +157,8 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "description": "Last balance update timestamp",
@@ -232,7 +235,8 @@
    "fieldname": "minimum_payout_threshold",
    "fieldtype": "Currency",
    "label": "Minimum Payout Threshold",
-   "options": "currency"
+   "options": "currency",
+   "permlevel": 1
   },
   {
    "fieldname": "lifetime_section",
@@ -458,7 +462,8 @@
    "description": "Reason if payout is being held",
    "fieldname": "payout_hold_reason",
    "fieldtype": "Small Text",
-   "label": "Payout Hold Reason"
+   "label": "Payout Hold Reason",
+   "permlevel": 1
   },
   {
    "fieldname": "transactions_tab",
@@ -539,7 +544,7 @@
    "description": "Balance transaction history"
   },
   {
-   "description": "Deprecated — use Transaction Records table instead",
+   "description": "Deprecated \u2014 use Transaction Records table instead",
    "fieldname": "recent_transactions",
    "fieldtype": "JSON",
    "label": "Recent Transactions (Deprecated)",
@@ -562,7 +567,8 @@
    "description": "Tax withholding rate percentage",
    "fieldname": "tax_withholding_rate",
    "fieldtype": "Percent",
-   "label": "Tax Withholding Rate"
+   "label": "Tax Withholding Rate",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -590,13 +596,15 @@
    "description": "Tax exemption certificate is valid",
    "fieldname": "tax_certificate_valid",
    "fieldtype": "Check",
-   "label": "Tax Certificate Valid"
+   "label": "Tax Certificate Valid",
+   "permlevel": 1
   },
   {
    "description": "Tax certificate expiry date",
    "fieldname": "tax_certificate_expiry",
    "fieldtype": "Date",
-   "label": "Tax Certificate Expiry"
+   "label": "Tax Certificate Expiry",
+   "permlevel": 1
   },
   {
    "fieldname": "alerts_tab",
@@ -614,14 +622,16 @@
    "description": "Flag for payment-related issues",
    "fieldname": "has_payment_issue",
    "fieldtype": "Check",
-   "label": "Has Payment Issue"
+   "label": "Has Payment Issue",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.has_payment_issue",
    "description": "Description of payment issue",
    "fieldname": "payment_issue_reason",
    "fieldtype": "Small Text",
-   "label": "Payment Issue Reason"
+   "label": "Payment Issue Reason",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_alerts",
@@ -632,21 +642,24 @@
    "description": "Payouts are suspended",
    "fieldname": "payout_suspended",
    "fieldtype": "Check",
-   "label": "Payout Suspended"
+   "label": "Payout Suspended",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.payout_suspended",
    "description": "Reason for payout suspension",
    "fieldname": "suspension_reason",
    "fieldtype": "Small Text",
-   "label": "Suspension Reason"
+   "label": "Suspension Reason",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.payout_suspended",
    "description": "Date payouts were suspended",
    "fieldname": "suspension_date",
    "fieldtype": "Datetime",
-   "label": "Suspension Date"
+   "label": "Suspension Date",
+   "permlevel": 1
   },
   {
    "fieldname": "system_tab",
@@ -693,7 +706,8 @@
    "description": "Internal notes",
    "fieldname": "notes",
    "fieldtype": "Small Text",
-   "label": "Notes"
+   "label": "Notes",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 0,
@@ -739,6 +753,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

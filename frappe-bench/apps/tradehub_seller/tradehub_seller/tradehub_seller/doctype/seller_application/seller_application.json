@@ -137,7 +137,8 @@
    "options": "User",
    "reqd": 1,
    "unique": 0,
-   "description": "User account for the applicant"
+   "description": "User account for the applicant",
+   "set_only_once": 1
   },
   {
    "fieldname": "business_name",
@@ -179,7 +180,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this application belongs to"
+   "description": "The tenant this application belongs to",
+   "read_only": 1
   },
   {
    "default": "Normal",
@@ -188,7 +190,8 @@
    "in_standard_filter": 1,
    "label": "Priority",
    "options": "Low\nNormal\nHigh\nUrgent",
-   "description": "Processing priority for the application"
+   "description": "Processing priority for the application",
+   "permlevel": 1
   },
   {
    "fieldname": "contact_tab",
@@ -451,14 +454,14 @@
    "fieldname": "tax_certificate_attachment",
    "fieldtype": "Attach",
    "label": "Tax Certificate",
-   "description": "Vergi Levhası",
+   "description": "Vergi Levhas\u0131",
    "mandatory_depends_on": "eval:doc.seller_type == 'Business' || doc.seller_type == 'Enterprise'"
   },
   {
    "fieldname": "signature_circular_attachment",
    "fieldtype": "Attach",
    "label": "Signature Circular",
-   "description": "İmza Sirküleri",
+   "description": "\u0130mza Sirk\u00fcleri",
    "mandatory_depends_on": "eval:doc.seller_type == 'Enterprise'"
   },
   {
@@ -641,7 +644,8 @@
    "fieldtype": "Link",
    "label": "Assigned To",
    "options": "User",
-   "description": "Reviewer assigned to this application"
+   "description": "Reviewer assigned to this application",
+   "permlevel": 1
   },
   {
    "fieldname": "review_started_at",
@@ -653,7 +657,8 @@
    "fieldname": "review_deadline",
    "fieldtype": "Date",
    "label": "Review Deadline",
-   "description": "Target date for completing the review"
+   "description": "Target date for completing the review",
+   "permlevel": 1
   },
   {
    "fieldname": "review_tab",
@@ -670,20 +675,23 @@
    "fieldname": "review_status",
    "fieldtype": "Select",
    "label": "Review Status",
-   "options": "\nNot Started\nIn Progress\nPending Documents\nPending Verification\nCompleted"
+   "options": "\nNot Started\nIn Progress\nPending Documents\nPending Verification\nCompleted",
+   "permlevel": 1
   },
   {
    "fieldname": "review_notes",
    "fieldtype": "Text",
    "label": "Review Notes",
-   "description": "Internal notes from the reviewer"
+   "description": "Internal notes from the reviewer",
+   "permlevel": 1
   },
   {
    "fieldname": "rejection_reason",
    "fieldtype": "Select",
    "label": "Rejection Reason",
    "options": "\nIncomplete Documents\nInvalid Tax ID\nFailed Verification\nProhibited Category\nPrevious Violations\nDuplicate Application\nSuspicious Activity\nOther",
-   "depends_on": "eval:doc.status == 'Rejected'"
+   "depends_on": "eval:doc.status == 'Rejected'",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_review",
@@ -714,7 +722,8 @@
    "fieldtype": "Small Text",
    "label": "Revision Notes",
    "depends_on": "eval:doc.revision_requested == 1",
-   "description": "What needs to be revised or updated"
+   "description": "What needs to be revised or updated",
+   "permlevel": 1
   },
   {
    "fieldname": "approval_tab",
@@ -757,14 +766,16 @@
    "fieldtype": "Link",
    "label": "Assigned Commission Plan",
    "options": "Commission Plan",
-   "description": "Commission plan assigned to the seller"
+   "description": "Commission plan assigned to the seller",
+   "permlevel": 1
   },
   {
    "fieldname": "initial_tier",
    "fieldtype": "Link",
    "label": "Initial Tier",
    "options": "Seller Tier",
-   "description": "Starting tier for the seller"
+   "description": "Starting tier for the seller",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -824,7 +835,8 @@
    "fieldname": "allow_reapplication",
    "fieldtype": "Check",
    "label": "Allow Reapplication",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant_name",
@@ -897,6 +909,12 @@
    "share": 0,
    "write": 1,
    "if_owner": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

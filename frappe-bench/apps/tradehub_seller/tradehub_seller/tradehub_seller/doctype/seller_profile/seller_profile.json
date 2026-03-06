@@ -123,7 +123,8 @@
   "last_active_at",
   "column_break_timestamps",
   "created_by",
-  "modified_by"
+  "modified_by",
+  "tenant_name"
  ],
  "fields": [
   {
@@ -152,7 +153,8 @@
    "label": "User",
    "options": "User",
    "reqd": 1,
-   "unique": 1
+   "unique": 1,
+   "set_only_once": 1
   },
   {
    "default": "Individual",
@@ -176,7 +178,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nUnder Review\nActive\nSuspended\nBlocked\nInactive\nVacation",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "description": "The tenant this seller belongs to",
@@ -194,14 +197,16 @@
    "fieldtype": "Link",
    "label": "Organization",
    "options": "Organization",
-   "description": "Business organization for this seller (if applicable)"
+   "description": "Business organization for this seller (if applicable)",
+   "set_only_once": 1
   },
   {
    "fieldname": "erpnext_supplier",
    "fieldtype": "Link",
    "label": "ERPNext Supplier",
    "options": "Supplier",
-   "description": "Linked ERPNext Supplier record for ERP integration"
+   "description": "Linked ERPNext Supplier record for ERP integration",
+   "set_only_once": 1
   },
   {
    "fieldname": "contact_tab",
@@ -423,24 +428,28 @@
    "default": "0",
    "fieldname": "identity_verified",
    "fieldtype": "Check",
-   "label": "Identity Verified"
+   "label": "Identity Verified",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "business_verified",
    "fieldtype": "Check",
-   "label": "Business Verified"
+   "label": "Business Verified",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "bank_verified",
    "fieldtype": "Check",
-   "label": "Bank Account Verified"
+   "label": "Bank Account Verified",
+   "permlevel": 1
   },
   {
    "fieldname": "verification_notes",
    "fieldtype": "Small Text",
-   "label": "Verification Notes"
+   "label": "Verification Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "banking_tab",
@@ -530,7 +539,8 @@
    "fieldtype": "Link",
    "label": "Seller Tier",
    "options": "Seller Tier",
-   "description": "Current tier based on performance"
+   "description": "Current tier based on performance",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -690,7 +700,8 @@
    "fieldtype": "Link",
    "label": "Commission Plan",
    "options": "Commission Plan",
-   "description": "Active commission plan for this seller"
+   "description": "Active commission plan for this seller",
+   "permlevel": 1
   },
   {
    "fieldname": "default_shipping_rule",
@@ -712,7 +723,8 @@
    "description": "Maximum number of active listings allowed",
    "fieldname": "max_listings",
    "fieldtype": "Int",
-   "label": "Max Listings"
+   "label": "Max Listings",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -756,7 +768,8 @@
    "depends_on": "eval:doc.is_restricted==1",
    "fieldname": "restriction_reason",
    "fieldtype": "Small Text",
-   "label": "Restriction Reason"
+   "label": "Restriction Reason",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.is_restricted==1",
@@ -774,21 +787,24 @@
    "description": "Can create and manage listings",
    "fieldname": "can_sell",
    "fieldtype": "Check",
-   "label": "Can Sell"
+   "label": "Can Sell",
+   "permlevel": 1
   },
   {
    "default": "0",
    "description": "Can request balance withdrawals",
    "fieldname": "can_withdraw",
    "fieldtype": "Check",
-   "label": "Can Withdraw"
+   "label": "Can Withdraw",
+   "permlevel": 1
   },
   {
    "default": "0",
    "description": "Can create new listings",
    "fieldname": "can_create_listings",
    "fieldtype": "Check",
-   "label": "Can Create Listings"
+   "label": "Can Create Listings",
+   "permlevel": 1
   },
   {
    "fieldname": "featured_section",
@@ -800,19 +816,22 @@
    "default": "0",
    "fieldname": "is_featured",
    "fieldtype": "Check",
-   "label": "Is Featured"
+   "label": "Is Featured",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.is_featured==1",
    "fieldname": "featured_from",
    "fieldtype": "Datetime",
-   "label": "Featured From"
+   "label": "Featured From",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.is_featured==1",
    "fieldname": "featured_until",
    "fieldtype": "Datetime",
-   "label": "Featured Until"
+   "label": "Featured Until",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_featured",
@@ -896,6 +915,13 @@
    "fieldname": "neighborhood_name",
    "fieldtype": "Data",
    "label": "Neighborhood Name"
+  },
+  {
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Tenant Name",
+   "fetch_from": "tenant.tenant_name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,

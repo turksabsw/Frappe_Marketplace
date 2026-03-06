@@ -94,7 +94,8 @@
    "label": "SKU Product",
    "options": "SKU Product",
    "reqd": 1,
-   "description": "Product that this Buy Box entry is for"
+   "description": "Product that this Buy Box entry is for",
+   "set_only_once": 1
   },
   {
    "fetch_from": "sku_product.product_name",
@@ -155,7 +156,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "Seller making this offer"
+   "description": "Seller making this offer",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -509,7 +511,8 @@
    "label": "Status",
    "options": "Active\nInactive\nSuspended\nExpired",
    "reqd": 1,
-   "description": "Current status of the Buy Box entry"
+   "description": "Current status of the Buy Box entry",
+   "permlevel": 1
   },
   {
    "default": "1",
@@ -546,7 +549,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
    "label": "Internal Notes",
-   "description": "Internal notes about this Buy Box entry"
+   "description": "Internal notes about this Buy Box entry",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -605,6 +609,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

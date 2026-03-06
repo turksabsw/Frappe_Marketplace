@@ -103,7 +103,8 @@
    "in_standard_filter": 1,
    "label": "Listing",
    "options": "Listing",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "description": "Auto-populated from listing",
@@ -127,7 +128,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nOut of Stock\nDiscontinued",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -382,7 +384,7 @@
    "description": "Variant image gallery"
   },
   {
-   "description": "Deprecated — use Variant Images table instead",
+   "description": "Deprecated \u2014 use Variant Images table instead",
    "fieldname": "images",
    "fieldtype": "JSON",
    "label": "Images (Deprecated)",
@@ -562,6 +564,12 @@
    "report": 1,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

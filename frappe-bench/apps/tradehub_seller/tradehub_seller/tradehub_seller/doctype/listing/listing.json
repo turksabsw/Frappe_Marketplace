@@ -202,7 +202,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -216,7 +217,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nActive\nPaused\nOut of Stock\nSold Out\nSuspended\nRejected\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "Fixed Price",
@@ -570,7 +572,8 @@
    "fieldname": "variant_of",
    "fieldtype": "Link",
    "label": "Variant Of",
-   "options": "Listing"
+   "options": "Listing",
+   "set_only_once": 1
   },
   {
    "collapsible": 1,
@@ -747,19 +750,22 @@
    "default": "0",
    "fieldname": "is_featured",
    "fieldtype": "Check",
-   "label": "Featured"
+   "label": "Featured",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "is_best_seller",
    "fieldtype": "Check",
-   "label": "Best Seller"
+   "label": "Best Seller",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "is_new_arrival",
    "fieldtype": "Check",
-   "label": "New Arrival"
+   "label": "New Arrival",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_settings",
@@ -828,7 +834,8 @@
    "description": "Listing requires admin approval before going live",
    "fieldname": "requires_approval",
    "fieldtype": "Check",
-   "label": "Requires Approval"
+   "label": "Requires Approval",
+   "permlevel": 1
   },
   {
    "fieldname": "b2b_tab",
@@ -1080,7 +1087,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Moderation Status",
-   "options": "Pending\nIn Review\nApproved\nRejected\nFlagged"
+   "options": "Pending\nIn Review\nApproved\nRejected\nFlagged",
+   "permlevel": 1
   },
   {
    "fieldname": "moderated_by",
@@ -1103,12 +1111,14 @@
    "depends_on": "eval:doc.moderation_status=='Rejected'",
    "fieldname": "rejection_reason",
    "fieldtype": "Small Text",
-   "label": "Rejection Reason"
+   "label": "Rejection Reason",
+   "permlevel": 1
   },
   {
    "fieldname": "moderation_notes",
    "fieldtype": "Small Text",
-   "label": "Moderation Notes"
+   "label": "Moderation Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "system_tab",
@@ -1229,6 +1239,12 @@
    "submit": 0,
    "write": 1,
    "cancel": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

@@ -119,14 +119,16 @@
    "label": "Status",
    "options": "Draft\nActive\nPassive\nArchive",
    "reqd": 1,
-   "description": "Product lifecycle status"
+   "description": "Product lifecycle status",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "is_published",
    "fieldtype": "Check",
    "label": "Is Published",
-   "description": "Whether product is visible on marketplace"
+   "description": "Whether product is visible on marketplace",
+   "permlevel": 1
   },
   {
    "fieldname": "ownership_tab",
@@ -146,7 +148,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "Seller who owns this product"
+   "description": "Seller who owns this product",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -438,7 +441,7 @@
    "label": "Images (Deprecated)",
    "hidden": 1,
    "read_only": 1,
-   "description": "Deprecated — use Product Images table instead"
+   "description": "Deprecated \u2014 use Product Images table instead"
   },
   {
    "fieldname": "seo_section",
@@ -496,7 +499,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
    "label": "Internal Notes",
-   "description": "Internal notes not visible to buyers"
+   "description": "Internal notes not visible to buyers",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_additional",
@@ -583,6 +587,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

@@ -60,7 +60,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "calculation_date",
@@ -84,18 +85,21 @@
    "fieldname": "total_orders",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Total Orders"
+   "label": "Total Orders",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "total_sales_amount",
    "fieldtype": "Currency",
-   "label": "Total Sales Amount"
+   "label": "Total Sales Amount",
+   "read_only": 1
   },
   {
    "fieldname": "last_order_date",
    "fieldtype": "Date",
-   "label": "Last Order Date"
+   "label": "Last Order Date",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_orders",
@@ -105,19 +109,22 @@
    "default": "0",
    "fieldname": "cancellation_rate",
    "fieldtype": "Percent",
-   "label": "Cancellation Rate"
+   "label": "Cancellation Rate",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "return_rate",
    "fieldtype": "Percent",
-   "label": "Return Rate"
+   "label": "Return Rate",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "on_time_delivery_rate",
    "fieldtype": "Percent",
-   "label": "On-Time Delivery Rate"
+   "label": "On-Time Delivery Rate",
+   "read_only": 1
   },
   {
    "fieldname": "listing_metrics_section",
@@ -128,13 +135,15 @@
    "default": "0",
    "fieldname": "listing_count",
    "fieldtype": "Int",
-   "label": "Total Listings"
+   "label": "Total Listings",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "active_listing_count",
    "fieldtype": "Int",
-   "label": "Active Listings"
+   "label": "Active Listings",
+   "read_only": 1
   },
   {
    "fieldname": "review_tab",
@@ -159,7 +168,8 @@
    "default": "0",
    "fieldname": "total_reviews",
    "fieldtype": "Int",
-   "label": "Total Reviews"
+   "label": "Total Reviews",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_reviews",
@@ -169,13 +179,15 @@
    "default": "0",
    "fieldname": "positive_review_rate",
    "fieldtype": "Percent",
-   "label": "Positive Review Rate"
+   "label": "Positive Review Rate",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "complaint_rate",
    "fieldtype": "Percent",
-   "label": "Complaint Rate"
+   "label": "Complaint Rate",
+   "read_only": 1
   },
   {
    "fieldname": "activity_metrics_section",
@@ -186,14 +198,16 @@
    "default": "0",
    "fieldname": "active_days",
    "fieldtype": "Int",
-   "label": "Active Days"
+   "label": "Active Days",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "avg_response_time_hours",
    "fieldtype": "Float",
    "label": "Avg Response Time (hrs)",
-   "precision": 1
+   "precision": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_activity",
@@ -203,7 +217,8 @@
    "default": "0",
    "fieldname": "repeat_customer_rate",
    "fieldtype": "Percent",
-   "label": "Repeat Customer Rate"
+   "label": "Repeat Customer Rate",
+   "read_only": 1
   },
   {
    "fieldname": "system_tab",
@@ -219,13 +234,15 @@
    "default": "Pending",
    "fieldname": "verification_status",
    "fieldtype": "Data",
-   "label": "Verification Status"
+   "label": "Verification Status",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "premium_seller",
    "fieldtype": "Check",
-   "label": "Premium Seller"
+   "label": "Premium Seller",
+   "permlevel": 1
   },
   {
    "fieldname": "seller_name",
@@ -262,6 +279,12 @@
   {
    "read": 1,
    "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
    "role": "System Manager",
    "write": 1
   }

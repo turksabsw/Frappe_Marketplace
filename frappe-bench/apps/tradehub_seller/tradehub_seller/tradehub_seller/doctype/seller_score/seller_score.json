@@ -118,7 +118,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "The seller this score belongs to"
+   "description": "The seller this score belongs to",
+   "set_only_once": 1
   },
   {
    "default": "Periodic",
@@ -150,7 +151,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nCalculating\nPending Review\nFinalized\nAppealed\nRevised",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -504,21 +506,24 @@
    "fieldname": "policy_violations",
    "fieldtype": "Int",
    "label": "Policy Violations",
-   "description": "Number of policy violations in period"
+   "description": "Number of policy violations in period",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "late_shipments",
    "fieldtype": "Int",
    "label": "Late Shipments",
-   "description": "Number of late shipments"
+   "description": "Number of late shipments",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "cancelled_orders",
    "fieldtype": "Int",
    "label": "Cancelled Orders",
-   "description": "Seller-cancelled orders"
+   "description": "Seller-cancelled orders",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_penalties",
@@ -529,7 +534,8 @@
    "fieldname": "disputed_orders",
    "fieldtype": "Int",
    "label": "Disputed Orders",
-   "description": "Orders with disputes"
+   "description": "Orders with disputes",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -537,7 +543,8 @@
    "fieldtype": "Float",
    "label": "Total Penalty Points",
    "precision": 2,
-   "description": "Total penalty points accumulated"
+   "description": "Total penalty points accumulated",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -545,7 +552,8 @@
    "fieldtype": "Float",
    "label": "Penalty Deduction",
    "precision": 2,
-   "description": "Score deduction from penalties"
+   "description": "Score deduction from penalties",
+   "permlevel": 1
   },
   {
    "fieldname": "bonuses_section",
@@ -559,13 +567,15 @@
    "fieldtype": "Float",
    "label": "Bonus Points",
    "precision": 2,
-   "description": "Bonus points earned"
+   "description": "Bonus points earned",
+   "permlevel": 1
   },
   {
    "fieldname": "bonus_reason",
    "fieldtype": "Small Text",
    "label": "Bonus Reason",
-   "description": "Reasons for bonus points"
+   "description": "Reasons for bonus points",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_bonuses",
@@ -584,7 +594,7 @@
    "label": "Special Achievements (Deprecated)",
    "hidden": 1,
    "read_only": 1,
-   "description": "Deprecated — use Achievements table instead"
+   "description": "Deprecated \u2014 use Achievements table instead"
   },
   {
    "fieldname": "weights_tab",
@@ -603,7 +613,8 @@
    "fieldtype": "Float",
    "label": "Fulfillment Weight (%)",
    "precision": 1,
-   "description": "Weight of fulfillment score in calculation"
+   "description": "Weight of fulfillment score in calculation",
+   "permlevel": 1
   },
   {
    "default": "20",
@@ -611,7 +622,8 @@
    "fieldtype": "Float",
    "label": "Delivery Weight (%)",
    "precision": 1,
-   "description": "Weight of delivery score in calculation"
+   "description": "Weight of delivery score in calculation",
+   "permlevel": 1
   },
   {
    "default": "20",
@@ -619,7 +631,8 @@
    "fieldtype": "Float",
    "label": "Quality Weight (%)",
    "precision": 1,
-   "description": "Weight of quality score in calculation"
+   "description": "Weight of quality score in calculation",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_weights",
@@ -631,7 +644,8 @@
    "fieldtype": "Float",
    "label": "Service Weight (%)",
    "precision": 1,
-   "description": "Weight of service score in calculation"
+   "description": "Weight of service score in calculation",
+   "permlevel": 1
   },
   {
    "default": "15",
@@ -639,7 +653,8 @@
    "fieldtype": "Float",
    "label": "Compliance Weight (%)",
    "precision": 1,
-   "description": "Weight of compliance score in calculation"
+   "description": "Weight of compliance score in calculation",
+   "permlevel": 1
   },
   {
    "default": "10",
@@ -647,7 +662,8 @@
    "fieldtype": "Float",
    "label": "Engagement Weight (%)",
    "precision": 1,
-   "description": "Weight of engagement score in calculation"
+   "description": "Weight of engagement score in calculation",
+   "permlevel": 1
   },
   {
    "fieldname": "system_tab",
@@ -664,13 +680,15 @@
    "fieldname": "calculation_notes",
    "fieldtype": "Text",
    "label": "Calculation Notes",
-   "description": "Notes about the score calculation"
+   "description": "Notes about the score calculation",
+   "permlevel": 1
   },
   {
    "fieldname": "manual_adjustments",
    "fieldtype": "Small Text",
    "label": "Manual Adjustments",
-   "description": "Description of any manual score adjustments"
+   "description": "Description of any manual score adjustments",
+   "permlevel": 1
   },
   {
    "fieldname": "adjusted_by",
@@ -768,6 +786,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

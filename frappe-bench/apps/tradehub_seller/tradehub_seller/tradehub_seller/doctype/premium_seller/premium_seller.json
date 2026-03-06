@@ -159,7 +159,8 @@
    "label": "Seller Profile",
    "options": "Seller Profile",
    "reqd": 1,
-   "unique": 1
+   "unique": 1,
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller_profile.seller_name",
@@ -190,7 +191,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nActive\nSuspended\nExpired\nCancelled",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fetch_from": "seller_profile.tenant",
@@ -243,7 +245,8 @@
    "fieldname": "subscription_status",
    "fieldtype": "Select",
    "label": "Subscription Status",
-   "options": "Active\nPending Payment\nGrace Period\nExpired\nCancelled"
+   "options": "Active\nPending Payment\nGrace Period\nExpired\nCancelled",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_subscription",
@@ -597,13 +600,15 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Verification Level",
-   "options": "Basic\nStandard\nAdvanced\nPremium\nEnterprise"
+   "options": "Basic\nStandard\nAdvanced\nPremium\nEnterprise",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "verified_by_platform",
    "fieldtype": "Check",
-   "label": "Verified by Platform"
+   "label": "Verified by Platform",
+   "permlevel": 1
   },
   {
    "fieldname": "verified_at",
@@ -620,7 +625,8 @@
    "fieldname": "on_site_verified",
    "fieldtype": "Check",
    "label": "On-Site Verified",
-   "description": "Physical verification completed"
+   "description": "Physical verification completed",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.on_site_verified==1",
@@ -977,6 +983,12 @@
    "report": 0,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

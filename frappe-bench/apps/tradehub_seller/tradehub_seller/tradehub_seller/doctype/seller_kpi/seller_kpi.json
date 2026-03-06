@@ -124,7 +124,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "The seller this KPI belongs to"
+   "description": "The seller this KPI belongs to",
+   "set_only_once": 1
   },
   {
    "default": "Order Fulfillment Rate",
@@ -159,7 +160,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nActive\nOn Track\nAt Risk\nBelow Target\nCritical\nExceeding\nPaused\nExpired",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -395,7 +397,8 @@
    "in_standard_filter": 1,
    "label": "Evaluation Status",
    "options": "Pending\nExceeding Target\nMeeting Target\nWithin Acceptable Range\nBelow Warning Threshold\nBelow Critical Threshold\nNot Applicable",
-   "description": "Overall evaluation of KPI performance"
+   "description": "Overall evaluation of KPI performance",
+   "permlevel": 1
   },
   {
    "default": "Not Graded",
@@ -403,7 +406,8 @@
    "fieldtype": "Select",
    "label": "Performance Grade",
    "options": "Not Graded\nA+\nA\nA-\nB+\nB\nB-\nC+\nC\nC-\nD\nF",
-   "description": "Letter grade for this KPI"
+   "description": "Letter grade for this KPI",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -843,6 +847,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

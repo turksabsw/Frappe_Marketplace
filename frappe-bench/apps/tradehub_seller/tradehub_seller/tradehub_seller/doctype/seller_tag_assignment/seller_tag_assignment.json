@@ -48,7 +48,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "Seller this tag is assigned to"
+   "description": "Seller this tag is assigned to",
+   "set_only_once": 1
   },
   {
    "fieldname": "tag",
@@ -58,7 +59,8 @@
    "label": "Tag",
    "options": "Seller Tag",
    "reqd": 1,
-   "description": "Tag assigned to the seller"
+   "description": "Tag assigned to the seller",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",

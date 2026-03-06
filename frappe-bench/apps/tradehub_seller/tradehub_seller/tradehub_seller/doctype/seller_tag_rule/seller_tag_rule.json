@@ -68,7 +68,8 @@
    "label": "Target Tag",
    "options": "Seller Tag",
    "reqd": 1,
-   "description": "Tag to assign when rule conditions are met"
+   "description": "Tag to assign when rule conditions are met",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",
