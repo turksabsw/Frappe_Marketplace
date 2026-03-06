@@ -80,7 +80,7 @@
    "fieldname": "template_name",
    "fieldtype": "Data",
    "label": "Template Name",
-   "fetch_from": "template.template_name",
+   "fetch_from": "template.title",
    "read_only": 1
   },
   {
