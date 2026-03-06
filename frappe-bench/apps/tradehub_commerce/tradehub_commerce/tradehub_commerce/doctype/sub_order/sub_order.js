@@ -118,6 +118,113 @@ frappe.ui.form.on('Sub Order', {
 });
 
 /**
+ * Child table event handlers for Sub Order Items
+ */
+frappe.ui.form.on('Sub Order Item', {
+    /**
+     * Quantity change handler
+     */
+    qty: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.line_subtotal = flt(row.qty) * flt(row.unit_price);
+        frm.refresh_field('items');
+        calculate_totals(frm);
+    },
+
+    /**
+     * Unit price change handler
+     */
+    unit_price: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.line_subtotal = flt(row.qty) * flt(row.unit_price);
+        frm.refresh_field('items');
+        calculate_totals(frm);
+    },
+
+    /**
+     * Item row added handler
+     */
+    items_add: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Item row removed handler
+     */
+    items_remove: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    }
+});
+
+/**
+ * Calculate sub order totals from line items
+ * @param {object} frm - Form object
+ */
+function calculate_totals(frm) {
+    var subtotal = 0;
+    var tax_amount = 0;
+    var discount_amount = 0;
+    var shipping_amount = 0;
+    var commission_amount = 0;
+
+    // Sum up item amounts (bottom-up aggregation)
+    if (frm.doc.items) {
+        frm.doc.items.forEach(function(item) {
+            // Calculate row line_subtotal
+            item.line_subtotal = flt(flt(item.qty) * flt(item.unit_price));
+
+            // Calculate row discount
+            if (item.discount_type === 'Percentage') {
+                item.discount_amount = flt(flt(item.line_subtotal) * flt(item.discount_value) / 100);
+            } else if (item.discount_type === 'Fixed') {
+                item.discount_amount = flt(item.discount_value);
+            } else {
+                item.discount_amount = 0;
+            }
+
+            // Taxable amount (after discount)
+            var taxable_amount = flt(item.line_subtotal) - flt(item.discount_amount);
+
+            // Calculate row tax
+            item.tax_amount = flt(taxable_amount * flt(item.tax_rate) / 100);
+
+            // Line total
+            item.line_total = flt(taxable_amount + flt(item.tax_amount));
+
+            // Calculate row commission
+            item.commission_amount = flt(taxable_amount * flt(item.commission_rate) / 100);
+
+            // Aggregate parent totals
+            subtotal += flt(item.line_subtotal);
+            tax_amount += flt(item.tax_amount);
+            discount_amount += flt(item.discount_amount);
+            shipping_amount += flt(item.shipping_amount);
+            commission_amount += flt(item.commission_amount);
+        });
+    }
+
+    frm.set_value('subtotal', subtotal);
+    frm.set_value('tax_amount', tax_amount);
+    frm.set_value('discount_amount', discount_amount);
+    frm.set_value('shipping_amount', shipping_amount || flt(frm.doc.shipping_amount));
+    frm.set_value('commission_amount', commission_amount);
+
+    // Grand total = subtotal - discount + shipping + tax
+    var grand_total = flt(subtotal) - flt(discount_amount) + flt(shipping_amount || flt(frm.doc.shipping_amount)) + flt(tax_amount);
+    frm.set_value('grand_total', grand_total);
+
+    // Commission rate (average)
+    if (flt(subtotal) > 0) {
+        frm.set_value('commission_rate', flt(commission_amount) / flt(subtotal) * 100);
+    }
+
+    // Seller payout = grand_total - commission
+    frm.set_value('seller_payout', flt(grand_total) - flt(commission_amount));
+
+    frm.refresh_field('items');
+}
+
+/**
  * Populate Sub Order fields from parent Marketplace Order
  */
 function populate_from_parent_order(frm, order) {

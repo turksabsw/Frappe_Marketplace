@@ -195,44 +195,81 @@ class SubOrder(Document):
     # =================================================================
 
     def calculate_totals(self):
-        """Calculate all sub order totals from line items."""
+        """
+        Calculate all sub order totals from line items.
+
+        Uses bottom-up aggregation: row amounts are calculated first
+        (via SubOrderItem.calculate_totals), then parent totals are
+        derived from the aggregated child values.
+        """
         subtotal = 0
         tax_amount = 0
         discount_amount = 0
         shipping_amount = 0
         commission_amount = 0
 
-        for item in self.items:
-            # Ensure item totals are calculated
-            item.calculate_totals()
+        if self.items:
+            for item in self.items:
+                # Bottom-up: calculate row amounts first
+                item.line_subtotal = flt(flt(item.unit_price, 2) * flt(item.qty, 2), 2)
 
-            subtotal += flt(item.line_subtotal) - flt(item.discount_amount)
-            tax_amount += flt(item.tax_amount)
-            discount_amount += flt(item.discount_amount)
-            shipping_amount += flt(item.shipping_amount)
-            commission_amount += flt(item.commission_amount)
+                # Calculate discount per item
+                if item.discount_type == "Percentage":
+                    item.discount_amount = flt(
+                        flt(item.line_subtotal, 2) * flt(item.discount_value) / 100, 2
+                    )
+                elif item.discount_type == "Fixed":
+                    item.discount_amount = flt(item.discount_value, 2)
+                else:
+                    item.discount_amount = 0
 
-        self.subtotal = subtotal
-        self.tax_amount = tax_amount
-        self.discount_amount = discount_amount
-        self.shipping_amount = shipping_amount or flt(self.shipping_amount)
-        self.commission_amount = commission_amount
+                # Taxable amount (after discount)
+                taxable_amount = flt(flt(item.line_subtotal, 2) - flt(item.discount_amount, 2), 2)
 
-        # Grand total
-        self.grand_total = (
-            flt(self.subtotal)
-            + flt(self.shipping_amount)
-            + flt(self.tax_amount)
+                # Calculate tax
+                item.tax_amount = flt(taxable_amount * flt(item.tax_rate) / 100, 2)
+
+                # Line total = taxable_amount + tax
+                item.line_total = flt(taxable_amount + flt(item.tax_amount, 2), 2)
+
+                # Calculate commission
+                item.commission_amount = flt(
+                    taxable_amount * flt(item.commission_rate) / 100, 2
+                )
+
+                # Aggregate parent totals
+                subtotal += flt(item.line_subtotal, 2)
+                tax_amount += flt(item.tax_amount, 2)
+                discount_amount += flt(item.discount_amount, 2)
+                shipping_amount += flt(item.shipping_amount, 2)
+                commission_amount += flt(item.commission_amount, 2)
+
+        # Set parent totals with precision
+        self.subtotal = flt(subtotal, 2)
+        self.tax_amount = flt(tax_amount, 2)
+        self.discount_amount = flt(discount_amount, 2)
+        self.shipping_amount = flt(shipping_amount, 2) or flt(self.shipping_amount, 2)
+        self.commission_amount = flt(commission_amount, 2)
+
+        # Grand total = subtotal - discount + shipping + tax
+        self.grand_total = flt(
+            flt(self.subtotal, 2)
+            - flt(self.discount_amount, 2)
+            + flt(self.shipping_amount, 2)
+            + flt(self.tax_amount, 2),
+            2
         )
 
         # Commission rate (average)
-        if flt(self.subtotal) > 0:
-            self.commission_rate = (
-                flt(self.commission_amount) / flt(self.subtotal) * 100
+        if flt(self.subtotal, 2) > 0:
+            self.commission_rate = flt(
+                flt(self.commission_amount, 2) / flt(self.subtotal, 2) * 100, 2
             )
 
         # Seller payout = grand_total - commission
-        self.seller_payout = flt(self.grand_total) - flt(self.commission_amount)
+        self.seller_payout = flt(
+            flt(self.grand_total, 2) - flt(self.commission_amount, 2), 2
+        )
 
     def update_fulfillment_counts(self):
         """Update fulfillment item counts."""
