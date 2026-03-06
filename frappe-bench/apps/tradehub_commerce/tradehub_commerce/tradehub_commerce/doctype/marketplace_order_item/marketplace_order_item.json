@@ -10,6 +10,7 @@
   "listing",
   "listing_variant",
   "seller",
+  "seller_name",
   "column_break_product",
   "title",
   "sku",
@@ -88,6 +89,13 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1
+  },
+  {
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller Name",
+   "fetch_from": "seller.seller_name",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_product",

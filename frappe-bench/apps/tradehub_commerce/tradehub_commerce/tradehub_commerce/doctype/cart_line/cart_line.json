@@ -8,6 +8,7 @@
   "listing",
   "listing_variant",
   "seller",
+  "seller_name",
   "title",
   "column_break_product",
   "sku",
@@ -69,6 +70,13 @@
    "options": "Seller Profile",
    "read_only": 1,
    "description": "Auto-filled from listing"
+  },
+  {
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller Name",
+   "fetch_from": "seller.seller_name",
+   "read_only": 1
   },
   {
    "fieldname": "title",
