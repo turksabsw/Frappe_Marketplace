@@ -90,11 +90,17 @@
     }
 
     @include dark {
-        color: #5a5b75;
+        color: #8b8ba3;
 
         &:hover {
             color: #ffffff;
             background: #1a1a23;
+        }
+
+        &.active {
+            color: #ffffff;
+            background: $brand;
+            box-shadow: 0 4px 14px $brand-glow;
         }
     }
 }
@@ -111,6 +117,14 @@
     .rail-icon:hover &,
     .rail-icon.active & {
         opacity: 1;
+    }
+
+    @include dark {
+        opacity: 0.85;
+
+        .rail-icon.active & {
+            opacity: 1;
+        }
     }
 }
 

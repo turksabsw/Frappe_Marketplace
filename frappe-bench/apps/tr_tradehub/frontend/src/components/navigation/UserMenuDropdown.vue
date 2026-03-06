@@ -55,18 +55,18 @@
           <span>Tema</span>
           <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
             <button
-              class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-all"
+              class="flex items-center justify-center w-7 h-7 rounded-md text-[12px] transition-all"
               :class="currentTheme === 'light' ? 'bg-white text-violet-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'"
               @click.stop="emit('set-theme', 'light')"
             >
-              <i class="fas fa-sun text-[10px]"></i>Açık
+              <i class="fas fa-sun"></i>
             </button>
             <button
-              class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-all"
+              class="flex items-center justify-center w-7 h-7 rounded-md text-[12px] transition-all"
               :class="currentTheme === 'dark' ? 'bg-white text-violet-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'"
               @click.stop="emit('set-theme', 'dark')"
             >
-              <i class="fas fa-moon text-[10px]"></i>Koyu
+              <i class="fas fa-moon"></i>
             </button>
           </div>
         </div>
