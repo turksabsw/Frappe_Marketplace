@@ -8,7 +8,6 @@ from frappe.utils import (
     cint, flt, getdate, nowdate, now_datetime, get_datetime,
     add_days, time_diff_in_hours
 )
-import json
 from datetime import datetime, time as dt_time
 
 
@@ -43,19 +42,9 @@ class CommissionRule(Document):
         if not self.effective_from:
             self.effective_from = now_datetime()
 
-        # Initialize JSON fields
+        # Initialize JSON field defaults
         if not self.day_of_week_restrictions:
             self.day_of_week_restrictions = "[]"
-        if not self.restricted_sellers:
-            self.restricted_sellers = "[]"
-        if not self.excluded_sellers:
-            self.excluded_sellers = "[]"
-        if not self.restricted_categories:
-            self.restricted_categories = "[]"
-        if not self.excluded_categories:
-            self.excluded_categories = "[]"
-        if not self.override_by:
-            self.override_by = "[]"
 
     def validate(self):
         """Validate commission rule data before saving."""
@@ -143,26 +132,19 @@ class CommissionRule(Document):
             frappe.throw(_("Seller Tier {0} does not exist").format(self.seller_tier))
 
     def validate_restrictions(self):
-        """Validate seller and category restrictions."""
-        # Validate JSON fields
-        for field in ['restricted_sellers', 'excluded_sellers',
-                      'restricted_categories', 'excluded_categories',
-                      'day_of_week_restrictions', 'override_by']:
-            value = getattr(self, field, None)
-            if value:
-                try:
-                    parsed = json.loads(value)
-                    if not isinstance(parsed, list):
-                        frappe.throw(_("{0} must be a JSON array").format(field))
-                except json.JSONDecodeError:
-                    frappe.throw(_("{0} must be valid JSON").format(field))
-
-        # Validate day of week values
+        """Validate seller and category restrictions using child tables."""
+        # Validate day of week restrictions (remains as JSON field)
         if self.day_of_week_restrictions:
-            days = json.loads(self.day_of_week_restrictions)
+            days = frappe.parse_json(self.day_of_week_restrictions)
+            if not isinstance(days, list):
+                frappe.throw(_("Day of Week Restrictions must be a JSON array"))
             for day in days:
                 if not isinstance(day, int) or day < 0 or day > 6:
                     frappe.throw(_("Day of week must be integer 0-6 (0=Monday)"))
+
+        # Child table fields (restricted_sellers_table, excluded_sellers_table,
+        # restricted_categories_table, excluded_categories_table, override_by_table)
+        # are validated by Frappe's built-in child table validation
 
     def validate_time_settings(self):
         """Validate time-based settings."""
@@ -245,8 +227,8 @@ class CommissionRule(Document):
 
         # Check day of week
         if self.day_of_week_restrictions:
-            days = json.loads(self.day_of_week_restrictions)
-            if days and now.weekday() not in days:
+            days = frappe.parse_json(self.day_of_week_restrictions)
+            if days and isinstance(days, list) and now.weekday() not in days:
                 return False
 
         # Check time of day
@@ -376,15 +358,15 @@ class CommissionRule(Document):
             return target != value
         elif operator == "In List":
             try:
-                values = json.loads(value) if value else []
+                values = frappe.parse_json(value) if value else []
                 return target in values
-            except:
+            except Exception:
                 return target in [v.strip() for v in (value or "").split(",")]
         elif operator == "Not In List":
             try:
-                values = json.loads(value) if value else []
+                values = frappe.parse_json(value) if value else []
                 return target not in values
-            except:
+            except Exception:
                 return target not in [v.strip() for v in (value or "").split(",")]
         elif operator == "Contains":
             return value and value in (target or "")
@@ -412,38 +394,38 @@ class CommissionRule(Document):
         return False
 
     def _check_seller_restrictions(self, seller):
-        """Check seller restrictions."""
+        """Check seller restrictions using child tables."""
         if not seller:
             return True
 
-        # Check restricted sellers (whitelist)
-        if self.restricted_sellers:
-            restricted = json.loads(self.restricted_sellers)
+        # Check restricted sellers (whitelist) via child table
+        if self.restricted_sellers_table:
+            restricted = [row.seller for row in self.restricted_sellers_table]
             if restricted and seller not in restricted:
                 return False
 
-        # Check excluded sellers (blacklist)
-        if self.excluded_sellers:
-            excluded = json.loads(self.excluded_sellers)
+        # Check excluded sellers (blacklist) via child table
+        if self.excluded_sellers_table:
+            excluded = [row.seller for row in self.excluded_sellers_table]
             if seller in excluded:
                 return False
 
         return True
 
     def _check_category_restrictions(self, category):
-        """Check category restrictions."""
+        """Check category restrictions using child tables."""
         if not category:
             return True
 
-        # Check restricted categories (whitelist)
-        if self.restricted_categories:
-            restricted = json.loads(self.restricted_categories)
+        # Check restricted categories (whitelist) via child table
+        if self.restricted_categories_table:
+            restricted = [row.category for row in self.restricted_categories_table]
             if restricted and category not in restricted:
                 return False
 
-        # Check excluded categories (blacklist)
-        if self.excluded_categories:
-            excluded = json.loads(self.excluded_categories)
+        # Check excluded categories (blacklist) via child table
+        if self.excluded_categories_table:
+            excluded = [row.category for row in self.excluded_categories_table]
             if category in excluded:
                 return False
 
@@ -475,10 +457,10 @@ class CommissionRule(Document):
 
         try:
             # Parse JSON condition
-            condition = json.loads(self.custom_condition)
+            condition = frappe.parse_json(self.custom_condition)
             return self._evaluate_condition_tree(condition, ctx)
 
-        except json.JSONDecodeError:
+        except (ValueError, TypeError):
             frappe.log_error(
                 f"Commission rule custom condition must be valid JSON: {self.custom_condition}",
                 "Commission Rule Evaluation Error"
