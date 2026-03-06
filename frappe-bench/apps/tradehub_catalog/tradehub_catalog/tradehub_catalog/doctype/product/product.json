@@ -16,6 +16,8 @@
   "section_break_4",
   "brand",
   "brand_name",
+  "category",
+  "category_name",
   "column_break_5",
   "product_family",
   "family_name",
@@ -97,6 +99,20 @@
    "read_only": 1
   },
   {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Category",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "category_name",
+   "fieldtype": "Data",
+   "label": "Category Name",
+   "fetch_from": "category.category_name",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
@@ -154,7 +170,7 @@
  "sort_order": "DESC",
  "track_changes": 1,
  "creation": "2024-01-01 00:00:00.000000",
- "modified": "2026-03-04 12:00:00.000000",
+ "modified": "2026-03-06 12:00:00.000000",
  "modified_by": "Administrator",
  "owner": "Administrator",
  "permissions": [
