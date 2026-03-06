@@ -15,6 +15,7 @@
   "status",
   "tenant",
   "organization",
+  "organization_name",
   "erpnext_supplier",
   "contact_tab",
   "contact_section",
@@ -33,6 +34,10 @@
   "state",
   "country",
   "postal_code",
+  "district",
+  "district_name",
+  "neighborhood",
+  "neighborhood_name",
   "addresses",
   "locations_section",
   "locations",
@@ -71,6 +76,7 @@
   "performance_tab",
   "performance_section",
   "seller_tier",
+  "tier_name",
   "seller_score",
   "column_break_performance",
   "total_sales_count",
@@ -199,6 +205,13 @@
    "options": "Organization",
    "description": "Business organization for this seller (if applicable)",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "organization_name",
+   "fieldtype": "Data",
+   "label": "Organization Name",
+   "fetch_from": "organization.organization_name",
+   "read_only": 1
   },
   {
    "fieldname": "erpnext_supplier",
@@ -541,6 +554,13 @@
    "options": "Seller Tier",
    "description": "Current tier based on performance",
    "permlevel": 1
+  },
+  {
+   "fieldname": "tier_name",
+   "fieldtype": "Data",
+   "label": "Tier Name",
+   "fetch_from": "seller_tier.tier_name",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -903,7 +923,9 @@
   {
    "fieldname": "district_name",
    "fieldtype": "Data",
-   "label": "District Name"
+   "label": "District Name",
+   "fetch_from": "district.district_name",
+   "read_only": 1
   },
   {
    "fieldname": "neighborhood",
@@ -914,7 +936,9 @@
   {
    "fieldname": "neighborhood_name",
    "fieldtype": "Data",
-   "label": "Neighborhood Name"
+   "label": "Neighborhood Name",
+   "fetch_from": "neighborhood.neighborhood_name",
+   "read_only": 1
   },
   {
    "fieldname": "tenant_name",
