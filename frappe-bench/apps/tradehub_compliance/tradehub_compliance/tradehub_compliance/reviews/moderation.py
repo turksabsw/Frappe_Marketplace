@@ -16,7 +16,6 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime, add_to_date
 from typing import Dict, Any, List, Optional
-import json
 import re
 
 
@@ -122,7 +121,7 @@ def create_moderation_case(
             "content_owner": content_owner,
             "content_owner_type": content_owner_type,
             "content_created_at": content_doc.creation,
-            "content_snapshot": json.dumps(content_snapshot),
+            "content_snapshot": frappe.as_json(content_snapshot),
             "report_source": report_source,
             "reporter": reporter,
             "report_reason": report_reason,
@@ -131,7 +130,7 @@ def create_moderation_case(
             "is_auto_detected": is_auto_detected,
             "detection_method": detection_method,
             "detection_confidence": detection_confidence,
-            "detection_flags": json.dumps(detection_flags) if detection_flags else None,
+            "detection_flags": frappe.as_json(detection_flags) if detection_flags else None,
             "created_by_user": frappe.session.user,
             "creation_date": now_datetime(),
             "sla_target_hours": _get_sla_target(calculated_priority or priority)
@@ -615,15 +614,15 @@ def _try_auto_assign(case_name: str):
 
 
 def _add_to_history(case, action: str, details: str, user: str = None):
-    """Add entry to moderation history."""
-    history = json.loads(case.moderation_history or "[]")
-    history.append({
-        "timestamp": str(now_datetime()),
-        "action": action,
+    """Add entry to moderation_history_table child table."""
+    case.append("moderation_history_table", {
+        "action_date": now_datetime(),
+        "action_type": action,
+        "action_by": user or frappe.session.user,
+        "previous_status": "",
+        "new_status": case.status or "",
         "details": details,
-        "user": user or frappe.session.user
     })
-    case.moderation_history = json.dumps(history)
 
 
 def _execute_content_action(content_type: str, content_id: str, action: str):

@@ -8,7 +8,6 @@ from frappe.utils import (
     cint, flt, getdate, nowdate, now_datetime,
     add_days, get_datetime, date_diff, strip_html_tags
 )
-import json
 import re
 
 
@@ -173,7 +172,12 @@ class Review(Document):
         # Check for potential spam patterns
         if self.contains_spam_patterns(plain_text):
             self.moderation_status = "Flagged"
-            self.flags = json.dumps(["potential_spam"])
+            self.append("flags_table", {
+                "flag_type": "Spam",
+                "flagged_by": frappe.session.user,
+                "flagged_at": now_datetime(),
+                "description": "Auto-detected potential spam during content validation",
+            })
 
     def validate_target(self):
         """Validate review target based on type."""
@@ -228,13 +232,8 @@ class Review(Document):
 
     def validate_media(self):
         """Validate media attachments."""
-        if self.images:
-            try:
-                images = json.loads(self.images) if isinstance(self.images, str) else self.images
-                if isinstance(images, list) and len(images) > 5:
-                    frappe.throw(_("Maximum 5 images allowed per review"))
-            except json.JSONDecodeError:
-                self.images = "[]"
+        if self.images_table and len(self.images_table) > 5:
+            frappe.throw(_("Maximum 5 images allowed per review"))
 
         if self.video_url:
             # Validate video URL format
@@ -635,15 +634,16 @@ class Review(Document):
         if cint(self.report_count) >= 3:
             self.db_set("moderation_status", "Flagged")
 
-        # Add flag to flags list
-        flags = json.loads(self.flags or "[]")
-        flag_entry = {
-            "type": flag_type,
-            "reporter": reporter or frappe.session.user,
-            "timestamp": now_datetime().isoformat()
-        }
-        flags.append(flag_entry)
-        self.db_set("flags", json.dumps(flags))
+        # Add flag entry to flags_table child table
+        review = frappe.get_doc("Review", self.name)
+        review.append("flags_table", {
+            "flag_type": flag_type or "Other",
+            "flagged_by": reporter or frappe.session.user,
+            "flagged_at": now_datetime(),
+            "description": "",
+        })
+        review.flags.ignore_validate = True
+        review.save(ignore_permissions=True)
 
     # =================================================================
     # Helpfulness Methods
@@ -799,7 +799,10 @@ class Review(Document):
             "is_verified_purchase": self.is_verified_purchase,
             "helpful_count": self.helpful_count,
             "unhelpful_count": self.unhelpful_count,
-            "images": json.loads(self.images or "[]"),
+            "images": [
+                {"image": row.image, "alt_text": row.alt_text, "sort_order": row.sort_order}
+                for row in (self.images_table or [])
+            ],
             "video_url": self.video_url,
             "published_at": self.published_at,
             "detailed_ratings": {
@@ -866,7 +869,11 @@ def create_review(review_type, listing=None, seller=None, rating=None,
 
     # Parse detailed ratings
     if detailed_ratings and isinstance(detailed_ratings, str):
-        detailed_ratings = json.loads(detailed_ratings)
+        detailed_ratings = frappe.parse_json(detailed_ratings)
+
+    # Parse images if provided as JSON string
+    if images and isinstance(images, str):
+        images = frappe.parse_json(images)
 
     review = frappe.get_doc({
         "doctype": "Review",
@@ -879,11 +886,28 @@ def create_review(review_type, listing=None, seller=None, rating=None,
         "pros": pros,
         "cons": cons,
         "marketplace_order": order,
-        "images": images if isinstance(images, str) else json.dumps(images or []),
         "video_url": video_url,
         "is_anonymous": cint(is_anonymous),
         "status": "Pending Review"
     })
+
+    # Add images to images_table child table
+    if images and isinstance(images, list):
+        for idx, img in enumerate(images):
+            if isinstance(img, str) and img.strip():
+                review.append("images_table", {
+                    "image": img.strip(),
+                    "alt_text": "",
+                    "sort_order": idx,
+                })
+            elif isinstance(img, dict):
+                image_url = img.get("image", "") or img.get("url", "") or img.get("file_url", "")
+                if image_url:
+                    review.append("images_table", {
+                        "image": image_url,
+                        "alt_text": img.get("alt_text", img.get("caption", "")),
+                        "sort_order": img.get("sort_order", idx),
+                    })
 
     # Apply detailed ratings
     if detailed_ratings:
