@@ -86,7 +86,8 @@
    "label": "Certificate Type",
    "options": "Certificate Type",
    "reqd": 1,
-   "description": "Type of certificate (CE, ISO 9001, GOTS, OEKO-TEX, etc.)"
+   "description": "Type of certificate (CE, ISO 9001, GOTS, OEKO-TEX, etc.)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "certificate_type.type_name",
@@ -118,7 +119,8 @@
    "label": "Status",
    "options": "Pending Verification\nUnder Review\nVerified\nRejected\nActive\nExpired\nSuspended\nRevoked",
    "reqd": 1,
-   "description": "Current status of the certificate"
+   "description": "Current status of the certificate",
+   "permlevel": 1
   },
   {
    "fetch_from": "certificate_type.applicable_to",
@@ -172,7 +174,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "mandatory_depends_on": "eval:['Seller', 'Both'].includes(doc.applicable_to) && !doc.sku_product",
-   "description": "The seller this certificate applies to (for seller certificates)"
+   "description": "The seller this certificate applies to (for seller certificates)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -201,7 +204,8 @@
    "fieldtype": "Data",
    "label": "Tenant Name",
    "read_only": 1,
-   "description": "Auto-filled from Tenant"
+   "description": "Auto-filled from Tenant",
+   "fetch_from": "tenant.tenant_name"
   },
   {
    "fieldname": "certificate_details_section",
@@ -330,7 +334,8 @@
    "label": "Verification Status",
    "options": "Pending\nIn Progress\nVerified\nFailed\nNot Applicable",
    "in_standard_filter": 1,
-   "description": "Status of certificate authenticity verification"
+   "description": "Status of certificate authenticity verification",
+   "permlevel": 1
   },
   {
    "fieldname": "verification_date",
@@ -466,7 +471,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to certificate owner)"
+   "description": "Internal notes (not visible to certificate owner)",
+   "permlevel": 1
   },
   {
    "fieldname": "details_tab",
@@ -571,6 +577,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

@@ -208,7 +208,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant for multi-tenant isolation (empty for global certificate types)"
+   "description": "Tenant for multi-tenant isolation (empty for global certificate types)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",
@@ -294,7 +295,8 @@
    "fieldname": "featured",
    "fieldtype": "Check",
    "label": "Featured",
-   "description": "Highlight this certificate type in listings"
+   "description": "Highlight this certificate type in listings",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -385,6 +387,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

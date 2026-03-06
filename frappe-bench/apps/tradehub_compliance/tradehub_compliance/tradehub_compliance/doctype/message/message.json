@@ -77,7 +77,8 @@
    "label": "Message Thread",
    "options": "Message Thread",
    "reqd": 1,
-   "description": "The conversation thread this message belongs to"
+   "description": "The conversation thread this message belongs to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "message_thread.subject",
@@ -110,7 +111,8 @@
    "label": "Status",
    "options": "Draft\nSent\nDelivered\nRead\nFailed",
    "reqd": 1,
-   "description": "Current message delivery status"
+   "description": "Current message delivery status",
+   "permlevel": 1
   },
   {
    "fieldname": "sender_section",
@@ -152,7 +154,8 @@
    "fieldtype": "Link",
    "label": "Buyer",
    "options": "Buyer Profile",
-   "description": "Buyer profile if sender is a buyer"
+   "description": "Buyer profile if sender is a buyer",
+   "set_only_once": 1
   },
   {
    "fetch_from": "buyer.buyer_name",
@@ -167,7 +170,8 @@
    "fieldtype": "Link",
    "label": "Seller",
    "options": "Seller Profile",
-   "description": "Seller profile if sender is a seller"
+   "description": "Seller profile if sender is a seller",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -504,6 +508,12 @@
    "report": 1,
    "role": "Seller",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

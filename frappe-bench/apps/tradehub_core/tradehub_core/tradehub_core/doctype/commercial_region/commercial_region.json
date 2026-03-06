@@ -90,7 +90,8 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Active"
+   "label": "Is Active",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -192,6 +193,12 @@
    "role": "Satici",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 1,

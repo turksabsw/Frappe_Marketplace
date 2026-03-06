@@ -130,7 +130,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nPublished\nRejected\nHidden\nRemoved",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -157,7 +158,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "reviewer_section",
@@ -196,7 +198,8 @@
    "fieldname": "organization",
    "fieldtype": "Link",
    "label": "Organization",
-   "options": "Organization"
+   "options": "Organization",
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -223,7 +226,8 @@
    "in_standard_filter": 1,
    "label": "Listing",
    "mandatory_depends_on": "eval:doc.review_type=='Product'",
-   "options": "Listing"
+   "options": "Listing",
+   "set_only_once": 1
   },
   {
    "fetch_from": "listing.title",
@@ -242,7 +246,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "mandatory_depends_on": "eval:doc.review_type=='Seller'",
-   "options": "Seller Profile"
+   "options": "Seller Profile",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -284,13 +289,15 @@
    "fieldname": "marketplace_order",
    "fieldtype": "Link",
    "label": "Marketplace Order",
-   "options": "Marketplace Order"
+   "options": "Marketplace Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "sub_order",
    "fieldtype": "Link",
    "label": "Sub Order",
-   "options": "Sub Order"
+   "options": "Sub Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_order",
@@ -461,7 +468,8 @@
    "description": "Featured on product page",
    "fieldname": "is_featured",
    "fieldtype": "Check",
-   "label": "Featured Review"
+   "label": "Featured Review",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -528,7 +536,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Moderation Status",
-   "options": "Pending\nApproved\nRejected\nFlagged\nUnder Review"
+   "options": "Pending\nApproved\nRejected\nFlagged\nUnder Review",
+   "permlevel": 1
   },
   {
    "fieldname": "moderated_by",
@@ -552,12 +561,14 @@
    "fieldname": "rejection_reason",
    "fieldtype": "Select",
    "label": "Rejection Reason",
-   "options": "\nSpam\nInappropriate Content\nFake Review\nOff-topic\nViolates Guidelines\nSeller Manipulation\nConflict of Interest\nOther"
+   "options": "\nSpam\nInappropriate Content\nFake Review\nOff-topic\nViolates Guidelines\nSeller Manipulation\nConflict of Interest\nOther",
+   "permlevel": 1
   },
   {
    "fieldname": "moderation_notes",
    "fieldtype": "Small Text",
-   "label": "Moderation Notes"
+   "label": "Moderation Notes",
+   "permlevel": 1
   },
   {
    "description": "Deprecated — use Flags table below. JSON array of flagged issues",
@@ -749,6 +760,12 @@
    "report": 0,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

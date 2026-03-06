@@ -96,7 +96,8 @@
    "label": "User",
    "options": "User",
    "reqd": 1,
-   "description": "The user who provided consent"
+   "description": "The user who provided consent",
+   "set_only_once": 1
   },
   {
    "fieldname": "user_full_name",
@@ -130,7 +131,8 @@
    "label": "Status",
    "options": "Pending Verification\nActive\nWithdrawn\nExpired\nSuperseded\nInvalid",
    "reqd": 1,
-   "description": "Current status of the consent"
+   "description": "Current status of the consent",
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -138,14 +140,16 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this consent belongs to"
+   "description": "The tenant this consent belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "kyc_profile",
    "fieldtype": "Link",
    "label": "KYC Profile",
    "options": "KYC Profile",
-   "description": "Associated KYC profile if applicable"
+   "description": "Associated KYC profile if applicable",
+   "set_only_once": 1
   },
   {
    "fieldname": "consent_details_section",
@@ -422,7 +426,8 @@
    "fieldname": "is_verified",
    "fieldtype": "Check",
    "label": "Consent Verified",
-   "description": "Whether consent has been verified (e.g., double opt-in)"
+   "description": "Whether consent has been verified (e.g., double opt-in)",
+   "permlevel": 1
   },
   {
    "fieldname": "verified_at",
@@ -516,7 +521,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
    "label": "Internal Notes",
-   "description": "Notes visible only to administrators"
+   "description": "Notes visible only to administrators",
+   "permlevel": 1
   },
   {
    "fieldname": "details_tab",
@@ -597,6 +603,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

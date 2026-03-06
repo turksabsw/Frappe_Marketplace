@@ -114,7 +114,8 @@
    "in_standard_filter": 1,
    "label": "Shipment",
    "options": "Marketplace Shipment",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "shipment_tracking_number",
@@ -480,21 +481,24 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Marketplace Order",
-   "options": "Marketplace Order"
+   "options": "Marketplace Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "sub_order",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Sub Order",
-   "options": "Sub Order"
+   "options": "Sub Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Seller",
-   "options": "Seller Profile"
+   "options": "Seller Profile",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller_name",
@@ -511,13 +515,15 @@
    "fieldname": "buyer",
    "fieldtype": "Link",
    "label": "Buyer",
-   "options": "User"
+   "options": "User",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",

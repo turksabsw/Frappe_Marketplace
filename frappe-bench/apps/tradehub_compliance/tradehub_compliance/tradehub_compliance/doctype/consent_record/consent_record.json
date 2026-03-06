@@ -111,7 +111,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nActive\nRevoked\nExpired",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "consent_topic",
@@ -121,7 +122,8 @@
    "label": "Consent Topic",
    "options": "Consent Topic",
    "reqd": 1,
-   "description": "What the consent is for"
+   "description": "What the consent is for",
+   "set_only_once": 1
   },
   {
    "fieldname": "topic_name",
@@ -156,7 +158,8 @@
    "fieldtype": "Link",
    "label": "Consent Text",
    "options": "Consent Text",
-   "description": "The consent text that was presented"
+   "description": "The consent text that was presented",
+   "set_only_once": 1
   },
   {
    "fieldname": "consent_text_version",
@@ -275,7 +278,8 @@
    "fieldname": "is_verified",
    "fieldtype": "Check",
    "label": "Is Verified",
-   "description": "Whether consent has been verified (e.g., double opt-in)"
+   "description": "Whether consent has been verified (e.g., double opt-in)",
+   "permlevel": 1
   },
   {
    "fieldname": "verified_at",
@@ -317,7 +321,8 @@
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -402,6 +407,12 @@
    "write": 1,
    "role": "All",
    "if_owner": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

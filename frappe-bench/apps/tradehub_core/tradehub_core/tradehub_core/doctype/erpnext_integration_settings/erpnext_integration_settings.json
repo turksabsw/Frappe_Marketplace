@@ -101,7 +101,8 @@
    "options": "Tenant",
    "reqd": 1,
    "unique": 1,
-   "description": "Tenant this ERPNext integration configuration belongs to"
+   "description": "Tenant this ERPNext integration configuration belongs to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",

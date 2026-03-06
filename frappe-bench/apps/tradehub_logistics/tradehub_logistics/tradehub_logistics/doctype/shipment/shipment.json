@@ -213,7 +213,8 @@
    "label": "Status",
    "options": "Draft\nPending Pickup\nPicked Up\nIn Transit\nAt Customs\nCustoms Cleared\nOut for Delivery\nDelivered\nException\nReturned\nCancelled",
    "reqd": 1,
-   "description": "Current status of the shipment"
+   "description": "Current status of the shipment",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_shipment_info",
@@ -244,7 +245,8 @@
    "fieldtype": "Select",
    "label": "Priority",
    "options": "Low\nNormal\nHigh\nUrgent",
-   "description": "Priority level for this shipment"
+   "description": "Priority level for this shipment",
+   "permlevel": 1
   },
   {
    "fieldname": "order_section",
@@ -259,7 +261,8 @@
    "label": "Order",
    "options": "Order",
    "reqd": 1,
-   "description": "The order being shipped"
+   "description": "The order being shipped",
+   "set_only_once": 1
   },
   {
    "fetch_from": "order.order_number",
@@ -309,7 +312,8 @@
    "label": "Sub Order",
    "options": "Sub Order",
    "in_standard_filter": 1,
-   "description": "The marketplace sub order being shipped"
+   "description": "The marketplace sub order being shipped",
+   "set_only_once": 1
   },
   {
    "fetch_from": "sub_order.sub_order_id",
@@ -487,7 +491,8 @@
    "in_standard_filter": 1,
    "label": "Carrier",
    "options": "Carrier",
-   "description": "The shipping carrier for this shipment"
+   "description": "The shipping carrier for this shipment",
+   "set_only_once": 1
   },
   {
    "fetch_from": "carrier.carrier_name",
@@ -1270,7 +1275,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to buyer)"
+   "description": "Internal notes (not visible to buyer)",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_notes",
@@ -1410,6 +1416,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

@@ -82,7 +82,8 @@
    "label": "Group Buy",
    "options": "Group Buy",
    "reqd": 1,
-   "description": "The group buy this commitment is for"
+   "description": "The group buy this commitment is for",
+   "set_only_once": 1
   },
   {
    "fieldname": "group_buy_title",
@@ -99,7 +100,8 @@
    "label": "Buyer",
    "options": "Buyer Profile",
    "reqd": 1,
-   "description": "The buyer making this commitment"
+   "description": "The buyer making this commitment",
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer_name",
@@ -137,7 +139,8 @@
    "label": "Status",
    "options": "Active\nPayment Pending\nPaid\nCancelled\nRefunded\nExpired",
    "reqd": 1,
-   "description": "Current status of the commitment"
+   "description": "Current status of the commitment",
+   "permlevel": 1
   },
   {
    "fieldname": "commitment_date",
@@ -350,6 +353,12 @@
    "read": 1,
    "write": 1,
    "role": "All"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

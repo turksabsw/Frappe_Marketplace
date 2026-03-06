@@ -76,7 +76,8 @@
    "label": "Consent Topic",
    "options": "Consent Topic",
    "reqd": 1,
-   "description": "The topic this consent text is for"
+   "description": "The topic this consent text is for",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -90,7 +91,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Approval\nActive\nSuperseded\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "tr",
@@ -251,7 +253,8 @@
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "company",
@@ -304,6 +307,12 @@
   {
    "read": 1,
    "role": "All"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

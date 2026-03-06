@@ -65,7 +65,8 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Active"
+   "label": "Is Active",
+   "permlevel": 1
   },
   {
    "fieldname": "category",
@@ -138,6 +139,12 @@
    "report": 1,
    "role": "Administrator",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

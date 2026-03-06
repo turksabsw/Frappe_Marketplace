@@ -179,7 +179,8 @@
    "label": "Status",
    "options": "Active\nInactive\nExpired",
    "reqd": 1,
-   "description": "Lead time configuration status"
+   "description": "Lead time configuration status",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -258,7 +259,8 @@
    "fieldname": "priority",
    "fieldtype": "Int",
    "label": "Priority",
-   "description": "Priority order when multiple lead times apply (lower = higher priority)"
+   "description": "Priority order when multiple lead times apply (lower = higher priority)",
+   "permlevel": 1
   },
   {
    "fieldname": "applies_to_region",
@@ -328,6 +330,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

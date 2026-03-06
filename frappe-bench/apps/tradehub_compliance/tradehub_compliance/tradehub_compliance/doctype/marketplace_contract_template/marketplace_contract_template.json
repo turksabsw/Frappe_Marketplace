@@ -148,7 +148,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant this template belongs to (leave empty for global templates)"
+   "description": "Tenant this template belongs to (leave empty for global templates)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",

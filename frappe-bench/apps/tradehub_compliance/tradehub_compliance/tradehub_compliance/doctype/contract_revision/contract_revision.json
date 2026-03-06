@@ -26,7 +26,8 @@
    "label": "Contract Instance",
    "options": "Contract Instance",
    "reqd": 1,
-   "read_only": 0
+   "read_only": 0,
+   "set_only_once": 1
   },
   {
    "fieldname": "revision_number",

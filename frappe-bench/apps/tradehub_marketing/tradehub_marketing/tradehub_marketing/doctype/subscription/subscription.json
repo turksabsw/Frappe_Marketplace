@@ -182,7 +182,8 @@
    "label": "Subscription Package",
    "options": "Subscription Package",
    "reqd": 1,
-   "description": "The subscription plan for this subscription"
+   "description": "The subscription plan for this subscription",
+   "set_only_once": 1
   },
   {
    "fetch_from": "subscription_package.package_name",
@@ -212,7 +213,8 @@
    "label": "Status",
    "options": "Draft\nTrial\nActive\nPending Payment\nGrace Period\nSuspended\nCancelled\nExpired",
    "reqd": 1,
-   "description": "Current status of the subscription"
+   "description": "Current status of the subscription",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -253,7 +255,8 @@
    "label": "Seller Profile",
    "options": "Seller Profile",
    "mandatory_depends_on": "eval:doc.subscriber_type=='Seller'",
-   "description": "The seller who owns this subscription"
+   "description": "The seller who owns this subscription",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller_profile.seller_name",
@@ -274,7 +277,8 @@
    "label": "Buyer Profile",
    "options": "User",
    "mandatory_depends_on": "eval:doc.subscriber_type=='Buyer'",
-   "description": "The buyer who owns this subscription"
+   "description": "The buyer who owns this subscription",
+   "set_only_once": 1
   },
   {
    "depends_on": "eval:doc.subscriber_type=='Organization'",
@@ -284,7 +288,8 @@
    "label": "Organization",
    "options": "Organization",
    "mandatory_depends_on": "eval:doc.subscriber_type=='Organization'",
-   "description": "The organization that owns this subscription"
+   "description": "The organization that owns this subscription",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller_profile.tenant",
@@ -362,7 +367,8 @@
    "fieldname": "current_price",
    "fieldtype": "Currency",
    "label": "Current Price",
-   "description": "Price per billing period"
+   "description": "Price per billing period",
+   "read_only": 1
   },
   {
    "fetch_from": "subscription_package.currency",
@@ -417,7 +423,8 @@
    "fieldname": "grace_period_days",
    "fieldtype": "Int",
    "label": "Grace Period (Days)",
-   "description": "Number of days after due date before suspension"
+   "description": "Number of days after due date before suspension",
+   "read_only": 1
   },
   {
    "fieldname": "grace_period_start_date",
@@ -786,7 +793,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to subscriber)"
+   "description": "Internal notes (not visible to subscriber)",
+   "permlevel": 1
   },
   {
    "fieldname": "subscriber_notes",
@@ -881,6 +889,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

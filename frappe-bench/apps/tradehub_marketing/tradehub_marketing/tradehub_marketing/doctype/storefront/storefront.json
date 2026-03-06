@@ -173,7 +173,8 @@
    "options": "Seller Profile",
    "reqd": 1,
    "unique": 1,
-   "description": "The seller who owns this storefront"
+   "description": "The seller who owns this storefront",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller_name",
@@ -202,7 +203,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nActive\nSuspended\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -643,7 +645,8 @@
    "fieldname": "is_featured",
    "fieldtype": "Check",
    "label": "Is Featured",
-   "description": "Feature this store on marketplace homepage"
+   "description": "Feature this store on marketplace homepage",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.is_featured==1",
@@ -748,6 +751,12 @@
    "report": 1,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

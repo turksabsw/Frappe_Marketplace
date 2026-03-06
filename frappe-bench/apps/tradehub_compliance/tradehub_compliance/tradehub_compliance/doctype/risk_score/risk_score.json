@@ -109,7 +109,8 @@
    "in_standard_filter": 1,
    "label": "Seller Profile",
    "mandatory_depends_on": "eval:doc.profile_type === 'Seller'",
-   "options": "Seller Profile"
+   "options": "Seller Profile",
+   "set_only_once": 1
   },
   {
    "depends_on": "eval:doc.profile_type === 'Seller'",
@@ -128,7 +129,8 @@
    "in_standard_filter": 1,
    "label": "Buyer Profile",
    "mandatory_depends_on": "eval:doc.profile_type === 'Buyer'",
-   "options": "User"
+   "options": "User",
+   "set_only_once": 1
   },
   {
    "depends_on": "eval:doc.profile_type === 'Buyer'",
@@ -151,7 +153,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nActive\nExpired\nSuspended\nUnder Review",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "description": "Tenant for this risk score (auto-populated from profile)",
@@ -200,7 +203,8 @@
    "in_standard_filter": 1,
    "label": "Risk Level",
    "options": "Very Low\nLow\nMedium\nHigh\nVery High\nCritical",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "description": "Primary risk category",
@@ -520,7 +524,8 @@
    "description": "Internal notes (not visible to profile owner)",
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "description": "Notes visible to profile owner",
@@ -649,6 +654,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

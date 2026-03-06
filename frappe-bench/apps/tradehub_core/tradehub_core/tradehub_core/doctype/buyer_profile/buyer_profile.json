@@ -108,7 +108,8 @@
    "label": "User",
    "options": "User",
    "reqd": 1,
-   "unique": 1
+   "unique": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "user_full_name",
@@ -133,7 +134,8 @@
    "in_standard_filter": 1,
    "label": "Buyer Category",
    "options": "Buyer Category",
-   "description": "Classification of buyer (e.g., Retailer, Wholesaler, Distributor)"
+   "description": "Classification of buyer (e.g., Retailer, Wholesaler, Distributor)",
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer_category_name",
@@ -154,14 +156,16 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nSuspended\nBlocked",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this buyer belongs to"
+   "description": "The tenant this buyer belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -175,7 +179,8 @@
    "fieldtype": "Link",
    "label": "Organization",
    "options": "Organization",
-   "description": "Business organization for this buyer (if applicable)"
+   "description": "Business organization for this buyer (if applicable)",
+   "set_only_once": 1
   },
   {
    "fieldname": "organization_name",
@@ -381,7 +386,8 @@
    "fieldname": "kyc_profile",
    "fieldtype": "Link",
    "label": "KYC Profile",
-   "options": "KYC Profile"
+   "options": "KYC Profile",
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -620,20 +626,23 @@
    "fieldtype": "Select",
    "label": "Verification Status",
    "in_list_view": 0,
-   "options": "\nPending\nVerified\nRejected\nSuspended"
+   "options": "\nPending\nVerified\nRejected\nSuspended",
+   "permlevel": 1
   },
   {
    "fieldname": "total_purchase_value",
    "fieldtype": "Currency",
    "label": "Total Purchase Value",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "payment_on_time_rate",
    "fieldtype": "Percent",
    "label": "Payment On Time Rate",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -678,6 +687,12 @@
    "read": 1,
    "write": 1,
    "role": "All"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

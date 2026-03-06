@@ -130,7 +130,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending Verification\nActive\nSuspended\nBlocked\nInactive",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -140,7 +141,8 @@
    "reqd": 1,
    "in_standard_filter": 1,
    "in_list_view": 1,
-   "description": "The tenant this organization belongs to (required for tenant isolation)"
+   "description": "The tenant this organization belongs to (required for tenant isolation)",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",

@@ -146,7 +146,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this import belongs to"
+   "description": "The tenant this import belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -161,7 +162,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "description": "The seller performing this import"
+   "description": "The seller performing this import",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller_name",
@@ -601,7 +603,8 @@
    "fieldname": "priority",
    "fieldtype": "Select",
    "label": "Priority",
-   "options": "Low\nMedium\nHigh\nCritical"
+   "options": "Low\nMedium\nHigh\nCritical",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 0,
@@ -646,6 +649,12 @@
    "report": 1,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

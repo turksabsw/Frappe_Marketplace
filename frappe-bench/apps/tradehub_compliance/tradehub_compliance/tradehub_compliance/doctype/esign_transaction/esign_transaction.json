@@ -70,7 +70,8 @@
    "in_standard_filter": 1,
    "label": "Contract Instance",
    "options": "Contract Instance",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -84,7 +85,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Initiated\nPending\nCompleted\nRejected\nExpired\nFailed",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "external_id",
@@ -243,6 +245,12 @@
   {
    "read": 1,
    "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
    "role": "System Manager",
    "write": 1
   }

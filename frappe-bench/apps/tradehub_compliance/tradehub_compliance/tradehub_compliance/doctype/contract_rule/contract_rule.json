@@ -80,7 +80,8 @@
    "in_standard_filter": 1,
    "label": "Contract Template",
    "options": "Contract Template",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -94,7 +95,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nDraft\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "1",
@@ -102,7 +104,8 @@
    "fieldname": "priority",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Priority"
+   "label": "Priority",
+   "permlevel": 1
   },
   {
    "description": "Tenant this rule belongs to (empty for global rules)",
@@ -110,7 +113,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "trigger_section",
@@ -267,7 +271,8 @@
    "fieldname": "notification_template",
    "fieldtype": "Link",
    "label": "Notification Template",
-   "options": "Email Template"
+   "options": "Email Template",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_notification",
@@ -424,6 +429,12 @@
    "report": 1,
    "role": "Marketplace Manager",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

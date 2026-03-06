@@ -157,7 +157,8 @@
    "fieldtype": "Link",
    "label": "Tenant",
    "options": "Tenant",
-   "description": "Tenant this channel belongs to (for multi-tenant setups)"
+   "description": "Tenant this channel belongs to (for multi-tenant setups)",
+   "set_only_once": 1
   },
   {
    "fieldname": "company",

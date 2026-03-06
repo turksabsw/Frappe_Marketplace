@@ -198,7 +198,8 @@
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "company",

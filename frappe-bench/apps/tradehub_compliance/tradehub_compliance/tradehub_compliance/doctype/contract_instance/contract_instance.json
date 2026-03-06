@@ -110,7 +110,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nSent\nPending Signature\nSigned\nRejected\nExpired",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "party_type",
@@ -211,7 +212,8 @@
    "fieldtype": "Link",
    "label": "E-Sign Provider",
    "options": "ESign Provider",
-   "depends_on": "eval:doc.signature_method=='Digital'"
+   "depends_on": "eval:doc.signature_method=='Digital'",
+   "set_only_once": 1
   },
   {
    "fieldname": "esign_transaction",
@@ -266,7 +268,8 @@
   {
    "fieldname": "rejection_reason",
    "fieldtype": "Small Text",
-   "label": "Rejection Reason"
+   "label": "Rejection Reason",
+   "permlevel": 1
   },
   {
    "fieldname": "tenant_section",
@@ -278,7 +281,8 @@
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -362,6 +366,12 @@
    "read": 1,
    "role": "All",
    "if_owner": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

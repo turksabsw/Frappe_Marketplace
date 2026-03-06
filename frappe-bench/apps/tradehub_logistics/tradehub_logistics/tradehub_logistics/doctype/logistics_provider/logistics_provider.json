@@ -162,7 +162,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nSuspended\nTesting",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "logo",
@@ -733,7 +734,8 @@
    "fieldname": "priority",
    "fieldtype": "Int",
    "label": "Priority",
-   "description": "Display order priority (lower = higher priority)"
+   "description": "Display order priority (lower = higher priority)",
+   "permlevel": 1
   },
   {
    "fieldname": "notes",
@@ -810,6 +812,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

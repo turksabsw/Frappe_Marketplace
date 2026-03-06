@@ -126,7 +126,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nActive\nExpired\nPaused\nCancelled\nCompleted",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "1",
@@ -135,7 +136,8 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Is Active"
+   "label": "Is Active",
+   "permlevel": 1
   },
   {
    "fieldname": "seller_section",
@@ -150,7 +152,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -441,6 +444,12 @@
    "report": 1,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

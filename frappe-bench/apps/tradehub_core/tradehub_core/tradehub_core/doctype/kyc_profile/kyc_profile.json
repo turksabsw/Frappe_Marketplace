@@ -136,7 +136,8 @@
    "options": "User",
    "reqd": 1,
    "unique": 1,
-   "description": "The user account this KYC profile belongs to"
+   "description": "The user account this KYC profile belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "user_full_name",
@@ -175,7 +176,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nIn Review\nDocuments Required\nVerified\nRejected\nExpired\nSuspended",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -183,7 +185,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this KYC profile belongs to"
+   "description": "The tenant this KYC profile belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -200,7 +203,8 @@
    "in_standard_filter": 1,
    "label": "Risk Level",
    "options": "Not Assessed\nLow\nMedium\nHigh\nVery High",
-   "description": "KYC risk classification"
+   "description": "KYC risk classification",
+   "permlevel": 1
   },
   {
    "fieldname": "personal_tab",
@@ -708,7 +712,8 @@
    "fieldname": "rejection_reason",
    "fieldtype": "Select",
    "label": "Rejection Reason",
-   "options": "\nInvalid ID Document\nExpired Document\nPoor Image Quality\nInformation Mismatch\nFraud Suspected\nUnderage\nSanctions Match\nPEP - High Risk\nIncomplete Information\nFailed Liveness Check\nOther"
+   "options": "\nInvalid ID Document\nExpired Document\nPoor Image Quality\nInformation Mismatch\nFraud Suspected\nUnderage\nSanctions Match\nPEP - High Risk\nIncomplete Information\nFailed Liveness Check\nOther",
+   "permlevel": 1
   },
   {
    "fieldname": "rejection_notes",
@@ -776,14 +781,16 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
    "label": "Internal Notes",
-   "description": "Notes visible only to administrators"
+   "description": "Notes visible only to administrators",
+   "permlevel": 1
   },
   {
    "fieldname": "buyer_profile",
    "fieldtype": "Link",
    "label": "Buyer Profile",
    "in_list_view": 0,
-   "options": "Buyer Profile"
+   "options": "Buyer Profile",
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer_name",
@@ -798,7 +805,8 @@
    "fieldtype": "Link",
    "label": "Seller Profile",
    "in_list_view": 0,
-   "options": "Seller Profile"
+   "options": "Seller Profile",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller_name",
@@ -889,6 +897,12 @@
    "report": 0,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

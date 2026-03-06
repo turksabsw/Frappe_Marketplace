@@ -152,7 +152,8 @@
    "label": "Priority",
    "options": "Critical\nHigh\nMedium\nLow",
    "reqd": 1,
-   "description": "Priority level for review queue"
+   "description": "Priority level for review queue",
+   "permlevel": 1
   },
   {
    "default": "Open",
@@ -163,7 +164,8 @@
    "label": "Status",
    "options": "Open\nAssigned\nIn Review\nPending Info\nEscalated\nResolved\nClosed\nAppealed\nReopened",
    "reqd": 1,
-   "description": "Current status of the moderation case"
+   "description": "Current status of the moderation case",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -175,7 +177,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this case belongs to"
+   "description": "The tenant this case belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant_name",
@@ -444,7 +447,8 @@
    "in_standard_filter": 1,
    "label": "Assigned To",
    "options": "User",
-   "description": "Moderator assigned to this case"
+   "description": "Moderator assigned to this case",
+   "permlevel": 1
   },
   {
    "fieldname": "assigned_at",
@@ -498,19 +502,22 @@
    "in_standard_filter": 1,
    "label": "Decision",
    "options": "\nApproved\nRejected\nRemoved\nEdits Required\nWarning Issued\nAccount Action\nNo Action Needed\nEscalate\nPending Legal",
-   "description": "Final decision on the case"
+   "description": "Final decision on the case",
+   "permlevel": 1
   },
   {
    "fieldname": "decision_reason",
    "fieldtype": "Small Text",
    "label": "Decision Reason",
-   "description": "Brief explanation for the decision"
+   "description": "Brief explanation for the decision",
+   "permlevel": 1
   },
   {
    "fieldname": "decision_notes",
    "fieldtype": "Text Editor",
    "label": "Decision Notes",
-   "description": "Detailed notes about the decision"
+   "description": "Detailed notes about the decision",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_decision",
@@ -787,7 +794,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
    "label": "Internal Notes",
-   "description": "Notes visible only to moderators and admins"
+   "description": "Notes visible only to moderators and admins",
+   "permlevel": 1
   },
   {
    "fieldname": "moderation_history",
@@ -904,6 +912,12 @@
    "report": 0,
    "role": "Marketplace Moderator",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

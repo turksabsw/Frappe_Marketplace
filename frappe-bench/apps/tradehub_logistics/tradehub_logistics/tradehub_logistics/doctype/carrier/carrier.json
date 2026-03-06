@@ -287,7 +287,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant for multi-tenant isolation (empty for global carriers)"
+   "description": "Tenant for multi-tenant isolation (empty for global carriers)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",
@@ -704,7 +705,8 @@
    "fieldname": "featured",
    "fieldtype": "Check",
    "label": "Featured",
-   "description": "Highlight this carrier in listings"
+   "description": "Highlight this carrier in listings",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -729,7 +731,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes about this carrier (not visible to customers)"
+   "description": "Internal notes about this carrier (not visible to customers)",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -782,6 +785,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

@@ -90,7 +90,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nActive\nSuspended\nCancelled",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "Basic",

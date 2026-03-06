@@ -115,7 +115,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nDeprecated",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -454,6 +455,12 @@
    "role": "All",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

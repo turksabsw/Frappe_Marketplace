@@ -141,7 +141,8 @@
    "options": "User",
    "reqd": 1,
    "unique": 1,
-   "description": "Link to the User account for this premium buyer"
+   "description": "Link to the User account for this premium buyer",
+   "set_only_once": 1
   },
   {
    "fetch_from": "buyer_profile.full_name",
@@ -172,7 +173,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nActive\nSuspended\nExpired\nCancelled",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -874,6 +876,12 @@
    "report": 0,
    "role": "All",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

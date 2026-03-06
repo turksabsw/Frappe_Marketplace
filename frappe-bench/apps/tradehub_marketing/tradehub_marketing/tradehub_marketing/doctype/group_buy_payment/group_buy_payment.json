@@ -96,7 +96,8 @@
    "in_standard_filter": 1,
    "label": "Group Buy",
    "options": "Group Buy",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "group_buy_title",
@@ -121,7 +122,8 @@
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "Buyer Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer_name",
@@ -150,7 +152,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nProcessing\nCompleted\nFailed\nRefunded\nPartially Refunded\nCancelled",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "payment_date",
@@ -369,6 +372,12 @@
   {
    "read": 1,
    "role": "All"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,

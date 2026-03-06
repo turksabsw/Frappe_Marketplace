@@ -115,7 +115,8 @@
    "label": "Status",
    "options": "Requested\nUnder Review\nApproved\nRejected\nIn Production\nReady to Ship\nShipped\nDelivered\nCompleted\nCancelled",
    "reqd": 1,
-   "description": "Current status of the sample request"
+   "description": "Current status of the sample request",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_request",
@@ -138,7 +139,8 @@
    "fieldtype": "Select",
    "label": "Priority",
    "options": "Low\nNormal\nHigh\nUrgent",
-   "description": "Priority level for processing this sample request"
+   "description": "Priority level for processing this sample request",
+   "permlevel": 1
   },
   {
    "fieldname": "product_section",
@@ -241,7 +243,8 @@
    "label": "Buyer",
    "options": "Buyer Profile",
    "reqd": 1,
-   "description": "The buyer requesting the sample"
+   "description": "The buyer requesting the sample",
+   "set_only_once": 1
   },
   {
    "fetch_from": "buyer.buyer_name",
@@ -562,7 +565,8 @@
    "fieldtype": "Small Text",
    "label": "Rejection Reason",
    "depends_on": "eval:doc.approval_decision == 'Rejected' || doc.approval_decision == 'Requires Modifications'",
-   "description": "Reason for rejection or required modifications"
+   "description": "Reason for rejection or required modifications",
+   "permlevel": 1
   },
   {
    "fieldname": "notes_section",
@@ -574,7 +578,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to buyer)"
+   "description": "Internal notes (not visible to buyer)",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_notes",
@@ -698,6 +703,12 @@
    "report": 1,
    "role": "Buyer",
    "share": 0,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

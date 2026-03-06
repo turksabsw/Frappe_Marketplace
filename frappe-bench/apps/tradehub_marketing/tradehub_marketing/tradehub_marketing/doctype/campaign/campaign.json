@@ -180,21 +180,24 @@
    "label": "Status",
    "options": "Draft\nScheduled\nActive\nPaused\nEnded\nCancelled",
    "reqd": 1,
-   "description": "Current status of the campaign"
+   "description": "Current status of the campaign",
+   "permlevel": 1
   },
   {
    "default": "10",
    "fieldname": "priority",
    "fieldtype": "Int",
    "label": "Priority",
-   "description": "Higher priority campaigns are applied first (1-100)"
+   "description": "Higher priority campaigns are applied first (1-100)",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "is_featured",
    "fieldtype": "Check",
    "label": "Is Featured",
-   "description": "Feature this campaign prominently on the marketplace"
+   "description": "Feature this campaign prominently on the marketplace",
+   "permlevel": 1
   },
   {
    "fieldname": "description_section",
@@ -578,7 +581,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "description": "Seller running this campaign (blank = platform-wide)"
+   "description": "Seller running this campaign (blank = platform-wide)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -659,7 +663,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to customers)"
+   "description": "Internal notes (not visible to customers)",
+   "permlevel": 1
   },
   {
    "fieldname": "terms_and_conditions",
@@ -723,6 +728,12 @@
    "role": "Buyer",
    "share": 0,
    "write": 0
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "quick_entry": 0,
