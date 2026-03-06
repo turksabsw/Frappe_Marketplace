@@ -66,8 +66,10 @@ class Listing(Document):
     def validate(self):
         """Validate listing data before saving."""
         self._guard_system_fields()
+        self._guard_primary_links()
         self.validate_seller()
         self.validate_tenant_seller_consistency()
+        self.refetch_denormalized_fields()
         self.validate_seller_can_create_listing()
         self.validate_prices()
         self.validate_inventory()
@@ -113,6 +115,52 @@ class Listing(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def _guard_primary_links(self):
+        """Enforce set_only_once on primary Link fields via Python guard."""
+        if self.is_new():
+            return
+
+        primary_links = ['seller']
+        for field in primary_links:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be changed after creation").format(field),
+                    frappe.PermissionError
+                )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch seller fields
+        if self.seller:
+            seller_data = frappe.db.get_value(
+                "Seller Profile", self.seller,
+                ["seller_name", "company_name", "tenant"],
+                as_dict=True
+            )
+            if seller_data:
+                self.seller_name = seller_data.seller_name
+                self.seller_company = seller_data.company_name
+                self.tenant = seller_data.tenant
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+        # Re-fetch category name
+        if self.category:
+            category_name = frappe.db.get_value(
+                "Category", self.category, "category_name"
+            )
+            if category_name:
+                self.category_name = category_name
 
     def before_save(self):
         """Actions before saving the listing."""

@@ -28,6 +28,8 @@ class RFQQuote(Document):
     def validate(self):
         """Validate quote data."""
         self._guard_system_fields()
+        self.refetch_denormalized_fields()
+        self.validate_tenant_boundary()
         self.validate_nda_signed()
         self.validate_deadline()
         self.validate_duplicate_quote()
@@ -52,6 +54,67 @@ class RFQQuote(Document):
                 frappe.throw(
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
+                )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch seller fields and tenant
+        if self.seller:
+            seller_data = frappe.db.get_value(
+                "Seller Profile", self.seller,
+                ["seller_name", "tenant"],
+                as_dict=True
+            )
+            if seller_data:
+                self.seller_name = seller_data.seller_name
+                self.tenant = seller_data.tenant
+
+        # Re-fetch RFQ fields
+        if self.rfq:
+            rfq_data = frappe.db.get_value(
+                "RFQ", self.rfq,
+                ["title", "buyer"],
+                as_dict=True
+            )
+            if rfq_data:
+                self.rfq_title = rfq_data.title
+                self.rfq_buyer = rfq_data.buyer
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+    def validate_tenant_boundary(self):
+        """
+        Validate tenant boundary on cross-document links.
+
+        Ensures seller belongs to the same tenant as the RFQ's buyer
+        to maintain multi-tenant data isolation.
+        """
+        if not self.seller or not self.rfq:
+            return
+
+        seller_tenant = frappe.db.get_value(
+            "Seller Profile", self.seller, "tenant"
+        )
+
+        # Get RFQ buyer's tenant
+        rfq_buyer = frappe.db.get_value("RFQ", self.rfq, "buyer")
+        if rfq_buyer:
+            buyer_tenant = frappe.db.get_value(
+                "Buyer Profile", rfq_buyer, "tenant"
+            )
+            if (seller_tenant and buyer_tenant
+                    and seller_tenant != buyer_tenant):
+                frappe.throw(
+                    _("Seller and RFQ Buyer must belong to the same tenant")
                 )
 
     def validate_nda_signed(self):

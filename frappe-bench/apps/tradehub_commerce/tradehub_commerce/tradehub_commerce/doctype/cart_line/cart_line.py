@@ -22,6 +22,7 @@ class CartLine(Document):
     def validate(self):
         """Validate cart line data."""
         self.validate_listing()
+        self.refetch_denormalized_fields()
         self.validate_quantity()
         self.calculate_totals()
 
@@ -54,6 +55,36 @@ class CartLine(Document):
                         self.listing_variant, self.listing
                     )
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch listing fields
+        if self.listing:
+            listing_data = frappe.db.get_value(
+                "Listing", self.listing,
+                ["title", "sku", "primary_image", "seller"],
+                as_dict=True
+            )
+            if listing_data:
+                self.title = listing_data.title
+                self.sku = listing_data.sku
+                self.primary_image = listing_data.primary_image
+                # Re-fetch seller from listing for consistency
+                if listing_data.seller:
+                    self.seller = listing_data.seller
+
+        # Re-fetch seller name
+        if self.seller:
+            seller_name = frappe.db.get_value(
+                "Seller Profile", self.seller, "seller_name"
+            )
+            if seller_name:
+                self.seller_name = seller_name
 
     def validate_quantity(self):
         """Validate quantity against listing limits."""

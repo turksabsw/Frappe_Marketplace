@@ -38,6 +38,8 @@ class RFQ(Document):
     def validate(self):
         """Validate RFQ data."""
         self._guard_system_fields()
+        self.refetch_denormalized_fields()
+        self.validate_tenant_boundary()
         self.validate_status_transition()
         self.validate_deadline()
         self.validate_nda_requirements()
@@ -61,6 +63,49 @@ class RFQ(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch buyer fields
+        if self.buyer:
+            buyer_data = frappe.db.get_value(
+                "Buyer Profile", self.buyer,
+                ["buyer_name", "company_name", "email"],
+                as_dict=True
+            )
+            if buyer_data:
+                self.buyer_name = buyer_data.buyer_name
+                self.buyer_company = buyer_data.company_name
+                self.buyer_email = buyer_data.email
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+    def validate_tenant_boundary(self):
+        """
+        Validate tenant boundary on cross-document links.
+
+        Ensures buyer belongs to the same tenant as the RFQ
+        to maintain multi-tenant data isolation.
+        """
+        if not self.buyer or not self.tenant:
+            return
+
+        buyer_tenant = frappe.db.get_value(
+            "Buyer Profile", self.buyer, "tenant"
+        )
+        if buyer_tenant and buyer_tenant != self.tenant:
+            frappe.throw(
+                _("Buyer does not belong to the same tenant as this RFQ")
+            )
 
     def validate_status_transition(self):
         """Validate status transitions."""

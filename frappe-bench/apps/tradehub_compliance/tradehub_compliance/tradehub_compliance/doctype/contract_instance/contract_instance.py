@@ -69,6 +69,7 @@ class ContractInstance(Document):
     def validate(self):
         """Validate the contract instance."""
         self._guard_system_fields()
+        self.refetch_denormalized_fields()
         self.validate_template()
         self.validate_status_transition()
         self.validate_signature()
@@ -96,6 +97,30 @@ class ContractInstance(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch template fields
+        if self.template:
+            template_data = frappe.db.get_value(
+                "Contract Template", self.template,
+                ["title", "contract_type"],
+                as_dict=True
+            )
+            if template_data:
+                self.template_name = template_data.title
+                self.contract_type = template_data.contract_type
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
 
     def validate_template(self):
         """Validate template is published."""

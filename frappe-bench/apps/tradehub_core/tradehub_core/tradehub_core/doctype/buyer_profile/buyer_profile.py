@@ -20,6 +20,7 @@ class BuyerProfile(Document):
         """Validate buyer profile data."""
         self._guard_system_fields()
         self._validate_user()
+        self.refetch_denormalized_fields()
         self._set_display_name()
         self._validate_interest_categories()
         self._validate_addresses()
@@ -49,6 +50,41 @@ class BuyerProfile(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch user full name
+        if self.user:
+            full_name = frappe.db.get_value("User", self.user, "full_name")
+            if full_name:
+                self.user_full_name = full_name
+
+        # Re-fetch buyer category name
+        if self.buyer_category:
+            category_name = frappe.db.get_value(
+                "Buyer Category", self.buyer_category, "category_name"
+            )
+            if category_name:
+                self.buyer_category_name = category_name
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+        # Re-fetch organization name
+        if self.organization:
+            org_name = frappe.db.get_value(
+                "Organization", self.organization, "organization_name"
+            )
+            if org_name:
+                self.organization_name = org_name
 
     def before_insert(self):
         """Set defaults before first save."""

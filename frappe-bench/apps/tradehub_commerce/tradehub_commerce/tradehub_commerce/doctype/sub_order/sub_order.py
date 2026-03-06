@@ -48,6 +48,8 @@ class SubOrder(Document):
         """Validate sub order data before saving."""
         self._guard_system_fields()
         self.validate_seller()
+        self.refetch_denormalized_fields()
+        self.validate_tenant_boundary()
         self.validate_items()
         self.validate_addresses()
         self.validate_status_transitions()
@@ -88,6 +90,66 @@ class SubOrder(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch seller fields
+        if self.seller:
+            seller_data = frappe.db.get_value(
+                "Seller Profile", self.seller,
+                ["seller_name", "company_name", "tenant"],
+                as_dict=True
+            )
+            if seller_data:
+                self.seller_name = seller_data.seller_name
+                self.seller_company = seller_data.company_name
+                if not self.tenant:
+                    self.tenant = seller_data.tenant
+
+        # Re-fetch marketplace order number
+        if self.marketplace_order:
+            order_number = frappe.db.get_value(
+                "Marketplace Order", self.marketplace_order, "order_number"
+            )
+            if order_number:
+                self.marketplace_order_number = order_number
+
+        # Re-fetch buyer name
+        if self.buyer:
+            buyer_name = frappe.db.get_value(
+                "Buyer Profile", self.buyer, "full_name"
+            )
+            if buyer_name:
+                self.buyer_name = buyer_name
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+    def validate_tenant_boundary(self):
+        """
+        Validate tenant boundary on cross-document links.
+
+        Ensures seller belongs to the same tenant as the sub order
+        to maintain multi-tenant data isolation.
+        """
+        if not self.seller or not self.tenant:
+            return
+
+        seller_tenant = frappe.db.get_value(
+            "Seller Profile", self.seller, "tenant"
+        )
+        if seller_tenant and seller_tenant != self.tenant:
+            frappe.throw(
+                _("Seller does not belong to the same tenant as this Sub Order")
+            )
 
     def on_update(self):
         """Actions after sub order is updated."""

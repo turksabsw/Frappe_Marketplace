@@ -98,9 +98,11 @@ class Order(Document):
     def validate(self):
         """Validate Order data before saving."""
         self._guard_system_fields()
+        self._guard_primary_links()
         self.validate_buyer()
         self.validate_seller()
         self.validate_tenant_match()
+        self.refetch_denormalized_fields()
         self.validate_status_transition()
         self.validate_tenant_isolation()
         self.calculate_totals()
@@ -131,6 +133,76 @@ class Order(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def _guard_primary_links(self):
+        """Enforce set_only_once on primary Link fields via Python guard."""
+        if self.is_new():
+            return
+
+        primary_links = ['buyer', 'seller']
+        for field in primary_links:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be changed after creation").format(field),
+                    frappe.PermissionError
+                )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        This ensures data consistency by overriding any client-side values
+        with authoritative data from the source documents. Prevents stale
+        or tampered fetch_from values from being saved.
+        """
+        # Re-fetch buyer fields
+        if self.buyer:
+            buyer_data = frappe.db.get_value(
+                "Buyer Profile", self.buyer,
+                ["buyer_name", "company_name", "email", "phone", "segment", "tenant"],
+                as_dict=True
+            )
+            if buyer_data:
+                self.buyer_name = buyer_data.buyer_name
+                self.buyer_company = buyer_data.company_name
+                self.buyer_email = buyer_data.email
+                self.buyer_phone = buyer_data.phone
+                self.buyer_segment = buyer_data.segment
+                self.tenant = buyer_data.tenant
+
+        # Re-fetch seller fields
+        if self.seller:
+            seller_data = frappe.db.get_value(
+                "Seller Profile", self.seller,
+                ["seller_name", "company_name", "contact_email", "contact_phone", "tier_name"],
+                as_dict=True
+            )
+            if seller_data:
+                self.seller_name = seller_data.seller_name
+                self.seller_company = seller_data.company_name
+                self.seller_email = seller_data.contact_email
+                self.seller_phone = seller_data.contact_phone
+                self.seller_tier_name = seller_data.tier_name
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+        # Re-fetch RFQ title
+        if self.rfq:
+            rfq_title = frappe.db.get_value("RFQ", self.rfq, "title")
+            if rfq_title:
+                self.rfq_title = rfq_title
+
+        # Re-fetch quotation total
+        if self.quotation:
+            quotation_total = frappe.db.get_value(
+                "Quotation", self.quotation, "total_amount"
+            )
+            if quotation_total is not None:
+                self.quotation_total = quotation_total
 
     def on_update(self):
         """Actions after Order is updated."""

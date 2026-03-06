@@ -56,6 +56,7 @@ class SellerProfile(Document):
         self._guard_system_fields()
         self.validate_user()
         self.validate_tenant_organization_consistency()
+        self.refetch_denormalized_fields()
         self.validate_tax_id()
         self.validate_iban()
         self.validate_mersis_number()
@@ -95,6 +96,55 @@ class SellerProfile(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents.
+        """
+        # Re-fetch organization name and tenant
+        if self.organization:
+            org_data = frappe.db.get_value(
+                "Organization", self.organization,
+                ["organization_name", "tenant"],
+                as_dict=True
+            )
+            if org_data:
+                self.organization_name = org_data.organization_name
+                if org_data.tenant and not self.tenant:
+                    self.tenant = org_data.tenant
+
+        # Re-fetch tier name
+        if self.seller_tier:
+            tier_name = frappe.db.get_value(
+                "Seller Tier", self.seller_tier, "tier_name"
+            )
+            if tier_name:
+                self.tier_name = tier_name
+
+        # Re-fetch district name
+        if self.district:
+            district_name = frappe.db.get_value(
+                "District", self.district, "district_name"
+            )
+            if district_name:
+                self.district_name = district_name
+
+        # Re-fetch neighborhood name
+        if self.neighborhood:
+            neighborhood_name = frappe.db.get_value(
+                "Neighborhood", self.neighborhood, "neighborhood_name"
+            )
+            if neighborhood_name:
+                self.neighborhood_name = neighborhood_name
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
 
     def on_update(self):
         """Actions to perform after seller profile is updated."""
