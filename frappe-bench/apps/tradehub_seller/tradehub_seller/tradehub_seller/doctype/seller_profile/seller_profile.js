@@ -53,6 +53,63 @@ frappe.ui.form.on('Seller Profile', {
         });
 
         // =====================================================
+        // Parent-Level District/Neighborhood Cascade Filters
+        // =====================================================
+        // District - filter by parent city field
+        frm.set_query('district', function() {
+            let filters = {
+                'is_active': 1
+            };
+            if (frm.doc.city) {
+                filters['city'] = frm.doc.city;
+            }
+            return {
+                filters: filters
+            };
+        });
+
+        // Neighborhood - filter by parent district field
+        frm.set_query('neighborhood', function() {
+            let filters = {
+                'is_active': 1
+            };
+            if (frm.doc.district) {
+                filters['district'] = frm.doc.district;
+            }
+            return {
+                filters: filters
+            };
+        });
+
+        // =====================================================
+        // Commission Plan Field - Filter by Tenant
+        // =====================================================
+        frm.set_query('commission_plan', function() {
+            if (frm.doc.tenant) {
+                return {
+                    filters: {
+                        'tenant': frm.doc.tenant
+                    }
+                };
+            }
+            return {};
+        });
+
+        // =====================================================
+        // Default Shipping Rule Field - Filter by Tenant
+        // =====================================================
+        frm.set_query('default_shipping_rule', function() {
+            if (frm.doc.tenant) {
+                return {
+                    filters: {
+                        'tenant': frm.doc.tenant
+                    }
+                };
+            }
+            return {};
+        });
+
+        // =====================================================
         // Address Item Child Table - Cascading Dropdown Filters
         // =====================================================
 
@@ -209,6 +266,40 @@ frappe.ui.form.on('Seller Profile', {
                 frm.set_value('kyc_profile', null);
             }
         }
+
+        // When tenant changes, check if commission_plan belongs to new tenant
+        if (frm.doc.commission_plan) {
+            if (frm.doc.tenant) {
+                frappe.db.get_value('Commission Plan', frm.doc.commission_plan, 'tenant', function(r) {
+                    if (r && r.tenant !== frm.doc.tenant) {
+                        frm.set_value('commission_plan', null);
+                        frappe.show_alert({
+                            message: __('Commission Plan cleared because it does not belong to the selected Tenant'),
+                            indicator: 'blue'
+                        });
+                    }
+                });
+            } else {
+                frm.set_value('commission_plan', null);
+            }
+        }
+
+        // When tenant changes, check if default_shipping_rule belongs to new tenant
+        if (frm.doc.default_shipping_rule) {
+            if (frm.doc.tenant) {
+                frappe.db.get_value('Shipping Rule', frm.doc.default_shipping_rule, 'tenant', function(r) {
+                    if (r && r.tenant !== frm.doc.tenant) {
+                        frm.set_value('default_shipping_rule', null);
+                        frappe.show_alert({
+                            message: __('Default Shipping Rule cleared because it does not belong to the selected Tenant'),
+                            indicator: 'blue'
+                        });
+                    }
+                });
+            } else {
+                frm.set_value('default_shipping_rule', null);
+            }
+        }
     },
 
     organization: function(frm) {
@@ -218,6 +309,44 @@ frappe.ui.form.on('Seller Profile', {
         // If organization is cleared, allow tenant to be edited again
         if (!frm.doc.organization) {
             frm.set_df_property('tenant', 'read_only', 0);
+        }
+    },
+
+    // =====================================================
+    // Parent-Level City→District→Neighborhood Cascade
+    // =====================================================
+
+    city: function(frm) {
+        // When city changes, clear district and neighborhood
+        // because they may not belong to the new city
+        if (frm.doc.district || frm.doc.neighborhood) {
+            frm.set_value('district', '');
+            frm.set_value('district_name', '');
+            frm.set_value('neighborhood', '');
+            frm.set_value('neighborhood_name', '');
+
+            if (frm.doc.city) {
+                frappe.show_alert({
+                    message: __('District and Neighborhood cleared due to city change'),
+                    indicator: 'blue'
+                });
+            }
+        }
+    },
+
+    district: function(frm) {
+        // When district changes, clear neighborhood
+        // because it may not belong to the new district
+        if (frm.doc.neighborhood) {
+            frm.set_value('neighborhood', '');
+            frm.set_value('neighborhood_name', '');
+
+            if (frm.doc.district) {
+                frappe.show_alert({
+                    message: __('Neighborhood cleared due to district change'),
+                    indicator: 'blue'
+                });
+            }
         }
     }
 });
