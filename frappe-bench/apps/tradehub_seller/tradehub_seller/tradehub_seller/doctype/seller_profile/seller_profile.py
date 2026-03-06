@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate, nowdate, now_datetime, add_days
-import json
 
 
 class SellerProfile(Document):
@@ -41,10 +40,6 @@ class SellerProfile(Document):
         # Set display name if not specified
         if not self.display_name:
             self.display_name = self.seller_name
-
-        # Initialize badges as empty array
-        if not self.badges:
-            self.badges = "[]"
 
     def before_validate(self):
         """
@@ -660,36 +655,34 @@ class SellerProfile(Document):
 
     # Badge Methods
     def add_badge(self, badge_id, badge_name, badge_description=None):
-        """Add a badge to the seller profile."""
-        badges = json.loads(self.badges or "[]")
-
-        # Check if badge already exists
-        for badge in badges:
-            if badge.get("id") == badge_id:
+        """Add a badge to the seller profile via the Seller Badge child table."""
+        # Check if badge already exists in child table
+        for badge in self.seller_badges:
+            if badge.badge_code == badge_id:
                 return False
 
-        badges.append({
-            "id": badge_id,
-            "name": badge_name,
+        self.append("seller_badges", {
+            "badge_code": badge_id,
+            "badge_name": badge_name,
             "description": badge_description,
-            "awarded_at": now_datetime().isoformat()
+            "earned_date": nowdate(),
+            "is_active": 1,
+            "awarded_by": frappe.session.user,
         })
 
-        self.badges = json.dumps(badges)
         self.save()
         return True
 
     def remove_badge(self, badge_id):
-        """Remove a badge from the seller profile."""
-        badges = json.loads(self.badges or "[]")
-        badges = [b for b in badges if b.get("id") != badge_id]
-        self.badges = json.dumps(badges)
+        """Remove a badge from the seller profile via the Seller Badge child table."""
+        self.seller_badges = [
+            b for b in self.seller_badges if b.badge_code != badge_id
+        ]
         self.save()
 
     def has_badge(self, badge_id):
-        """Check if seller has a specific badge."""
-        badges = json.loads(self.badges or "[]")
-        return any(b.get("id") == badge_id for b in badges)
+        """Check if seller has a specific badge in the Seller Badge child table."""
+        return any(b.badge_code == badge_id for b in self.seller_badges)
 
     # Status Check Methods
     def is_active(self):
@@ -774,7 +767,15 @@ def get_seller_profile(seller_name=None, user=None):
         "can_accept_orders": seller.can_accept_orders(),
         "is_top_seller": seller.is_top_seller,
         "is_premium_seller": seller.is_premium_seller,
-        "badges": json.loads(seller.badges or "[]"),
+        "badges": [
+            {
+                "badge_code": b.badge_code,
+                "badge_name": b.badge_name,
+                "description": b.description,
+                "earned_date": str(b.earned_date) if b.earned_date else None,
+            }
+            for b in seller.seller_badges
+        ],
         "city": seller.city,
         "country": seller.country
     }
@@ -1008,7 +1009,15 @@ def get_seller_statistics(seller_name):
             "complaint_rate": seller.complaint_rate,
             "positive_feedback_rate": seller.positive_feedback_rate
         },
-        "badges": json.loads(seller.badges or "[]"),
+        "badges": [
+            {
+                "badge_code": b.badge_code,
+                "badge_name": b.badge_name,
+                "description": b.description,
+                "earned_date": str(b.earned_date) if b.earned_date else None,
+            }
+            for b in seller.seller_badges
+        ],
         "available_listing_slots": seller.get_available_listing_slots()
     }
 
@@ -1037,7 +1046,15 @@ def award_badge(seller_name, badge_id, badge_name, badge_description=None):
         return {
             "status": "success",
             "message": _("Badge awarded successfully"),
-            "badges": json.loads(seller.badges or "[]")
+            "badges": [
+                {
+                    "badge_code": b.badge_code,
+                    "badge_name": b.badge_name,
+                    "description": b.description,
+                    "earned_date": str(b.earned_date) if b.earned_date else None,
+                }
+                for b in seller.seller_badges
+            ],
         }
     else:
         return {

@@ -8,7 +8,6 @@ from frappe.utils import (
     cint, flt, getdate, nowdate, now_datetime, get_datetime,
     add_days, date_diff
 )
-import json
 
 
 class SellerBalance(Document):
@@ -30,10 +29,6 @@ class SellerBalance(Document):
         if not self.created_by:
             self.created_by = frappe.session.user
         self.created_at = now_datetime()
-
-        # Initialize JSON fields
-        if not self.recent_transactions:
-            self.recent_transactions = "[]"
 
         # Set initial last_updated
         self.last_updated = now_datetime()
@@ -579,7 +574,7 @@ class SellerBalance(Document):
 
     def get_transaction_history(self, limit=20):
         """
-        Get recent transaction history.
+        Get recent transaction history from the Transaction Records child table.
 
         Args:
             limit: Number of transactions to return
@@ -587,34 +582,97 @@ class SellerBalance(Document):
         Returns:
             list: Recent transactions
         """
-        transactions = json.loads(self.recent_transactions or "[]")
-        return transactions[:limit]
+        return frappe.get_all(
+            "Seller Balance Transaction",
+            filters={
+                "parent": self.name,
+                "parentfield": "transaction_records",
+            },
+            fields=[
+                "transaction_date", "transaction_type", "amount",
+                "running_balance", "reference_name", "description",
+            ],
+            order_by="transaction_date desc",
+            limit_page_length=limit,
+        )
 
     # =================================================================
     # Helper Methods
     # =================================================================
 
     def _log_transaction(self, transaction_type, amount, reference=None, description=None):
-        """Log a balance transaction."""
-        transactions = json.loads(self.recent_transactions or "[]")
+        """Log a balance transaction to the Transaction Records child table."""
+        mapped_type = self._map_transaction_type(transaction_type, amount)
+        balance_after = (
+            flt(self.available_balance) + flt(amount)
+            if transaction_type != "Release" else 0
+        )
+        full_description = (
+            f"{transaction_type}: {description}" if description else transaction_type
+        )
 
-        transaction = {
-            "type": transaction_type,
+        # Get next idx for child table row
+        max_idx = frappe.db.sql(
+            """SELECT COALESCE(MAX(idx), 0)
+            FROM `tabSeller Balance Transaction`
+            WHERE parent = %s AND parentfield = 'transaction_records'""",
+            self.name,
+        )[0][0]
+
+        row = frappe.get_doc({
+            "doctype": "Seller Balance Transaction",
+            "parent": self.name,
+            "parenttype": "Seller Balance",
+            "parentfield": "transaction_records",
+            "idx": cint(max_idx) + 1,
+            "transaction_date": now_datetime(),
+            "transaction_type": mapped_type,
             "amount": flt(amount),
-            "balance_after": flt(self.available_balance) + flt(amount) if transaction_type != "Release" else None,
-            "reference": reference,
-            "description": description,
-            "timestamp": str(now_datetime()),
-            "user": frappe.session.user
+            "running_balance": flt(balance_after),
+            "reference_name": reference,
+            "description": full_description,
+        })
+        row.db_insert()
+
+        # Keep only last 100 transactions — remove oldest excess rows
+        total = frappe.db.count(
+            "Seller Balance Transaction",
+            {"parent": self.name, "parentfield": "transaction_records"},
+        )
+        if total > 100:
+            oldest = frappe.db.sql(
+                """SELECT name FROM `tabSeller Balance Transaction`
+                WHERE parent = %s AND parentfield = 'transaction_records'
+                ORDER BY transaction_date ASC
+                LIMIT %s""",
+                (self.name, total - 100),
+            )
+            for row_name in oldest:
+                frappe.db.delete("Seller Balance Transaction", {"name": row_name[0]})
+
+    def _map_transaction_type(self, original_type, amount):
+        """Map detailed transaction type to Seller Balance Transaction Select categories."""
+        type_map = {
+            "Earnings": "Credit",
+            "Release": "Release",
+            "Commission": "Debit",
+            "Refund": "Debit",
+            "Hold": "Hold",
+            "Release Hold": "Release",
+            "Hold Refunded": "Debit",
+            "Payout Requested": "Debit",
+            "Payout Completed": "Debit",
+            "Payout Failed": "Credit",
+            "Payouts Suspended": "Hold",
+            "Payouts Resumed": "Release",
         }
+        # Handle Adjustment types based on amount sign
+        if original_type.startswith("Adjustment"):
+            return "Credit" if flt(amount) >= 0 else "Debit"
 
-        # Add to beginning (most recent first)
-        transactions.insert(0, transaction)
-
-        # Keep only last 100 transactions
-        transactions = transactions[:100]
-
-        self.db_set("recent_transactions", json.dumps(transactions))
+        return type_map.get(
+            original_type, "Credit" if flt(amount) >= 0 else "Debit"
+        )
 
     def _update_last_updated(self):
         """Update the last_updated timestamp."""
