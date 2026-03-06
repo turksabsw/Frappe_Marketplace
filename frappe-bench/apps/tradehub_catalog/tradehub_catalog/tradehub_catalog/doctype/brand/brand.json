@@ -103,7 +103,8 @@
    "label": "Verification Status",
    "options": "Pending\nUnder Review\nVerified\nRejected",
    "reqd": 1,
-   "description": "Current verification status of the brand"
+   "description": "Current verification status of the brand",
+   "permlevel": 1
   },
   {
    "fieldname": "branding_section",
@@ -133,7 +134,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant for multi-tenant isolation (empty for global brands)"
+   "description": "Tenant for multi-tenant isolation (empty for global brands)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",
@@ -170,7 +172,8 @@
    "fieldtype": "Link",
    "label": "Registered By",
    "options": "User",
-   "description": "User who registered this brand"
+   "description": "User who registered this brand",
+   "set_only_once": 1
   },
   {
    "fetch_from": "registered_by.full_name",
@@ -230,7 +233,8 @@
    "fieldname": "verification_notes",
    "fieldtype": "Small Text",
    "label": "Verification Notes",
-   "description": "Notes from verification process"
+   "description": "Notes from verification process",
+   "permlevel": 1
   },
   {
    "fieldname": "additional_tab",
@@ -327,14 +331,16 @@
    "fieldname": "display_order",
    "fieldtype": "Int",
    "label": "Display Order",
-   "description": "Sort order for display (lower numbers appear first)"
+   "description": "Sort order for display (lower numbers appear first)",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "featured",
    "fieldtype": "Check",
    "label": "Featured",
-   "description": "Highlight brand on homepage and listings"
+   "description": "Highlight brand on homepage and listings",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_display",
@@ -345,7 +351,8 @@
    "fieldname": "show_in_filters",
    "fieldtype": "Check",
    "label": "Show in Filters",
-   "description": "Display brand in product filters"
+   "description": "Display brand in product filters",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -386,6 +393,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {

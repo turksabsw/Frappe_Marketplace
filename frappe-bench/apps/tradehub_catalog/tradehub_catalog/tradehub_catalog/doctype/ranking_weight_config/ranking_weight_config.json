@@ -97,14 +97,16 @@
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "set_only_once": 1
   },
   {
    "description": "Apply this config to a specific category only",
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Category",
-   "options": "Category"
+   "options": "Category",
+   "set_only_once": 1
   },
   {
    "fieldname": "weights_tab",

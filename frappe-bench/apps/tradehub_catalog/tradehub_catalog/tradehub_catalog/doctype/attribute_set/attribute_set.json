@@ -73,7 +73,8 @@
    "fieldname": "inherit_from",
    "fieldtype": "Link",
    "label": "Inherit From",
-   "options": "Attribute Set"
+   "options": "Attribute Set",
+   "set_only_once": 1
   },
   {
    "fieldname": "inherit_from_name",

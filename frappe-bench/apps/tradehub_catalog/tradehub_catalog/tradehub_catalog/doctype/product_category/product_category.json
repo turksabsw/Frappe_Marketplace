@@ -107,7 +107,8 @@
    "ignore_user_permissions": 1,
    "label": "Parent Category",
    "options": "Product Category",
-   "description": "Parent category for hierarchy"
+   "description": "Parent category for hierarchy",
+   "set_only_once": 1
   },
   {
    "fetch_from": "parent_product_category.category_name",
@@ -146,7 +147,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant for multi-tenant isolation (empty for global categories)"
+   "description": "Tenant for multi-tenant isolation (empty for global categories)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",

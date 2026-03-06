@@ -70,7 +70,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Parent Category",
-   "options": "Category"
+   "options": "Category",
+   "set_only_once": 1
   },
   {
    "fieldname": "parent_category_name",
@@ -121,7 +122,8 @@
    "fieldname": "attribute_set",
    "fieldtype": "Link",
    "label": "Attribute Set",
-   "options": "Attribute Set"
+   "options": "Attribute Set",
+   "set_only_once": 1
   },
   {
    "fieldname": "attribute_set_name",
@@ -152,7 +154,8 @@
    "fieldname": "tax_rate",
    "fieldtype": "Link",
    "label": "Tax Rate",
-   "options": "Tax Rate"
+   "options": "Tax Rate",
+   "permlevel": 1
   },
   {
    "fieldname": "commission_section",
@@ -164,14 +167,16 @@
    "description": "Default commission rate percentage for this category",
    "fieldname": "commission_rate",
    "fieldtype": "Percent",
-   "label": "Commission Rate (%)"
+   "label": "Commission Rate (%)",
+   "permlevel": 1
   },
   {
    "default": "1.00",
    "description": "Minimum commission amount (in default currency)",
    "fieldname": "min_commission",
    "fieldtype": "Currency",
-   "label": "Minimum Commission"
+   "label": "Minimum Commission",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_3",
@@ -181,14 +186,16 @@
    "description": "Maximum commission amount (in default currency)",
    "fieldname": "max_commission",
    "fieldtype": "Currency",
-   "label": "Maximum Commission"
+   "label": "Maximum Commission",
+   "permlevel": 1
   },
   {
    "default": "0.00",
    "description": "Fixed commission per transaction (added to percentage)",
    "fieldname": "fixed_commission",
    "fieldtype": "Currency",
-   "label": "Fixed Commission"
+   "label": "Fixed Commission",
+   "permlevel": 1
   },
   {
    "fieldname": "seo_tab",
@@ -290,6 +297,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {

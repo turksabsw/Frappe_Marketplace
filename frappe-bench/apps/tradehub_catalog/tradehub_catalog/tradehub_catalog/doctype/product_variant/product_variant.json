@@ -119,7 +119,8 @@
    "label": "Status",
    "options": "Active\nInactive\nDiscontinued",
    "reqd": 1,
-   "description": "Variant availability status"
+   "description": "Variant availability status",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -141,7 +142,8 @@
    "label": "SKU Product",
    "options": "SKU Product",
    "reqd": 1,
-   "description": "Parent SKU Product this variant belongs to"
+   "description": "Parent SKU Product this variant belongs to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "sku_product.product_name",
@@ -550,6 +552,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {

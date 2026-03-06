@@ -76,7 +76,8 @@
    "label": "Channel Code",
    "reqd": 1,
    "unique": 1,
-   "description": "Unique identifier (lowercase, underscores only)"
+   "description": "Unique identifier (lowercase, underscores only)",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic_1",

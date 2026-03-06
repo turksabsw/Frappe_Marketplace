@@ -148,7 +148,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nProcessing\nActive\nFailed\nArchived\nDeleted",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -156,7 +157,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this asset belongs to"
+   "description": "The tenant this asset belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "uploaded_by",
@@ -661,7 +663,8 @@
   {
    "fieldname": "moderation_notes",
    "fieldtype": "Small Text",
-   "label": "Moderation Notes"
+   "label": "Moderation Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "system_tab",
@@ -725,6 +728,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {

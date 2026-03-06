@@ -93,7 +93,8 @@
    "label": "Attribute",
    "options": "Product Attribute",
    "reqd": 1,
-   "description": "Parent attribute this value belongs to"
+   "description": "Parent attribute this value belongs to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "attribute.attribute_name",

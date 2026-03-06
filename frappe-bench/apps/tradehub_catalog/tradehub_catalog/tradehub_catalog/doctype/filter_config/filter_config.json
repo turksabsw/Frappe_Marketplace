@@ -110,7 +110,8 @@
    "options": "Product Category",
    "in_standard_filter": 1,
    "mandatory_depends_on": "eval:!doc.is_default",
-   "description": "Product category this filter applies to"
+   "description": "Product category this filter applies to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "category.category_name",
@@ -179,7 +180,8 @@
    "options": "Product Attribute",
    "depends_on": "eval:doc.filter_type=='Attribute'",
    "mandatory_depends_on": "eval:doc.filter_type=='Attribute'",
-   "description": "Product Attribute to use for filtering"
+   "description": "Product Attribute to use for filtering",
+   "set_only_once": 1
   },
   {
    "fetch_from": "attribute.attribute_name",
@@ -314,7 +316,8 @@
    "label": "Tenant",
    "options": "Tenant",
    "in_standard_filter": 1,
-   "description": "Tenant for multi-tenant isolation (empty for global configurations)"
+   "description": "Tenant for multi-tenant isolation (empty for global configurations)",
+   "set_only_once": 1
   },
   {
    "fetch_from": "tenant.tenant_name",

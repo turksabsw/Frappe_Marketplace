@@ -94,7 +94,8 @@
    "label": "Brand",
    "options": "Brand",
    "reqd": 1,
-   "description": "Brand that this authorization is for"
+   "description": "Brand that this authorization is for",
+   "set_only_once": 1
   },
   {
    "fetch_from": "brand.brand_name",
@@ -146,7 +147,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "Seller authorized to resell this brand"
+   "description": "Seller authorized to resell this brand",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -227,7 +229,8 @@
    "label": "Authorization Status",
    "options": "Pending\nUnder Review\nApproved\nRejected\nSuspended\nExpired\nRevoked",
    "reqd": 1,
-   "description": "Current status of the brand authorization"
+   "description": "Current status of the brand authorization",
+   "permlevel": 1
   },
   {
    "default": "Standard Reseller",
@@ -247,14 +250,16 @@
    "fieldname": "is_exclusive",
    "fieldtype": "Check",
    "label": "Exclusive Authorization",
-   "description": "Whether this is an exclusive reseller agreement"
+   "description": "Whether this is an exclusive reseller agreement",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "priority_level",
    "fieldtype": "Int",
    "label": "Priority Level",
-   "description": "Priority for displaying this seller (higher = more prominent)"
+   "description": "Priority for displaying this seller (higher = more prominent)",
+   "permlevel": 1
   },
   {
    "fieldname": "validity_section",
@@ -386,14 +391,16 @@
    "fieldname": "eligible_for_buybox",
    "fieldtype": "Check",
    "label": "Eligible for Buy Box",
-   "description": "Whether this seller can compete for Buy Box on brand products"
+   "description": "Whether this seller can compete for Buy Box on brand products",
+   "permlevel": 1
   },
   {
    "default": "0",
    "fieldname": "buybox_priority_boost",
    "fieldtype": "Int",
    "label": "Buy Box Priority Boost",
-   "description": "Additional points added to Buy Box score (0-20)"
+   "description": "Additional points added to Buy Box score (0-20)",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_buybox",
@@ -404,7 +411,8 @@
    "fieldname": "suppress_unauthorized",
    "fieldtype": "Check",
    "label": "Suppress Unauthorized Sellers",
-   "description": "Hide unauthorized sellers from Buy Box for this brand-seller"
+   "description": "Hide unauthorized sellers from Buy Box for this brand-seller",
+   "permlevel": 1
   },
   {
    "fieldname": "documents_tab",
@@ -521,7 +529,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
    "label": "Internal Notes",
-   "description": "Internal notes about this authorization (admin only)"
+   "description": "Internal notes about this authorization (admin only)",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -559,6 +568,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {

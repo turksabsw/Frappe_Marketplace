@@ -136,7 +136,8 @@
    "label": "Attribute Group",
    "options": "PIM Attribute Group",
    "in_standard_filter": 1,
-   "description": "Group for organizing attributes in forms"
+   "description": "Group for organizing attributes in forms",
+   "set_only_once": 1
   },
   {
    "fieldname": "settings_section",

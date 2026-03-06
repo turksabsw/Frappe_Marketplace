@@ -72,7 +72,8 @@
    "label": "Family Code",
    "reqd": 1,
    "unique": 1,
-   "description": "Unique identifier (lowercase, underscores only)"
+   "description": "Unique identifier (lowercase, underscores only)",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_basic_1",
@@ -86,7 +87,8 @@
    "label": "Product Class",
    "options": "Product Class",
    "reqd": 1,
-   "description": "The product class this family belongs to"
+   "description": "The product class this family belongs to",
+   "set_only_once": 1
   },
   {
    "fieldname": "class_name",

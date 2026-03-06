@@ -73,7 +73,8 @@
    "in_standard_filter": 1,
    "label": "Attribute Type",
    "options": "Select\nText\nNumeric\nBoolean\nDate\nColor",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "1",

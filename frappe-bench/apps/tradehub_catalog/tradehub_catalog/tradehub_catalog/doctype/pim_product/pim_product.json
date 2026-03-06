@@ -302,7 +302,8 @@
    "label": "Product Family",
    "options": "Product Family",
    "reqd": 1,
-   "description": "Product family defining attribute schema and completeness rules"
+   "description": "Product family defining attribute schema and completeness rules",
+   "set_only_once": 1
   },
   {
    "fieldname": "family_name",
@@ -342,7 +343,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPending Review\nApproved\nPublished\nArchived\nDiscontinued\nOut of Stock\nHidden",
-   "description": "Product lifecycle status"
+   "description": "Product lifecycle status",
+   "permlevel": 1
   },
   {
    "default": "1",
@@ -364,7 +366,8 @@
    "in_standard_filter": 1,
    "label": "Brand",
    "options": "Brand",
-   "description": "Product brand"
+   "description": "Product brand",
+   "set_only_once": 1
   },
   {
    "fieldname": "brand_name",
@@ -600,7 +603,8 @@
    "fieldtype": "Link",
    "label": "Primary Category",
    "options": "Category",
-   "description": "Main category for the product"
+   "description": "Main category for the product",
+   "set_only_once": 1
   },
   {
    "fieldname": "primary_category_name",
@@ -1781,6 +1785,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   },
   {
