@@ -71,6 +71,7 @@ class Quotation(Document):
 
     def validate(self):
         """Validate Quotation data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_rfq()
         self.validate_validity_date()
@@ -83,6 +84,27 @@ class Quotation(Document):
         self.calculate_advance_amount()
         self.update_dates_on_status_change()
         self.check_validity_expiry()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'quotation_number',
+            'created_date',
+            'submitted_date',
+            'reviewed_date',
+            'decided_date',
+            'linked_order',
+            'linked_sales_order',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after Quotation is updated."""

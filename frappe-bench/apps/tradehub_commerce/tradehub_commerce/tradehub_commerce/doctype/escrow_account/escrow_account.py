@@ -59,12 +59,44 @@ class EscrowAccount(Document):
 
     def validate(self):
         """Validate escrow account data before saving."""
+        self._guard_system_fields()
         self.validate_amounts()
         self.validate_parties()
         self.validate_status_transition()
         self.validate_release_settings()
         self.calculate_fees()
         self.update_payout_amount()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'escrow_id',
+            'created_at',
+            'closed_at',
+            'held_amount',
+            'released_amount',
+            'refunded_amount',
+            'pending_release_amount',
+            'total_fees',
+            'net_amount_to_seller',
+            'release_approved_by',
+            'release_approved_at',
+            'payout_date',
+            'payout_amount',
+            'dispute_opened_at',
+            'dispute_resolved_at',
+            'erpnext_journal_entry',
+            'erpnext_payment_entry',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after escrow account is updated."""

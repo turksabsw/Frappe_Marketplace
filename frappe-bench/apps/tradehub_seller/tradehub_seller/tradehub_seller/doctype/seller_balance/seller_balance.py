@@ -38,6 +38,7 @@ class SellerBalance(Document):
 
     def validate(self):
         """Validate seller balance data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_balances()
         self.validate_iban()
@@ -46,6 +47,38 @@ class SellerBalance(Document):
         self.modified_by_user = frappe.session.user
         self.modified_at = now_datetime()
         self.last_updated = now_datetime()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'available_balance',
+            'pending_balance',
+            'held_balance',
+            'reserved_balance',
+            'total_balance',
+            'lifetime_earnings',
+            'lifetime_payouts',
+            'lifetime_commissions',
+            'lifetime_refunds',
+            'lifetime_adjustments',
+            'net_lifetime_earnings',
+            'total_orders_completed',
+            'total_orders_refunded',
+            'total_commission_paid',
+            'total_payout_count',
+            'total_tax_withheld',
+            'created_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after balance is updated."""

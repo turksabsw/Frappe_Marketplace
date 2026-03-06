@@ -18,10 +18,37 @@ class BuyerProfile(Document):
 
     def validate(self):
         """Validate buyer profile data."""
+        self._guard_system_fields()
         self._validate_user()
         self._set_display_name()
         self._validate_interest_categories()
         self._validate_addresses()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'total_orders',
+            'total_spent',
+            'average_order_value',
+            'last_order_date',
+            'total_group_buys',
+            'total_commitments',
+            'total_commitment_amount',
+            'successful_group_buys',
+            'total_purchase_value',
+            'payment_on_time_rate',
+            'joined_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def before_insert(self):
         """Set defaults before first save."""

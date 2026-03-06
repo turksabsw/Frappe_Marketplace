@@ -16,6 +16,7 @@ class Coupon(Document):
 
     def validate(self):
         """Validation rules for coupon"""
+        self._guard_system_fields()
         self.validate_coupon_code()
         self.validate_discount_value()
         self.validate_bogo_configuration()
@@ -23,6 +24,21 @@ class Coupon(Document):
         self.validate_usage_limits()
         self.validate_min_order_amount()
         self.validate_seller_tenant_consistency()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'used_count',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def normalize_coupon_code(self):
         """Normalize coupon code to uppercase"""

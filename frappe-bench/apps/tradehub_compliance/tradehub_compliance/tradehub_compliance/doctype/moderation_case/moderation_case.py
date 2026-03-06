@@ -57,12 +57,44 @@ class ModerationCase(Document):
 
     def validate(self):
         """Validate case data before saving."""
+        self._guard_system_fields()
         self.validate_content()
         self.validate_status_transitions()
         self.validate_decision()
         self.validate_appeal()
         self.validate_escalation()
         self.update_metrics()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'case_id',
+            'created_by_user',
+            'creation_date',
+            'assigned_at',
+            'review_started_at',
+            'review_completed_at',
+            'reviewed_by',
+            'review_time_seconds',
+            'appeal_submitted_at',
+            'appeal_decided_by',
+            'appeal_decided_at',
+            'escalated_at',
+            'escalated_by',
+            'queue_position',
+            'wait_time_hours',
+            'resolution_time_hours',
+            'sla_status',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions to perform after case is updated."""

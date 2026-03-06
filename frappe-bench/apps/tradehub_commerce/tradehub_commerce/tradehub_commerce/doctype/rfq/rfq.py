@@ -37,10 +37,30 @@ class RFQ(Document):
 
     def validate(self):
         """Validate RFQ data."""
+        self._guard_system_fields()
         self.validate_status_transition()
         self.validate_deadline()
         self.validate_nda_requirements()
         self.validate_targeting()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'rfq_code',
+            'published_at',
+            'closed_at',
+            'quote_count',
+            'current_views',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def validate_status_transition(self):
         """Validate status transitions."""

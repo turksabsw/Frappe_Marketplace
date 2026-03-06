@@ -27,10 +27,32 @@ class RFQQuote(Document):
 
     def validate(self):
         """Validate quote data."""
+        self._guard_system_fields()
         self.validate_nda_signed()
         self.validate_deadline()
         self.validate_duplicate_quote()
         self.validate_rfq_status()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'submitted_at',
+            'revision_count',
+            'last_revised_at',
+            'accepted_at',
+            'rejected_at',
+            'discount_amount',
+            'total_amount',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def validate_nda_signed(self):
         """Check NDA is signed if required."""

@@ -56,6 +56,7 @@ class PaymentIntent(Document):
 
     def validate(self):
         """Validate payment intent data before saving."""
+        self._guard_system_fields()
         self.validate_amount()
         self.validate_buyer()
         self.validate_status_transition()
@@ -63,6 +64,37 @@ class PaymentIntent(Document):
         self.validate_installments()
         self.calculate_net_amount()
         self.check_expiration()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'intent_id',
+            'created_at',
+            'authorized_at',
+            'captured_at',
+            'captured_amount',
+            'refunded_at',
+            'escrow_released_at',
+            'last_webhook_at',
+            'webhook_count',
+            'processing_started_at',
+            'completed_at',
+            'failed_at',
+            'cancelled_at',
+            'last_retry_at',
+            'retry_count',
+            'erpnext_payment_entry',
+            'erpnext_journal_entry',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after payment intent is updated."""

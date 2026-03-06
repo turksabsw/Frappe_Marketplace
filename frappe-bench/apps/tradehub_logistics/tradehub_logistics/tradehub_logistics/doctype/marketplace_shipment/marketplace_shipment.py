@@ -47,6 +47,7 @@ class MarketplaceShipment(Document):
 
     def validate(self):
         """Validate shipment data before saving."""
+        self._guard_system_fields()
         self.validate_sub_order()
         self.validate_carrier()
         self.validate_addresses()
@@ -55,6 +56,29 @@ class MarketplaceShipment(Document):
         self.calculate_costs()
         self.calculate_volumetric_weight()
         self.generate_tracking_url_if_needed()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'shipment_id',
+            'created_at',
+            'picked_up_at',
+            'in_transit_at',
+            'out_for_delivery_at',
+            'delivered_at',
+            'exception_at',
+            'carrier_response',
+            'last_sync_at',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after shipment is updated."""

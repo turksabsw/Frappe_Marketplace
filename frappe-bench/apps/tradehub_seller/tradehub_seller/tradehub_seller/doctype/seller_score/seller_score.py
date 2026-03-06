@@ -41,6 +41,7 @@ class SellerScore(Document):
 
     def validate(self):
         """Validate score data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_scores()
         self.validate_weights()
@@ -48,6 +49,31 @@ class SellerScore(Document):
         self.calculate_overall_score()
         self.calculate_score_change()
         self.determine_trend()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'previous_score',
+            'score_change',
+            'score_trend',
+            'percentile_rank',
+            'tier_at_calculation',
+            'orders_evaluated',
+            'reviews_evaluated',
+            'created_at',
+            'created_by',
+            'finalized_at',
+            'finalized_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after score is updated."""

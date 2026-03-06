@@ -18,9 +18,34 @@ class GroupBuy(Document):
 
     def validate(self):
         """Validate group buy data before save."""
+        self._guard_system_fields()
         self._validate_dates()
         self._validate_pricing()
         self._validate_quantities()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'current_quantity',
+            'participant_count',
+            'current_price',
+            'total_commitment_amount',
+            'average_price',
+            'view_count',
+            'funded_at',
+            'completed_at',
+            'created_by',
+            'created_at',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def before_insert(self):
         """Set defaults before first save."""

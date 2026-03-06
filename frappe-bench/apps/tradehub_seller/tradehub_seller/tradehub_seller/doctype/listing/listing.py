@@ -65,6 +65,7 @@ class Listing(Document):
 
     def validate(self):
         """Validate listing data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_tenant_seller_consistency()
         self.validate_seller_can_create_listing()
@@ -80,6 +81,38 @@ class Listing(Document):
         self.set_listing_type_flags()
         self.generate_route()
         self.update_status_based_on_inventory()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'listing_code',
+            'erpnext_item',
+            'view_count',
+            'wishlist_count',
+            'order_count',
+            'last_sold_at',
+            'average_rating',
+            'review_count',
+            'quality_score',
+            'ranking_score',
+            'ranking_updated_at',
+            'conversion_rate',
+            'click_through_rate',
+            'seller_score',
+            'moderated_by',
+            'moderated_at',
+            'published_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def before_save(self):
         """Actions before saving the listing."""

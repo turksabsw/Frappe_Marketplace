@@ -58,6 +58,7 @@ class Review(Document):
 
     def validate(self):
         """Validate review data before saving."""
+        self._guard_system_fields()
         self.validate_reviewer()
         self.validate_rating()
         self.validate_review_content()
@@ -72,6 +73,35 @@ class Review(Document):
 
         # Calculate helpfulness score
         self.calculate_helpfulness_score()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'review_id',
+            'is_verified_purchase',
+            'purchase_date',
+            'verification_date',
+            'helpful_count',
+            'unhelpful_count',
+            'helpfulness_score',
+            'report_count',
+            'moderated_by',
+            'moderated_at',
+            'submitted_at',
+            'published_at',
+            'edit_count',
+            'ip_address',
+            'user_agent',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after review is updated."""

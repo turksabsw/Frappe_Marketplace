@@ -97,6 +97,7 @@ class Order(Document):
 
     def validate(self):
         """Validate Order data before saving."""
+        self._guard_system_fields()
         self.validate_buyer()
         self.validate_seller()
         self.validate_tenant_match()
@@ -105,6 +106,31 @@ class Order(Document):
         self.calculate_totals()
         self.calculate_payment_amounts()
         self.update_dates_on_status_change()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'order_number',
+            'confirmed_date',
+            'processing_start_date',
+            'shipped_date',
+            'delivered_date',
+            'completed_date',
+            'cancellation_date',
+            'linked_sales_order',
+            'linked_purchase_order',
+            'linked_invoice',
+            'linked_delivery_note',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after Order is updated."""

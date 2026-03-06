@@ -47,6 +47,7 @@ class SellerKPI(Document):
 
     def validate(self):
         """Validate KPI data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_period()
         self.validate_thresholds()
@@ -54,6 +55,37 @@ class SellerKPI(Document):
         self.calculate_derived_values()
         self.evaluate_performance()
         self.set_period_label()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'previous_value',
+            'value_change',
+            'value_trend',
+            'percentage_of_target',
+            'deviation_from_target',
+            'last_calculated_at',
+            'score_contribution',
+            'sample_size',
+            'data_points_count',
+            'peer_average',
+            'peer_rank',
+            'peer_percentile',
+            'tier_average',
+            'category_average',
+            'platform_average',
+            'created_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after KPI is updated."""

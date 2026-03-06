@@ -55,6 +55,7 @@ class MarketplaceOrder(Document):
 
     def validate(self):
         """Validate order data before saving."""
+        self._guard_system_fields()
         self.validate_buyer()
         self.validate_items()
         self.validate_addresses()
@@ -62,6 +63,47 @@ class MarketplaceOrder(Document):
         self.calculate_totals()
         self.update_seller_summary()
         self.validate_payment_status()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'order_id',
+            'paid_at',
+            'paid_amount',
+            'escrow_released_at',
+            'confirmed_at',
+            'processing_started_at',
+            'shipped_at',
+            'delivered_at',
+            'completed_at',
+            'cancelled_at',
+            'refunded_at',
+            'cancellation_requested_at',
+            'cancellation_approved_by',
+            'total_commission',
+            'commission_rate',
+            'commission_collected_at',
+            'e_invoice_uuid',
+            'e_invoice_number',
+            'e_invoice_date',
+            'erpnext_customer',
+            'erpnext_sales_order',
+            'erpnext_delivery_note',
+            'erpnext_sales_invoice',
+            'erpnext_payment_entry',
+            'cart',
+            'ip_address',
+            'user_agent',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after order is updated."""

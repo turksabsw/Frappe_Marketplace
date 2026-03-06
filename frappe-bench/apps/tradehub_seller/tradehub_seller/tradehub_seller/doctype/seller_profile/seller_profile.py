@@ -53,6 +53,7 @@ class SellerProfile(Document):
 
     def validate(self):
         """Validate seller profile data before saving."""
+        self._guard_system_fields()
         self.validate_user()
         self.validate_tenant_organization_consistency()
         self.validate_tax_id()
@@ -63,6 +64,37 @@ class SellerProfile(Document):
         self.validate_vacation_mode()
         self.modified_by = frappe.session.user
         self.last_active_at = now_datetime()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'verified_at',
+            'verified_by',
+            'seller_score',
+            'total_sales_count',
+            'total_sales_amount',
+            'average_rating',
+            'total_reviews',
+            'order_fulfillment_rate',
+            'on_time_delivery_rate',
+            'return_rate',
+            'response_time_hours',
+            'cancellation_rate',
+            'complaint_rate',
+            'positive_feedback_rate',
+            'last_metrics_update',
+            'joined_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions to perform after seller profile is updated."""

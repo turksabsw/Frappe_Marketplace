@@ -113,6 +113,7 @@ class Shipment(Document):
 
     def validate(self):
         """Validate Shipment data before saving."""
+        self._guard_system_fields()
         self.validate_order()
         self.validate_status_transition()
         self.validate_tenant_isolation()
@@ -123,6 +124,33 @@ class Shipment(Document):
         self.set_incoterm_description()
         self.update_tracking_status()
         self.update_dates_on_status_change()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'shipment_number',
+            'carrier_shipment_id',
+            'label_generated',
+            'label_url',
+            'actual_delivery_date',
+            'delivery_time',
+            'in_transit_date',
+            'out_for_delivery_date',
+            'exception_date',
+            'customs_clearance_date',
+            'exception_resolution_date',
+            'linked_delivery_note',
+            'linked_sales_order',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after Shipment is updated."""

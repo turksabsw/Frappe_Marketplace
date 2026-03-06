@@ -25,6 +25,43 @@ class Subscription(Document):
         self.set_created_info()
         self.set_defaults_from_package()
 
+    def validate(self):
+        """Validate subscription data before saving."""
+        self._guard_system_fields()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'is_active',
+            'last_billing_date',
+            'cancellation_date',
+            'total_billed',
+            'total_paid',
+            'outstanding_amount',
+            'is_suspended',
+            'suspended_at',
+            'last_reactivated_at',
+            'reactivation_count',
+            'failed_renewal_attempts',
+            'last_renewal_attempt',
+            'current_product_count',
+            'current_month_orders',
+            'current_day_api_calls',
+            'last_payment_date',
+            'last_payment_amount',
+            'created_at',
+            'created_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
+
     def before_save(self):
         """Validate and update fields before saving."""
         self.validate_subscriber()

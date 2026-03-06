@@ -46,11 +46,48 @@ class SubOrder(Document):
 
     def validate(self):
         """Validate sub order data before saving."""
+        self._guard_system_fields()
         self.validate_seller()
         self.validate_items()
         self.validate_addresses()
         self.validate_status_transitions()
         self.calculate_totals()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'sub_order_id',
+            'paid_at',
+            'escrow_released_at',
+            'accepted_at',
+            'processing_started_at',
+            'packed_at',
+            'shipped_at',
+            'delivered_at',
+            'completed_at',
+            'cancelled_at',
+            'refunded_at',
+            'return_requested_at',
+            'return_received_at',
+            'cancellation_requested_at',
+            'cancellation_approved_by',
+            'e_invoice_uuid',
+            'e_invoice_number',
+            'e_invoice_date',
+            'erpnext_sales_order',
+            'erpnext_delivery_note',
+            'erpnext_sales_invoice',
+            'erpnext_payment_entry',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after sub order is updated."""

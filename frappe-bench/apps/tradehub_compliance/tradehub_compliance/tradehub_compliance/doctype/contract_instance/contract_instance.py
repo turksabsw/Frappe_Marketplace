@@ -68,9 +68,34 @@ class ContractInstance(Document):
 
     def validate(self):
         """Validate the contract instance."""
+        self._guard_system_fields()
         self.validate_template()
         self.validate_status_transition()
         self.validate_signature()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'created_at',
+            'template_version_snapshot',
+            'template_content_snapshot',
+            'content_hash_snapshot',
+            'sent_at',
+            'esign_transaction',
+            'signed_at',
+            'signed_by',
+            'rejected_at',
+            'rejected_by',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def validate_template(self):
         """Validate template is published."""

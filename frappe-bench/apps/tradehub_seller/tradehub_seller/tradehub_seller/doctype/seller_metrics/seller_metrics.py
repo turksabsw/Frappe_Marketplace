@@ -22,7 +22,37 @@ class SellerMetrics(Document):
 
     def validate(self):
         """Validate metrics data."""
+        self._guard_system_fields()
         self.validate_rates()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'total_orders',
+            'total_sales_amount',
+            'last_order_date',
+            'cancellation_rate',
+            'return_rate',
+            'on_time_delivery_rate',
+            'listing_count',
+            'active_listing_count',
+            'avg_rating',
+            'total_reviews',
+            'positive_review_rate',
+            'complaint_rate',
+            'active_days',
+            'avg_response_time_hours',
+            'repeat_customer_rate',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def validate_rates(self):
         """Ensure rate fields are within valid ranges."""

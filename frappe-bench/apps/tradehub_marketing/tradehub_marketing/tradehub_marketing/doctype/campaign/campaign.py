@@ -45,12 +45,34 @@ class Campaign(Document):
 
     def validate(self):
         """Validate campaign data before saving."""
+        self._guard_system_fields()
         self.validate_dates()
         self.validate_discount_value()
         self.validate_budget()
         self.validate_usage_limits()
         self.update_status()
         self.calculate_remaining_budget()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'spent_amount',
+            'total_usage',
+            'unique_users',
+            'views_count',
+            'clicks_count',
+            'orders_count',
+            'revenue_generated',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after campaign is updated."""

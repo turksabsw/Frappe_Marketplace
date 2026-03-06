@@ -48,6 +48,7 @@ class CommissionRule(Document):
 
     def validate(self):
         """Validate commission rule data before saving."""
+        self._guard_system_fields()
         self.validate_priority()
         self.validate_commission_settings()
         self.validate_dates()
@@ -57,6 +58,28 @@ class CommissionRule(Document):
         self.validate_default_rule()
         self.modified_by_user = frappe.session.user
         self.modified_at_date = now_datetime()
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'usage_count',
+            'total_commission_generated',
+            'average_commission_amount',
+            'total_gmv_processed',
+            'last_applied_date',
+            'last_applied_order',
+            'created_by',
+            'created_at',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
 
     def on_update(self):
         """Actions after rule is updated."""
