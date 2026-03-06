@@ -20,7 +20,8 @@
    "in_standard_filter": 1,
    "label": "RFQ",
    "options": "RFQ",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "seller",
@@ -29,7 +30,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "contract_instance",
@@ -42,7 +44,8 @@
   {
    "fieldname": "created_at",
    "fieldtype": "Datetime",
-   "label": "Created At"
+   "label": "Created At",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

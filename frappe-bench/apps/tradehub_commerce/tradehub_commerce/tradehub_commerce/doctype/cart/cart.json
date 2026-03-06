@@ -98,7 +98,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nCheckout\nConverted\nAbandoned\nExpired\nMerged",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -111,7 +112,8 @@
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "User",
-   "description": "The user who owns this cart"
+   "description": "The user who owns this cart",
+   "set_only_once": 1
   },
   {
    "default": "Individual",
@@ -126,7 +128,8 @@
    "fieldtype": "Link",
    "label": "Organization",
    "options": "Organization",
-   "description": "Organization account for B2B purchases"
+   "description": "Organization account for B2B purchases",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant",
@@ -134,7 +137,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "Multi-tenant isolation"
+   "description": "Multi-tenant isolation",
+   "read_only": 1
   },
   {
    "fieldname": "items_section",
@@ -410,7 +414,8 @@
   {
    "fieldname": "ip_address",
    "fieldtype": "Data",
-   "label": "IP Address"
+   "label": "IP Address",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_session",
@@ -419,7 +424,8 @@
   {
    "fieldname": "user_agent",
    "fieldtype": "Small Text",
-   "label": "User Agent"
+   "label": "User Agent",
+   "read_only": 1
   },
   {
    "fieldname": "last_activity",
@@ -454,33 +460,38 @@
    "fieldname": "item_count",
    "fieldtype": "Int",
    "label": "Item Count",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_discount",
    "fieldtype": "Currency",
    "label": "Total Discount",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "tax_total",
    "fieldtype": "Currency",
    "label": "Tax Total",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "buyer_name",

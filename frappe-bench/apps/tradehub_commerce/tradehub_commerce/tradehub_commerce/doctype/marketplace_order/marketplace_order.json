@@ -202,7 +202,8 @@
    "in_standard_filter": 1,
    "label": "Order Status",
    "options": "Pending\nAwait Payment\nPayment Received\nConfirmed\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nDelivered\nCompleted\nCancelled\nRefunded\nOn Hold\nDisputed",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -215,7 +216,8 @@
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "User",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "Individual",
@@ -229,14 +231,16 @@
    "fieldname": "organization",
    "fieldtype": "Link",
    "label": "Organization",
-   "options": "Organization"
+   "options": "Organization",
+   "set_only_once": 1
   },
   {
    "fieldname": "tenant",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -320,7 +324,7 @@
    "description": "Structured seller-wise subtotals and item counts"
   },
   {
-   "description": "JSON with seller-wise subtotals and item counts (deprecated — use child table)",
+   "description": "JSON with seller-wise subtotals and item counts (deprecated \u2014 use child table)",
    "fieldname": "seller_summary",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -405,7 +409,8 @@
    "fieldname": "coupon_discount",
    "fieldtype": "Currency",
    "label": "Coupon Discount",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_discounts",
@@ -421,7 +426,8 @@
    "fieldname": "promotion_discount",
    "fieldtype": "Currency",
    "label": "Promotion Discount",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -448,7 +454,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Payment Status",
-   "options": "Pending\nAwait Verification\nProcessing\nPaid\nPartially Paid\nFailed\nRefunded\nPartially Refunded\nCancelled\nDisputed"
+   "options": "Pending\nAwait Verification\nProcessing\nPaid\nPartially Paid\nFailed\nRefunded\nPartially Refunded\nCancelled\nDisputed",
+   "permlevel": 1
   },
   {
    "fieldname": "payment_method",
@@ -471,7 +478,8 @@
    "fieldname": "payment_intent",
    "fieldtype": "Link",
    "label": "Payment Intent",
-   "options": "Payment Intent"
+   "options": "Payment Intent",
+   "set_only_once": 1
   },
   {
    "description": "Gateway transaction reference",
@@ -504,13 +512,15 @@
    "fieldname": "escrow_status",
    "fieldtype": "Select",
    "label": "Escrow Status",
-   "options": "Not Required\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded"
+   "options": "Not Required\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded",
+   "permlevel": 1
   },
   {
    "fieldname": "escrow_account",
    "fieldtype": "Link",
    "label": "Escrow Account",
-   "options": "Escrow Account"
+   "options": "Escrow Account",
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -671,7 +681,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Fulfillment Status",
-   "options": "Pending\nPartially Packed\nPacked\nPartially Shipped\nShipped\nIn Transit\nOut for Delivery\nPartially Delivered\nDelivered\nPartially Returned\nReturned\nCancelled"
+   "options": "Pending\nPartially Packed\nPacked\nPartially Shipped\nShipped\nIn Transit\nOut for Delivery\nPartially Delivered\nDelivered\nPartially Returned\nReturned\nCancelled",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -751,7 +762,7 @@
    "fieldname": "invoice_type",
    "fieldtype": "Select",
    "label": "Invoice Type",
-   "options": "\nE-Invoice (E-Fatura)\nE-Archive (E-Arşiv)\nPaper Invoice"
+   "options": "\nE-Invoice (E-Fatura)\nE-Archive (E-Ar\u015fiv)\nPaper Invoice"
   },
   {
    "default": "1",
@@ -782,7 +793,8 @@
    "fieldname": "e_invoice_status",
    "fieldtype": "Select",
    "label": "E-Invoice Status",
-   "options": "\nPending\nQueued\nSent\nAccepted\nRejected\nCancelled\nError"
+   "options": "\nPending\nQueued\nSent\nAccepted\nRejected\nCancelled\nError",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.e_invoice_enabled",
@@ -895,7 +907,8 @@
    "fieldname": "commission_status",
    "fieldtype": "Select",
    "label": "Commission Status",
-   "options": "Pending\nCalculated\nCollected\nPartially Collected\nWaived"
+   "options": "Pending\nCalculated\nCollected\nPartially Collected\nWaived",
+   "permlevel": 1
   },
   {
    "fieldname": "commission_collected_at",
@@ -942,7 +955,8 @@
    "default": "0",
    "fieldname": "cancellation_approved",
    "fieldtype": "Check",
-   "label": "Cancellation Approved"
+   "label": "Cancellation Approved",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.cancellation_approved",
@@ -950,7 +964,8 @@
    "fieldtype": "Link",
    "label": "Approved By",
    "options": "User",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.status=='Cancelled'",
@@ -994,7 +1009,8 @@
    "fieldname": "refund_status",
    "fieldtype": "Select",
    "label": "Refund Status",
-   "options": "\nPending\nApproved\nProcessing\nRefunded\nRejected"
+   "options": "\nPending\nApproved\nProcessing\nRefunded\nRejected",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.refund_status=='Refunded'",
@@ -1030,7 +1046,8 @@
    "description": "Internal staff notes (not visible to customer)",
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "special_instructions",
@@ -1141,47 +1158,54 @@
    "fieldname": "item_count",
    "fieldtype": "Int",
    "label": "Item Count",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "total_discount",
    "fieldtype": "Currency",
    "label": "Total Discount",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "tax_total",
    "fieldtype": "Currency",
    "label": "Tax Total",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "shipping_total",
    "fieldtype": "Currency",
    "label": "Shipping Total",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "seller_payout",
    "fieldtype": "Currency",
    "label": "Seller Payout",
    "in_list_view": 0,
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "organization_name",

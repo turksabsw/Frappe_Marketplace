@@ -165,7 +165,8 @@
    "in_standard_filter": 1,
    "label": "Marketplace Order",
    "options": "Marketplace Order",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "Today",
@@ -186,7 +187,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "Pending",
@@ -196,7 +198,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nAccepted\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nDelivered\nCompleted\nCancelled\nRefunded\nOn Hold\nDisputed",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -218,7 +221,8 @@
    "fieldtype": "Link",
    "label": "Buyer",
    "options": "User",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer_name",
@@ -341,7 +345,8 @@
    "description": "Commission rate for this sub order",
    "fieldname": "commission_rate",
    "fieldtype": "Percent",
-   "label": "Commission Rate (%)"
+   "label": "Commission Rate (%)",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -371,7 +376,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Payout Status",
-   "options": "Pending\nScheduled\nProcessing\nPaid\nFailed\nHeld\nCancelled"
+   "options": "Pending\nScheduled\nProcessing\nPaid\nFailed\nHeld\nCancelled",
+   "permlevel": 1
   },
   {
    "fieldname": "payout_reference",
@@ -389,7 +395,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Payment Status",
-   "options": "Pending\nPaid\nPartially Paid\nRefunded\nPartially Refunded\nCancelled\nDisputed"
+   "options": "Pending\nPaid\nPartially Paid\nRefunded\nPartially Refunded\nCancelled\nDisputed",
+   "permlevel": 1
   },
   {
    "fieldname": "paid_at",
@@ -406,7 +413,8 @@
    "fieldname": "escrow_status",
    "fieldtype": "Select",
    "label": "Escrow Status",
-   "options": "Not Required\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded"
+   "options": "Not Required\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded",
+   "permlevel": 1
   },
   {
    "description": "Scheduled date for escrow release",
@@ -436,7 +444,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Fulfillment Status",
-   "options": "Pending\nAccepted\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nPartially Delivered\nDelivered\nReturned\nCancelled"
+   "options": "Pending\nAccepted\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nPartially Delivered\nDelivered\nReturned\nCancelled",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -619,7 +628,8 @@
    "fieldname": "e_invoice_status",
    "fieldtype": "Select",
    "label": "E-Invoice Status",
-   "options": "\nPending\nQueued\nSent\nAccepted\nRejected\nCancelled\nError"
+   "options": "\nPending\nQueued\nSent\nAccepted\nRejected\nCancelled\nError",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.e_invoice_enabled",
@@ -728,7 +738,8 @@
    "default": "0",
    "fieldname": "cancellation_approved",
    "fieldtype": "Check",
-   "label": "Cancellation Approved"
+   "label": "Cancellation Approved",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.cancellation_approved",
@@ -736,7 +747,8 @@
    "fieldtype": "Link",
    "label": "Approved By",
    "options": "User",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.status=='Cancelled'",
@@ -780,7 +792,8 @@
    "fieldname": "refund_status",
    "fieldtype": "Select",
    "label": "Refund Status",
-   "options": "\nPending\nApproved\nProcessing\nRefunded\nRejected"
+   "options": "\nPending\nApproved\nProcessing\nRefunded\nRejected",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.refund_status=='Refunded'",
@@ -872,7 +885,8 @@
    "description": "Internal notes (not visible to buyer/seller)",
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "collapsible": 1,

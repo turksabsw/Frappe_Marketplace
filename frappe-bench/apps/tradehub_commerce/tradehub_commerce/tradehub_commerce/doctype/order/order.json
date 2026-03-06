@@ -144,7 +144,8 @@
    "label": "Status",
    "options": "Draft\nPending\nConfirmed\nProcessing\nReady to Ship\nShipped\nDelivered\nCompleted\nCancelled\nRefunded\nOn Hold",
    "reqd": 1,
-   "description": "Current status of the order"
+   "description": "Current status of the order",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_order_info",
@@ -190,7 +191,8 @@
    "label": "Buyer",
    "options": "Buyer Profile",
    "reqd": 1,
-   "description": "The buyer placing this order"
+   "description": "The buyer placing this order",
+   "set_only_once": 1
   },
   {
    "fetch_from": "buyer.buyer_name",
@@ -249,7 +251,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "The seller fulfilling this order"
+   "description": "The seller fulfilling this order",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -344,7 +347,8 @@
    "label": "RFQ",
    "options": "RFQ",
    "depends_on": "eval:doc.source_type === 'RFQ' || doc.source_type === 'Quotation'",
-   "description": "The RFQ this order originated from"
+   "description": "The RFQ this order originated from",
+   "set_only_once": 1
   },
   {
    "fetch_from": "rfq.title",
@@ -365,7 +369,8 @@
    "label": "Quotation",
    "options": "Quotation",
    "depends_on": "eval:doc.source_type === 'Quotation'",
-   "description": "The quotation this order is based on"
+   "description": "The quotation this order is based on",
+   "set_only_once": 1
   },
   {
    "fetch_from": "quotation.total_amount",
@@ -382,7 +387,8 @@
    "label": "Sample Request",
    "options": "Sample Request",
    "depends_on": "eval:doc.source_type === 'Sample Conversion'",
-   "description": "The sample request this order is based on"
+   "description": "The sample request this order is based on",
+   "set_only_once": 1
   },
   {
    "fieldname": "items_section",
@@ -453,7 +459,8 @@
    "fieldname": "tax_amount",
    "fieldtype": "Currency",
    "label": "Tax Amount",
-   "description": "Applicable tax amount"
+   "description": "Applicable tax amount",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -499,7 +506,8 @@
    "in_standard_filter": 1,
    "label": "Payment Status",
    "options": "Pending\nAdvance Received\nPartially Paid\nFully Paid\nOverdue\nRefunded",
-   "description": "Current payment status"
+   "description": "Current payment status",
+   "permlevel": 1
   },
   {
    "fieldname": "payment_terms",
@@ -552,7 +560,8 @@
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount",
-   "description": "Total amount paid so far"
+   "description": "Total amount paid so far",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -792,7 +801,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to buyer/seller)"
+   "description": "Internal notes (not visible to buyer/seller)",
+   "permlevel": 1
   },
   {
    "fieldname": "cancellation_section",
@@ -814,7 +824,8 @@
    "label": "Cancelled By",
    "options": "\nBuyer\nSeller\nSystem\nAdmin",
    "depends_on": "eval:doc.status === 'Cancelled' || doc.status === 'Refunded'",
-   "description": "Who cancelled the order"
+   "description": "Who cancelled the order",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_cancellation",
@@ -834,7 +845,8 @@
    "label": "Refund Status",
    "options": "\nNot Applicable\nPending\nProcessing\nCompleted\nPartial",
    "depends_on": "eval:doc.status === 'Cancelled' || doc.status === 'Refunded'",
-   "description": "Status of refund if applicable"
+   "description": "Status of refund if applicable",
+   "permlevel": 1
   },
   {
    "default": "0",

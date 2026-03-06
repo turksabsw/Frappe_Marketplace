@@ -131,7 +131,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Pending\nFunds Held\nPartially Released\nReleased\nDisputed\nDispute Resolved\nRefunded\nPartially Refunded\nCancelled\nExpired",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "Order Payment",
@@ -151,7 +152,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "read_only": 1
   },
   {
    "default": "Now",
@@ -178,14 +180,16 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Marketplace Order",
-   "options": "Marketplace Order"
+   "options": "Marketplace Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "sub_order",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Sub Order",
-   "options": "Sub Order"
+   "options": "Sub Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_order",
@@ -195,7 +199,8 @@
    "fieldname": "payment_intent",
    "fieldtype": "Link",
    "label": "Payment Intent",
-   "options": "Payment Intent"
+   "options": "Payment Intent",
+   "set_only_once": 1
   },
   {
    "fieldname": "seller",
@@ -204,7 +209,8 @@
    "in_standard_filter": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer",
@@ -212,7 +218,8 @@
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "User",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "amounts_tab",
@@ -240,7 +247,8 @@
    "in_list_view": 1,
    "label": "Total Amount",
    "options": "currency",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -293,7 +301,8 @@
    "fieldname": "commission_amount",
    "fieldtype": "Currency",
    "label": "Commission Amount",
-   "options": "currency"
+   "options": "currency",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -421,7 +430,7 @@
    "description": "Structured partial release records"
   },
   {
-   "description": "JSON array of partial release records (deprecated — use child table)",
+   "description": "JSON array of partial release records (deprecated \u2014 use child table)",
    "fieldname": "partial_releases",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -444,7 +453,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Payout Status",
-   "options": "Pending\nScheduled\nProcessing\nCompleted\nFailed\nHeld\nCancelled"
+   "options": "Pending\nScheduled\nProcessing\nCompleted\nFailed\nHeld\nCancelled",
+   "permlevel": 1
   },
   {
    "description": "Payout transaction reference",
@@ -455,7 +465,8 @@
   {
    "fieldname": "payout_date",
    "fieldtype": "Datetime",
-   "label": "Payout Date"
+   "label": "Payout Date",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_payout",
@@ -508,7 +519,8 @@
    "depends_on": "eval:doc.has_dispute",
    "fieldname": "dispute_opened_at",
    "fieldtype": "Datetime",
-   "label": "Dispute Opened At"
+   "label": "Dispute Opened At",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_dispute",
@@ -519,7 +531,8 @@
    "fieldname": "dispute_status",
    "fieldtype": "Select",
    "label": "Dispute Status",
-   "options": "\nOpen\nUnder Review\nEscalated\nResolved\nClosed"
+   "options": "\nOpen\nUnder Review\nEscalated\nResolved\nClosed",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.has_dispute",
@@ -527,13 +540,15 @@
    "fieldname": "dispute_resolution",
    "fieldtype": "Select",
    "label": "Dispute Resolution",
-   "options": "\nFull Refund to Buyer\nPartial Refund to Buyer\nFull Release to Seller\nPartial Release to Seller\nSplit Decision"
+   "options": "\nFull Refund to Buyer\nPartial Refund to Buyer\nFull Release to Seller\nPartial Release to Seller\nSplit Decision",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.has_dispute",
    "fieldname": "dispute_resolved_at",
    "fieldtype": "Datetime",
-   "label": "Dispute Resolved At"
+   "label": "Dispute Resolved At",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.dispute_resolution",
@@ -636,7 +651,8 @@
    "fieldname": "erpnext_sync_status",
    "fieldtype": "Select",
    "label": "ERPNext Sync Status",
-   "options": "Not Synced\nPending\nSynced\nFailed"
+   "options": "Not Synced\nPending\nSynced\nFailed",
+   "permlevel": 1
   },
   {
    "fieldname": "erpnext_sync_error",
@@ -659,7 +675,8 @@
    "description": "Internal notes (admin only)",
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "description": "Custom metadata JSON",

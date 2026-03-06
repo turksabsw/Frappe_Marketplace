@@ -138,7 +138,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nActive\nSuspended\nExpired\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "tenant",
@@ -146,7 +147,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this commission plan belongs to (leave blank for platform-wide)"
+   "description": "The tenant this commission plan belongs to (leave blank for platform-wide)",
+   "read_only": 1
   },
   {
    "default": "0",

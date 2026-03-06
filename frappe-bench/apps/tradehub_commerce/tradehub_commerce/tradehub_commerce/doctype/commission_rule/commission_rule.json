@@ -150,7 +150,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nActive\nSuspended\nExpired\nArchived",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "description": "Tenant this rule belongs to (blank for platform-wide)",
@@ -158,7 +159,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "read_only": 1
   },
   {
    "default": "100",

@@ -102,7 +102,8 @@
    "label": "Status",
    "options": "Draft\nActive\nPartially Paid\nCompleted\nOverdue\nDefaulted\nCancelled",
    "reqd": 1,
-   "description": "Current status of the payment plan"
+   "description": "Current status of the payment plan",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_plan_info",
@@ -197,8 +198,8 @@
    "fieldtype": "Link",
    "label": "Buyer",
    "options": "Buyer Profile",
-   "read_only": 1,
-   "description": "Auto-filled from Order"
+   "description": "Auto-filled from Order",
+   "set_only_once": 1
   },
   {
    "fetch_from": "order.buyer_name",
@@ -247,8 +248,8 @@
    "fieldtype": "Link",
    "label": "Seller",
    "options": "Seller Profile",
-   "read_only": 1,
-   "description": "Auto-filled from Order"
+   "description": "Auto-filled from Order",
+   "set_only_once": 1
   },
   {
    "fetch_from": "order.seller_name",
@@ -326,7 +327,8 @@
    "in_list_view": 1,
    "label": "Total Plan Amount",
    "reqd": 1,
-   "description": "Total amount to be paid through this payment plan"
+   "description": "Total amount to be paid through this payment plan",
+   "read_only": 1
   },
   {
    "default": "USD",
@@ -531,7 +533,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text",
    "label": "Internal Notes",
-   "description": "Internal notes (not visible to buyer/seller)"
+   "description": "Internal notes (not visible to buyer/seller)",
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,

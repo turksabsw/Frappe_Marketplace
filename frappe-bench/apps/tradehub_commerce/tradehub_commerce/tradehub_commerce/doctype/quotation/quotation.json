@@ -120,7 +120,8 @@
    "label": "Status",
    "options": "Draft\nSubmitted\nUnder Review\nSelected\nRejected\nExpired\nCancelled",
    "reqd": 1,
-   "description": "Current status of the quotation"
+   "description": "Current status of the quotation",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_quotation_info",
@@ -155,7 +156,8 @@
    "label": "RFQ",
    "options": "RFQ",
    "reqd": 1,
-   "description": "The Request for Quotation this is responding to"
+   "description": "The Request for Quotation this is responding to",
+   "set_only_once": 1
   },
   {
    "fetch_from": "rfq.title",
@@ -215,7 +217,8 @@
    "label": "Seller",
    "options": "Seller Profile",
    "reqd": 1,
-   "description": "The seller submitting this quotation"
+   "description": "The seller submitting this quotation",
+   "set_only_once": 1
   },
   {
    "fetch_from": "seller.seller_name",
@@ -346,7 +349,8 @@
    "fieldname": "tax_amount",
    "fieldtype": "Currency",
    "label": "Tax Amount",
-   "description": "Applicable tax amount (if any)"
+   "description": "Applicable tax amount (if any)",
+   "read_only": 1
   },
   {
    "default": "0",

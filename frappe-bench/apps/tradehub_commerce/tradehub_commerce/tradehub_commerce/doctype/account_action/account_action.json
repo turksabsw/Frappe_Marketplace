@@ -132,7 +132,8 @@
    "label": "Status",
    "options": "Draft\nPending Approval\nActive\nExpired\nLifted\nAppealed\nOverturned\nEscalated\nCancelled",
    "reqd": 1,
-   "description": "Current status of the action"
+   "description": "Current status of the action",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_basic",
@@ -144,7 +145,8 @@
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "The tenant this action belongs to"
+   "description": "The tenant this action belongs to",
+   "read_only": 1
   },
   {
    "fieldname": "created_by_user",
@@ -208,7 +210,8 @@
    "options": "Organization",
    "depends_on": "eval:doc.target_type=='Organization'",
    "mandatory_depends_on": "eval:doc.target_type=='Organization'",
-   "description": "Organization being actioned"
+   "description": "Organization being actioned",
+   "set_only_once": 1
   },
   {
    "fieldname": "action_details_section",
@@ -647,7 +650,8 @@
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
    "label": "Internal Notes",
-   "description": "Notes visible only to administrators"
+   "description": "Notes visible only to administrators",
+   "permlevel": 1
   },
   {
    "fieldname": "tenant_name",

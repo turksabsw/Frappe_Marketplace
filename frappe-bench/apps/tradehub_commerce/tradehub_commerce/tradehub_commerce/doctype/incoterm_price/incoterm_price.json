@@ -112,9 +112,9 @@
    "fieldtype": "Link",
    "label": "Seller",
    "options": "Seller Profile",
-   "read_only": 1,
    "in_standard_filter": 1,
-   "description": "Auto-filled from SKU Product"
+   "description": "Auto-filled from SKU Product",
+   "set_only_once": 1
   },
   {
    "fetch_from": "sku_product.seller_name",
@@ -187,7 +187,8 @@
    "label": "Status",
    "options": "Active\nInactive\nExpired",
    "reqd": 1,
-   "description": "Pricing availability status"
+   "description": "Pricing availability status",
+   "permlevel": 1
   },
   {
    "default": "0",

@@ -190,7 +190,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Created\nPending\nProcessing\nRequires Action\nRequires Capture\nAuthorized\nCaptured\nPaid\nPartially Paid\nFailed\nCancelled\nExpired\nRefunded\nPartially Refunded\nDisputed",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "Checkout",
@@ -209,7 +210,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
-   "options": "Tenant"
+   "options": "Tenant",
+   "read_only": 1
   },
   {
    "default": "Now",
@@ -235,20 +237,23 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Marketplace Order",
-   "options": "Marketplace Order"
+   "options": "Marketplace Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "sub_order",
    "fieldtype": "Link",
    "label": "Sub Order",
-   "options": "Sub Order"
+   "options": "Sub Order",
+   "set_only_once": 1
   },
   {
    "description": "Cart if payment was initiated from cart",
    "fieldname": "cart",
    "fieldtype": "Link",
    "label": "Cart",
-   "options": "Cart"
+   "options": "Cart",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_order",
@@ -261,7 +266,8 @@
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "User",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "Individual",
@@ -275,7 +281,8 @@
    "fieldname": "organization",
    "fieldtype": "Link",
    "label": "Organization",
-   "options": "Organization"
+   "options": "Organization",
+   "set_only_once": 1
   },
   {
    "fieldname": "amount_section",
@@ -465,7 +472,7 @@
   },
   {
    "depends_on": "eval:doc.has_installments",
-   "description": "JSON object with installment breakdown (deprecated — use Installment Plan Table)",
+   "description": "JSON object with installment breakdown (deprecated \u2014 use Installment Plan Table)",
    "fieldname": "installment_plan",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -649,7 +656,8 @@
    "fieldname": "refund_status",
    "fieldtype": "Select",
    "label": "Refund Status",
-   "options": "None\nRequested\nPending\nProcessing\nRefunded\nPartially Refunded\nFailed\nRejected"
+   "options": "None\nRequested\nPending\nProcessing\nRefunded\nPartially Refunded\nFailed\nRejected",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -683,7 +691,7 @@
    "label": "Refund Gateway ID"
   },
   {
-   "description": "JSON array of partial refunds (deprecated — use Partial Refunds Table)",
+   "description": "JSON array of partial refunds (deprecated \u2014 use Partial Refunds Table)",
    "fieldname": "partial_refunds",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -719,14 +727,16 @@
    "fieldname": "escrow_account",
    "fieldtype": "Link",
    "label": "Escrow Account",
-   "options": "Escrow Account"
+   "options": "Escrow Account",
+   "set_only_once": 1
   },
   {
    "depends_on": "eval:doc.escrow_enabled",
    "fieldname": "escrow_status",
    "fieldtype": "Select",
    "label": "Escrow Status",
-   "options": "\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded"
+   "options": "\nPending\nHeld\nPartially Released\nReleased\nDisputed\nRefunded",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_escrow",
@@ -748,7 +758,8 @@
    "depends_on": "eval:doc.escrow_enabled",
    "fieldname": "escrow_released_at",
    "fieldtype": "Datetime",
-   "label": "Escrow Released At"
+   "label": "Escrow Released At",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -876,17 +887,19 @@
    "description": "Risk score from 0-100",
    "fieldname": "risk_score",
    "fieldtype": "Int",
-   "label": "Risk Score"
+   "label": "Risk Score",
+   "permlevel": 1
   },
   {
    "default": "Low",
    "fieldname": "risk_level",
    "fieldtype": "Select",
    "label": "Risk Level",
-   "options": "Low\nMedium\nHigh\nCritical"
+   "options": "Low\nMedium\nHigh\nCritical",
+   "permlevel": 1
   },
   {
-   "description": "JSON array of triggered fraud flags (deprecated — use Fraud Flags Table)",
+   "description": "JSON array of triggered fraud flags (deprecated \u2014 use Fraud Flags Table)",
    "fieldname": "fraud_flags",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -909,7 +922,8 @@
    "fieldname": "fraud_check_status",
    "fieldtype": "Select",
    "label": "Fraud Check Status",
-   "options": "Not Checked\nPending\nPassed\nReview Required\nFailed"
+   "options": "Not Checked\nPending\nPassed\nReview Required\nFailed",
+   "permlevel": 1
   },
   {
    "fieldname": "fraud_check_response",
@@ -920,7 +934,8 @@
    "default": "0",
    "fieldname": "is_flagged",
    "fieldtype": "Check",
-   "label": "Is Flagged for Review"
+   "label": "Is Flagged for Review",
+   "permlevel": 1
   },
   {
    "fieldname": "integration_tab",
@@ -995,7 +1010,8 @@
    "fieldname": "erpnext_sync_status",
    "fieldtype": "Select",
    "label": "ERPNext Sync Status",
-   "options": "Not Synced\nPending\nSynced\nFailed"
+   "options": "Not Synced\nPending\nSynced\nFailed",
+   "permlevel": 1
   },
   {
    "fieldname": "erpnext_sync_error",
@@ -1071,7 +1087,8 @@
   {
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "description": "Error log for debugging",

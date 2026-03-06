@@ -199,7 +199,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive\nMaintenance\nDeprecated",
-   "reqd": 1
+   "reqd": 1,
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -1039,7 +1040,8 @@
   {
    "fieldname": "internal_notes",
    "fieldtype": "Text Editor",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "description": "Terms and conditions for this payment method",

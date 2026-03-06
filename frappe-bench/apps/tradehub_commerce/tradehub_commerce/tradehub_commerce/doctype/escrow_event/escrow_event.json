@@ -92,7 +92,8 @@
    "in_standard_filter": 1,
    "label": "Escrow Account",
    "options": "Escrow Account",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "default": "General",
@@ -246,13 +247,15 @@
    "fieldname": "seller",
    "fieldtype": "Link",
    "label": "Seller",
-   "options": "Seller Profile"
+   "options": "Seller Profile",
+   "set_only_once": 1
   },
   {
    "fieldname": "buyer",
    "fieldtype": "Link",
    "label": "Buyer",
-   "options": "User"
+   "options": "User",
+   "set_only_once": 1
   },
   {
    "fieldname": "references_tab",
@@ -269,13 +272,15 @@
    "fieldname": "marketplace_order",
    "fieldtype": "Link",
    "label": "Marketplace Order",
-   "options": "Marketplace Order"
+   "options": "Marketplace Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "sub_order",
    "fieldtype": "Link",
    "label": "Sub Order",
-   "options": "Sub Order"
+   "options": "Sub Order",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_order_ref",
@@ -285,7 +290,8 @@
    "fieldname": "payment_intent",
    "fieldtype": "Link",
    "label": "Payment Intent",
-   "options": "Payment Intent"
+   "options": "Payment Intent",
+   "set_only_once": 1
   },
   {
    "fieldname": "dispute_case",
@@ -317,7 +323,8 @@
   {
    "fieldname": "payout_status",
    "fieldtype": "Data",
-   "label": "Payout Status"
+   "label": "Payout Status",
+   "permlevel": 1
   },
   {
    "fieldname": "payout_error",
@@ -338,12 +345,14 @@
   {
    "fieldname": "ip_address",
    "fieldtype": "Data",
-   "label": "IP Address"
+   "label": "IP Address",
+   "read_only": 1
   },
   {
    "fieldname": "user_agent",
    "fieldtype": "Small Text",
-   "label": "User Agent"
+   "label": "User Agent",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_request",
@@ -387,7 +396,8 @@
    "description": "Internal notes (admin only)",
    "fieldname": "internal_notes",
    "fieldtype": "Small Text",
-   "label": "Internal Notes"
+   "label": "Internal Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "related_events_table",
@@ -397,7 +407,7 @@
    "description": "Structured links to related escrow events"
   },
   {
-   "description": "JSON array of related event names (deprecated — use child table)",
+   "description": "JSON array of related event names (deprecated \u2014 use child table)",
    "fieldname": "related_events",
    "fieldtype": "JSON",
    "hidden": 1,
@@ -464,7 +474,8 @@
    "fieldtype": "Data",
    "label": "Escrow Status",
    "fetch_from": "escrow_account.status",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "seller_name",
