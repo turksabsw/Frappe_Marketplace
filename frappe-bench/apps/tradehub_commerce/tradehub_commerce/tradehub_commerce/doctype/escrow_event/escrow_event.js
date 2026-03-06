@@ -30,6 +30,23 @@ frappe.ui.form.on('Escrow Event', {
                 filters: filters
             };
         });
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('payout_status', 'read_only', 1);
+            frm.set_df_property('internal_notes', 'read_only', 1);
+            frm.set_df_property('escrow_status', 'read_only', 1);
+
+            // Hide internal notes from non-admin users
+            frm.set_df_property('internal_notes', 'hidden', 1);
+        }
     },
 
     // =====================================================

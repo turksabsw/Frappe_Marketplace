@@ -11,6 +11,18 @@ frappe.ui.form.on("Neighborhood", {
                 }
             };
         });
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('is_active', 'read_only', 1);
+        }
     },
 
     district: function(frm) {

@@ -30,6 +30,27 @@ frappe.ui.form.on('Brand Gating', {
 
         // Make tenant field read-only (fetched from seller)
         frm.set_df_property('tenant', 'read_only', 1);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('authorization_status', 'read_only', 1);
+            frm.set_df_property('is_exclusive', 'read_only', 1);
+            frm.set_df_property('priority_level', 'read_only', 1);
+            frm.set_df_property('eligible_for_buybox', 'read_only', 1);
+            frm.set_df_property('buybox_priority_boost', 'read_only', 1);
+            frm.set_df_property('suppress_unauthorized', 'read_only', 1);
+            frm.set_df_property('internal_notes', 'read_only', 1);
+
+            // Hide internal notes from non-admin users
+            frm.set_df_property('internal_notes', 'hidden', 1);
+        }
     },
 
     // =========================================================================

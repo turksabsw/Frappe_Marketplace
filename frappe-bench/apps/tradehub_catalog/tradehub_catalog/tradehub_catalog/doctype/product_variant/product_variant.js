@@ -28,6 +28,18 @@ frappe.ui.form.on('Product Variant', {
 
         // Setup field filters
         frm.events.setup_filters(frm);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+        }
     },
 
     /**

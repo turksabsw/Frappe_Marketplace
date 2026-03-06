@@ -47,6 +47,20 @@ frappe.ui.form.on('Group Buy', {
 
         // Make tenant field read-only when seller is selected
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('is_featured', 'read_only', 1);
+            frm.set_df_property('is_verified', 'read_only', 1);
+        }
     },
 
     tenant: function(frm) {

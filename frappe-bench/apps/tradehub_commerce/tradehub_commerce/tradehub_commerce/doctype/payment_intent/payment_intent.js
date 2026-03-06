@@ -72,6 +72,29 @@ frappe.ui.form.on('Payment Intent', {
 
         // Make tenant field read-only when buyer is selected
         frm.set_df_property('tenant', 'read_only', frm.doc.buyer ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('refund_status', 'read_only', 1);
+            frm.set_df_property('escrow_status', 'read_only', 1);
+            frm.set_df_property('risk_score', 'read_only', 1);
+            frm.set_df_property('risk_level', 'read_only', 1);
+            frm.set_df_property('fraud_check_status', 'read_only', 1);
+            frm.set_df_property('is_flagged', 'read_only', 1);
+            frm.set_df_property('erpnext_sync_status', 'read_only', 1);
+            frm.set_df_property('internal_notes', 'read_only', 1);
+
+            // Hide internal notes from non-admin users
+            frm.set_df_property('internal_notes', 'hidden', 1);
+        }
     },
 
     // =====================================================

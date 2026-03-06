@@ -56,6 +56,30 @@ frappe.ui.form.on('Sub Order', {
                 true
             );
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('payout_status', 'read_only', 1);
+            frm.set_df_property('payment_status', 'read_only', 1);
+            frm.set_df_property('escrow_status', 'read_only', 1);
+            frm.set_df_property('fulfillment_status', 'read_only', 1);
+            frm.set_df_property('e_invoice_status', 'read_only', 1);
+            frm.set_df_property('cancellation_approved', 'read_only', 1);
+            frm.set_df_property('cancellation_approved_by', 'read_only', 1);
+            frm.set_df_property('refund_status', 'read_only', 1);
+            frm.set_df_property('internal_notes', 'read_only', 1);
+
+            // Hide internal notes from non-admin users
+            frm.set_df_property('internal_notes', 'hidden', 1);
+        }
     },
 
     marketplace_order: function(frm) {

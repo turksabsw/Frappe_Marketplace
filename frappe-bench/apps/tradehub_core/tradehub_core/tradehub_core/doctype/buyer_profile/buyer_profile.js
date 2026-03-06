@@ -33,6 +33,19 @@ frappe.ui.form.on('Buyer Profile', {
         if (!frm.is_new() && frm.doc.verification_status === 'Verified') {
             frm.trigger('show_purchase_summary');
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('verification_status', 'read_only', 1);
+        }
     },
 
     onload: function(frm) {

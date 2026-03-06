@@ -68,6 +68,18 @@ frappe.ui.form.on('PIM Product', {
 
         // Make product_class read-only (fetched from product_family)
         frm.set_df_property('product_class', 'read_only', frm.doc.product_family ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+        }
     },
 
     // =========================================================================

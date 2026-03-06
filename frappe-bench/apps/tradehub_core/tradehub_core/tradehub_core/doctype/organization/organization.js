@@ -28,6 +28,22 @@ frappe.ui.form.on('Organization', {
                 }
             });
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('verification_status', 'read_only', 1);
+            frm.set_df_property('credit_limit', 'read_only', 1);
+            frm.set_df_property('is_approved_buyer', 'read_only', 1);
+            frm.set_df_property('is_approved_seller', 'read_only', 1);
+        }
     },
 
     tenant: function(frm) {

@@ -16,6 +16,27 @@ frappe.ui.form.on('Seller Application', {
         if (frm.doc.status === 'Approved') {
             frm.trigger('add_approved_links');
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('priority', 'read_only', 1);
+            frm.set_df_property('assigned_to', 'read_only', 1);
+            frm.set_df_property('review_deadline', 'read_only', 1);
+            frm.set_df_property('review_status', 'read_only', 1);
+            frm.set_df_property('review_notes', 'read_only', 1);
+            frm.set_df_property('rejection_reason', 'read_only', 1);
+            frm.set_df_property('revision_notes', 'read_only', 1);
+            frm.set_df_property('commission_plan', 'read_only', 1);
+            frm.set_df_property('initial_tier', 'read_only', 1);
+            frm.set_df_property('allow_reapplication', 'read_only', 1);
+        }
     },
 
     setup_workflow_buttons: function(frm) {

@@ -21,6 +21,34 @@ frappe.ui.form.on('Seller Score', {
         // Make tenant field read-only when seller is selected
         // (since tenant is auto-populated from seller via fetch_from)
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('policy_violations', 'read_only', 1);
+            frm.set_df_property('late_shipments', 'read_only', 1);
+            frm.set_df_property('cancelled_orders', 'read_only', 1);
+            frm.set_df_property('disputed_orders', 'read_only', 1);
+            frm.set_df_property('penalty_points', 'read_only', 1);
+            frm.set_df_property('penalty_deduction', 'read_only', 1);
+            frm.set_df_property('bonus_points', 'read_only', 1);
+            frm.set_df_property('bonus_reason', 'read_only', 1);
+            frm.set_df_property('fulfillment_weight', 'read_only', 1);
+            frm.set_df_property('delivery_weight', 'read_only', 1);
+            frm.set_df_property('quality_weight', 'read_only', 1);
+            frm.set_df_property('service_weight', 'read_only', 1);
+            frm.set_df_property('compliance_weight', 'read_only', 1);
+            frm.set_df_property('engagement_weight', 'read_only', 1);
+            frm.set_df_property('calculation_notes', 'read_only', 1);
+            frm.set_df_property('manual_adjustments', 'read_only', 1);
+        }
     },
 
     tenant: function(frm) {

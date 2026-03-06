@@ -121,6 +121,37 @@ frappe.ui.form.on('Seller Profile', {
                 }
             };
         });
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('verification_status', 'read_only', 1);
+            frm.set_df_property('identity_verified', 'read_only', 1);
+            frm.set_df_property('business_verified', 'read_only', 1);
+            frm.set_df_property('bank_verified', 'read_only', 1);
+            frm.set_df_property('verification_notes', 'read_only', 1);
+            frm.set_df_property('seller_tier', 'read_only', 1);
+            frm.set_df_property('seller_score', 'read_only', 1);
+            frm.set_df_property('commission_plan', 'read_only', 1);
+            frm.set_df_property('max_listings', 'read_only', 1);
+            frm.set_df_property('is_restricted', 'read_only', 1);
+            frm.set_df_property('restriction_reason', 'read_only', 1);
+            frm.set_df_property('can_sell', 'read_only', 1);
+            frm.set_df_property('can_withdraw', 'read_only', 1);
+            frm.set_df_property('can_create_listings', 'read_only', 1);
+            frm.set_df_property('is_featured', 'read_only', 1);
+            frm.set_df_property('featured_from', 'read_only', 1);
+            frm.set_df_property('featured_until', 'read_only', 1);
+            frm.set_df_property('is_top_seller', 'read_only', 1);
+            frm.set_df_property('is_premium_seller', 'read_only', 1);
+        }
     },
 
     tenant: function(frm) {

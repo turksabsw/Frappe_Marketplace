@@ -52,6 +52,22 @@ frappe.ui.form.on('Tenant', {
                 }
             };
         });
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('subscription_tier', 'read_only', 1);
+            frm.set_df_property('max_sellers', 'read_only', 1);
+            frm.set_df_property('max_listings_per_seller', 'read_only', 1);
+            frm.set_df_property('commission_rate', 'read_only', 1);
+        }
     },
 
     setup: function(frm) {

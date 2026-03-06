@@ -22,6 +22,19 @@ frappe.ui.form.on('Lead Time', {
         // Make seller and tenant read-only (populated from sku_product)
         frm.set_df_property('seller', 'read_only', frm.doc.sku_product ? 1 : 0);
         frm.set_df_property('tenant', 'read_only', frm.doc.sku_product ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('priority', 'read_only', 1);
+        }
     },
 
     sku_product: function(frm) {

@@ -83,6 +83,22 @@ frappe.ui.form.on('Category', {
                 // Note: This returns the count via client.get if needed
             });
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('tax_rate', 'read_only', 1);
+            frm.set_df_property('commission_rate', 'read_only', 1);
+            frm.set_df_property('min_commission', 'read_only', 1);
+            frm.set_df_property('max_commission', 'read_only', 1);
+            frm.set_df_property('fixed_commission', 'read_only', 1);
+        }
     },
 
     parent_category: function(frm) {

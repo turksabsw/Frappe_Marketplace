@@ -100,6 +100,25 @@ frappe.ui.form.on('Order', {
         // Make tenant field read-only when buyer is selected
         // (since tenant is auto-populated from buyer via fetch_from)
         frm.set_df_property('tenant', 'read_only', frm.doc.buyer ? 1 : 0);
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('payment_status', 'read_only', 1);
+            frm.set_df_property('internal_notes', 'read_only', 1);
+            frm.set_df_property('cancelled_by', 'read_only', 1);
+            frm.set_df_property('refund_status', 'read_only', 1);
+
+            // Hide internal notes from non-admin users
+            frm.set_df_property('internal_notes', 'hidden', 1);
+        }
     },
 
     /**

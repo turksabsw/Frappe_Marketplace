@@ -178,6 +178,22 @@ frappe.ui.form.on('Review', {
         if (frm.doc.is_verified_purchase) {
             frm.set_intro(__('Verified Purchase'), 'green');
         }
+    
+        // =====================================================
+        // Role-Based Field Authorization
+        // =====================================================
+        var is_admin = frappe.user_roles.includes('Satici Admin')
+            || frappe.user_roles.includes('Alici Admin')
+            || frappe.user_roles.includes('System Manager');
+
+        if (!is_admin) {
+            // Lock admin-editable fields for non-admin users
+            frm.set_df_property('status', 'read_only', 1);
+            frm.set_df_property('is_featured', 'read_only', 1);
+            frm.set_df_property('moderation_status', 'read_only', 1);
+            frm.set_df_property('rejection_reason', 'read_only', 1);
+            frm.set_df_property('moderation_notes', 'read_only', 1);
+        }
     },
 
     // =====================================================
