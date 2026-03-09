@@ -138,6 +138,39 @@ frappe.ui.form.on('Sub Order', {
         if (!frm.doc.tenant) {
             frm.set_value('tenant_name', '');
         }
+    },
+
+    /**
+     * Discount 1 change handler - recalculates totals with cascading discounts
+     */
+    discount_1: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 2 change handler - recalculates totals with cascading discounts
+     */
+    discount_2: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 3 change handler - recalculates totals with cascading discounts
+     */
+    discount_3: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Show discount tiers toggle handler - shows/hides discount 2 and 3 fields
+     */
+    show_discount_tiers: function(frm) {
+        if (!frm.doc.show_discount_tiers) {
+            // Clear discount 2 and 3 when hiding tiers
+            frm.set_value('discount_2', 0);
+            frm.set_value('discount_3', 0);
+        }
+        calculate_totals(frm);
     }
 });
 
@@ -187,7 +220,7 @@ frappe.ui.form.on('Sub Order Item', {
 function calculate_totals(frm) {
     var subtotal = 0;
     var tax_amount = 0;
-    var discount_amount = 0;
+    var item_discount_amount = 0;
     var shipping_amount = 0;
     var commission_amount = 0;
 
@@ -221,7 +254,7 @@ function calculate_totals(frm) {
             // Aggregate parent totals
             subtotal += flt(item.line_subtotal);
             tax_amount += flt(item.tax_amount);
-            discount_amount += flt(item.discount_amount);
+            item_discount_amount += flt(item.discount_amount);
             shipping_amount += flt(item.shipping_amount);
             commission_amount += flt(item.commission_amount);
         });
@@ -229,12 +262,35 @@ function calculate_totals(frm) {
 
     frm.set_value('subtotal', subtotal);
     frm.set_value('tax_amount', tax_amount);
-    frm.set_value('discount_amount', discount_amount);
     frm.set_value('shipping_amount', shipping_amount || flt(frm.doc.shipping_amount));
     frm.set_value('commission_amount', commission_amount);
 
+    // Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+    var cascading_discount = 0;
+    var effective_discount_pct = 0;
+    var d1 = flt(frm.doc.discount_1);
+    var d2 = flt(frm.doc.discount_2);
+    var d3 = flt(frm.doc.discount_3);
+
+    if (flt(subtotal) > 0) {
+        var price_after_d1 = flt(flt(subtotal) * (1 - d1 / 100));
+        var price_after_d2 = flt(price_after_d1 * (1 - d2 / 100));
+        var final_price = flt(price_after_d2 * (1 - d3 / 100));
+        cascading_discount = flt(flt(subtotal) - final_price);
+    }
+
+    // Total discount = item-level discounts + cascading parent discount
+    var total_discount = flt(item_discount_amount) + flt(cascading_discount);
+    frm.set_value('discount_amount', total_discount);
+
+    // Effective discount percentage for display
+    if (flt(subtotal) > 0) {
+        effective_discount_pct = flt(total_discount / flt(subtotal) * 100);
+    }
+    frm.set_value('effective_discount_pct', effective_discount_pct);
+
     // Grand total = subtotal - discount + shipping + tax
-    var grand_total = flt(subtotal) - flt(discount_amount) + flt(shipping_amount || flt(frm.doc.shipping_amount)) + flt(tax_amount);
+    var grand_total = flt(subtotal) - flt(total_discount) + flt(shipping_amount || flt(frm.doc.shipping_amount)) + flt(tax_amount);
     frm.set_value('grand_total', grand_total);
 
     // Commission rate (average)

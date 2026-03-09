@@ -199,6 +199,39 @@ frappe.ui.form.on('Marketplace Order', {
             frm.set_df_property('buyer_tax_id', 'read_only', 0);
             frm.set_df_property('tenant', 'read_only', 0);
         }
+    },
+
+    /**
+     * Discount 1 change handler - recalculates totals with cascading discounts
+     */
+    discount_1: function(frm) {
+        calculate_order_totals(frm);
+    },
+
+    /**
+     * Discount 2 change handler - recalculates totals with cascading discounts
+     */
+    discount_2: function(frm) {
+        calculate_order_totals(frm);
+    },
+
+    /**
+     * Discount 3 change handler - recalculates totals with cascading discounts
+     */
+    discount_3: function(frm) {
+        calculate_order_totals(frm);
+    },
+
+    /**
+     * Show discount tiers toggle handler - shows/hides discount 2 and 3 fields
+     */
+    show_discount_tiers: function(frm) {
+        if (!frm.doc.show_discount_tiers) {
+            // Clear discount 2 and 3 when hiding tiers
+            frm.set_value('discount_2', 0);
+            frm.set_value('discount_3', 0);
+        }
+        calculate_order_totals(frm);
     }
 });
 
@@ -517,7 +550,7 @@ function calculate_order_totals(frm) {
     let items = frm.doc.items || [];
 
     let subtotal = 0;
-    let total_discount = 0;
+    let item_discount = 0;
     let total_tax = 0;
     let total_commission = 0;
     let total_shipping = 0;
@@ -526,7 +559,7 @@ function calculate_order_totals(frm) {
 
     items.forEach(function(item) {
         subtotal += flt(item.line_subtotal);
-        total_discount += flt(item.discount_amount);
+        item_discount += flt(item.discount_amount);
         total_tax += flt(item.tax_amount);
         total_commission += flt(item.commission_amount);
         total_shipping += flt(item.shipping_amount);
@@ -534,17 +567,40 @@ function calculate_order_totals(frm) {
         total_weight += flt(item.weight) * flt(item.qty);
     });
 
-    // Apply order-level discounts (coupon, promotion)
+    // Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+    var cascading_discount = 0;
+    var effective_discount_pct = 0;
+    var d1 = flt(frm.doc.discount_1);
+    var d2 = flt(frm.doc.discount_2);
+    var d3 = flt(frm.doc.discount_3);
+
+    if (flt(subtotal) > 0) {
+        var price_after_d1 = flt(flt(subtotal) * (1 - d1 / 100));
+        var price_after_d2 = flt(price_after_d1 * (1 - d2 / 100));
+        var final_price = flt(price_after_d2 * (1 - d3 / 100));
+        cascading_discount = flt(flt(subtotal) - final_price);
+    }
+
+    // Apply order-level discounts (coupon, promotion) AFTER cascading discounts
     let coupon_discount = flt(frm.doc.coupon_discount);
     let promotion_discount = flt(frm.doc.promotion_discount);
     let order_discount = coupon_discount + promotion_discount;
 
+    // Total discount = item-level + cascading + coupon/promotion
+    let total_discount = flt(item_discount) + flt(cascading_discount) + flt(order_discount);
+
+    // Effective discount percentage for display
+    if (flt(subtotal) > 0) {
+        effective_discount_pct = flt(total_discount / flt(subtotal) * 100);
+    }
+    frm.set_value('effective_discount_pct', effective_discount_pct);
+
     // Calculate grand total
-    let grand_total = subtotal - total_discount - order_discount + total_tax + total_shipping;
+    let grand_total = flt(subtotal) - flt(total_discount) + flt(total_tax) + flt(total_shipping);
 
     // Update parent totals using frm.set_value
     frm.set_value('subtotal', subtotal);
-    frm.set_value('total_discount', total_discount + order_discount);
+    frm.set_value('total_discount', total_discount);
     frm.set_value('tax_total', total_tax);
     frm.set_value('shipping_total', total_shipping);
     frm.set_value('grand_total', grand_total);
@@ -554,6 +610,6 @@ function calculate_order_totals(frm) {
     frm.set_value('total_weight', total_weight);
 
     // Calculate seller payout (grand_total - commission)
-    let seller_payout = grand_total - total_commission;
+    let seller_payout = flt(grand_total) - flt(total_commission);
     frm.set_value('seller_payout', seller_payout);
 }
