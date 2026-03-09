@@ -182,7 +182,7 @@ class Order(Document):
                 self.seller_company = seller_data.company_name
                 self.seller_email = seller_data.contact_email
                 self.seller_phone = seller_data.contact_phone
-                self.seller_tier_name = seller_data.tier_name
+                self.seller_tier = seller_data.tier_name
 
         # Re-fetch tenant name
         if self.tenant:
@@ -196,13 +196,13 @@ class Order(Document):
             if rfq_title:
                 self.rfq_title = rfq_title
 
-        # Re-fetch quotation total
+        # Re-fetch quotation amount
         if self.quotation:
             quotation_total = frappe.db.get_value(
                 "Quotation", self.quotation, "total_amount"
             )
             if quotation_total is not None:
-                self.quotation_total = quotation_total
+                self.quotation_amount = quotation_total
 
     def on_update(self):
         """Actions after Order is updated."""
@@ -332,33 +332,51 @@ class Order(Document):
     # =========================================================================
 
     def calculate_totals(self):
-        """Calculate order totals from items."""
+        """
+        Calculate order totals from items.
+
+        Uses bottom-up aggregation: row amounts first, then parent totals.
+        Implements cascading discount formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100).
+        """
         subtotal = 0
 
         # Calculate subtotal from items
         if self.items:
             for item in self.items:
-                item_amount = flt(item.quantity, 2) * flt(item.unit_price, 2)
-                item.amount = item_amount
-                subtotal += item_amount
+                # IMPORTANT: Wrap multiplication result in outer flt(..., 2) for financial precision
+                item.amount = flt(flt(item.quantity, 2) * flt(item.unit_price, 2), 2)
+                subtotal += flt(item.amount, 2)
 
-        self.subtotal = subtotal
+        self.subtotal = flt(subtotal, 2)
 
-        # Calculate discount amount
-        if self.discount_percentage:
-            self.discount_amount = flt(subtotal * flt(self.discount_percentage) / 100, 2)
+        # Validate discount values (0-100 range)
+        for d in [self.discount_1, self.discount_2, self.discount_3]:
+            if flt(d) < 0 or flt(d) > 100:
+                frappe.throw(_("Discount percentage must be between 0 and 100"))
+
+        # Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+        price_after_d1 = flt(flt(self.subtotal, 2) * (1 - flt(self.discount_1, 2) / 100), 2)
+        price_after_d2 = flt(price_after_d1 * (1 - flt(self.discount_2, 2) / 100), 2)
+        final_price = flt(price_after_d2 * (1 - flt(self.discount_3, 2) / 100), 2)
+        self.discount_amount = flt(flt(self.subtotal, 2) - final_price, 2)
+
+        # Compute effective discount percentage for display
+        if flt(self.subtotal, 2) > 0:
+            self.effective_discount_pct = flt(
+                flt(self.discount_amount, 2) / flt(self.subtotal, 2) * 100, 2
+            )
         else:
-            self.discount_amount = 0
+            self.effective_discount_pct = 0
 
         # Calculate tax amount if tax rate is provided
-        taxable_amount = subtotal - flt(self.discount_amount)
+        taxable_amount = flt(flt(self.subtotal, 2) - flt(self.discount_amount, 2), 2)
         if self.tax_rate:
-            self.tax_amount = flt(taxable_amount * flt(self.tax_rate) / 100, 2)
+            self.tax_amount = flt(flt(taxable_amount, 2) * flt(self.tax_rate, 2) / 100, 2)
 
         # Calculate total
         self.total_amount = flt(
-            subtotal - flt(self.discount_amount) +
-            flt(self.tax_amount) + flt(self.shipping_cost),
+            flt(self.subtotal, 2) - flt(self.discount_amount, 2) +
+            flt(self.tax_amount, 2) + flt(self.shipping_cost, 2),
             2
         )
 
