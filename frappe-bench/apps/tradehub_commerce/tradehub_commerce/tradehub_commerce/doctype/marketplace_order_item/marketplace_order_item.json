@@ -29,6 +29,11 @@
   "column_break_pricing",
   "discount_type",
   "discount_value",
+  "discount_1",
+  "show_discount_tiers",
+  "discount_2",
+  "discount_3",
+  "effective_discount_pct",
   "discount_amount",
   "totals_section",
   "line_subtotal",
@@ -214,6 +219,44 @@
    "fieldname": "discount_value",
    "fieldtype": "Float",
    "label": "Discount Value"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_1",
+   "fieldtype": "Percent",
+   "label": "Discount 1 (%)",
+   "description": "First tier discount percentage"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_discount_tiers",
+   "fieldtype": "Check",
+   "label": "Show Discount Tiers",
+   "description": "Enable to show additional discount tiers (Discount 2 and 3)"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_2",
+   "fieldtype": "Percent",
+   "label": "Discount 2 (%)",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Second tier discount percentage (applied after Discount 1)"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_3",
+   "fieldtype": "Percent",
+   "label": "Discount 3 (%)",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Third tier discount percentage (applied after Discount 2)"
+  },
+  {
+   "default": "0",
+   "fieldname": "effective_discount_pct",
+   "fieldtype": "Percent",
+   "label": "Effective Discount %",
+   "read_only": 1,
+   "description": "Calculated effective discount percentage from all tiers"
   },
   {
    "default": "0",
