@@ -226,8 +226,152 @@ frappe.ui.form.on('Listing', {
         if (frm.doc.attribute_set) {
             load_attribute_set_attributes(frm);
         }
+    },
+
+    // =====================================================
+    // G1: Pricing & Discount Field Change Handlers
+    // =====================================================
+
+    /**
+     * Base price change handler - recalculates discounts and pricing tier percentages
+     */
+    base_price: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 1 change handler - recalculates totals with cascading discounts
+     */
+    discount_1: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 2 change handler - recalculates totals with cascading discounts
+     */
+    discount_2: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 3 change handler - recalculates totals with cascading discounts
+     */
+    discount_3: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Show discount tiers toggle handler - shows/hides discount 2 and 3 fields
+     */
+    show_discount_tiers: function(frm) {
+        if (!frm.doc.show_discount_tiers) {
+            // Clear discount 2 and 3 when hiding tiers
+            frm.set_value('discount_2', 0);
+            frm.set_value('discount_3', 0);
+        }
+        calculate_totals(frm);
     }
 });
+
+/**
+ * Child table event handlers for Listing Bulk Pricing Tier
+ */
+frappe.ui.form.on('Listing Bulk Pricing Tier', {
+    /**
+     * Price change handler - recalculates tier discount percentage from base price
+     */
+    price: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        var base_price = flt(frm.doc.base_price);
+
+        // Calculate discount percentage: (base_price - tier_price) / base_price * 100
+        if (flt(base_price) > 0) {
+            row.discount_percentage = flt((flt(base_price) - flt(row.price)) / flt(base_price) * 100);
+        } else {
+            row.discount_percentage = 0;
+        }
+
+        frm.refresh_field('pricing_tiers');
+        calculate_totals(frm);
+    },
+
+    /**
+     * Minimum quantity change handler
+     */
+    min_qty: function(frm, cdt, cdn) {
+        frm.refresh_field('pricing_tiers');
+        calculate_totals(frm);
+    },
+
+    /**
+     * Maximum quantity change handler
+     */
+    max_qty: function(frm, cdt, cdn) {
+        frm.refresh_field('pricing_tiers');
+        calculate_totals(frm);
+    },
+
+    /**
+     * Pricing tier row added handler
+     */
+    pricing_tiers_add: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Pricing tier row removed handler
+     */
+    pricing_tiers_remove: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    }
+});
+
+/**
+ * Calculate listing totals - cascading discounts and pricing tier discount percentages.
+ *
+ * Uses cascading discount formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100).
+ * Also recalculates discount_percentage for each pricing tier from the base price.
+ *
+ * @param {object} frm - Form object
+ */
+function calculate_totals(frm) {
+    var base_price = flt(frm.doc.base_price);
+
+    // =====================================================
+    // Pricing Tier Discount Percentage Calculation
+    // =====================================================
+    // Recalculate discount_percentage for each pricing tier based on base_price
+    if (frm.doc.pricing_tiers) {
+        frm.doc.pricing_tiers.forEach(function(tier) {
+            if (flt(base_price) > 0) {
+                tier.discount_percentage = flt((flt(base_price) - flt(tier.price)) / flt(base_price) * 100);
+            } else {
+                tier.discount_percentage = 0;
+            }
+        });
+        frm.refresh_field('pricing_tiers');
+    }
+
+    // =====================================================
+    // Cascading Discount Calculation
+    // =====================================================
+    var discount_amount = 0;
+    var effective_discount_pct = 0;
+    var d1 = flt(frm.doc.discount_1);
+    var d2 = flt(frm.doc.discount_2);
+    var d3 = flt(frm.doc.discount_3);
+
+    if (flt(base_price) > 0) {
+        var price_after_d1 = flt(flt(base_price) * (1 - d1 / 100));
+        var price_after_d2 = flt(price_after_d1 * (1 - d2 / 100));
+        var final_price = flt(price_after_d2 * (1 - d3 / 100));
+        discount_amount = flt(flt(base_price) - final_price);
+        effective_discount_pct = flt(discount_amount / flt(base_price) * 100);
+    }
+
+    frm.set_value('discount_amount', flt(discount_amount));
+    frm.set_value('effective_discount_pct', flt(effective_discount_pct));
+}
 
 /**
  * Load attributes from category's attribute_set into the listing attributes child table
