@@ -21,6 +21,12 @@
   "attribute_set",
   "attribute_set_name",
   "erpnext_item_group",
+  "icon_section",
+  "icon",
+  "icon_name",
+  "column_break_icon",
+  "icon_class",
+  "icon_color",
   "commerce_tab",
   "tax_section",
   "tax_rate",
@@ -139,6 +145,38 @@
    "fieldtype": "Link",
    "label": "ERPNext Item Group",
    "options": "Item Group"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "icon_section",
+   "fieldtype": "Section Break",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "icon",
+   "fieldtype": "Attach Image",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "icon_name",
+   "fieldtype": "Data",
+   "label": "Icon Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_icon",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "icon_class",
+   "fieldtype": "Data",
+   "label": "Icon Class"
+  },
+  {
+   "default": "#333333",
+   "fieldname": "icon_color",
+   "fieldtype": "Color",
+   "label": "Icon Color"
   },
   {
    "fieldname": "commerce_tab",
@@ -280,7 +318,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-03-04 12:00:00.000000",
+ "modified": "2026-03-09 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Catalog",
  "name": "Category",
