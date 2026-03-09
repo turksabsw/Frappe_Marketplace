@@ -30,6 +30,12 @@
   "description_section",
   "description",
   "image",
+  "icon_section",
+  "icon",
+  "icon_name",
+  "column_break_icon",
+  "icon_class",
+  "icon_color",
   "seo_section",
   "seo_title",
   "seo_description",
@@ -192,6 +198,38 @@
    "description": "Category image for display"
   },
   {
+   "collapsible": 1,
+   "fieldname": "icon_section",
+   "fieldtype": "Section Break",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "icon",
+   "fieldtype": "Attach Image",
+   "label": "Icon"
+  },
+  {
+   "fieldname": "icon_name",
+   "fieldtype": "Data",
+   "label": "Icon Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_icon",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "icon_class",
+   "fieldtype": "Data",
+   "label": "Icon Class"
+  },
+  {
+   "default": "#333333",
+   "fieldname": "icon_color",
+   "fieldtype": "Color",
+   "label": "Icon Color"
+  },
+  {
    "fieldname": "seo_section",
    "fieldtype": "Section Break",
    "label": "SEO",
@@ -321,7 +359,7 @@
    "link_fieldname": "parent_product_category"
   }
  ],
- "modified": "2026-02-05 00:00:00.000000",
+ "modified": "2026-03-09 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Catalog",
  "name": "Product Category",
