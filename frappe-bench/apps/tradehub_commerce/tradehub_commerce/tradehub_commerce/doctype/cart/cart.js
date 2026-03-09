@@ -363,6 +363,40 @@ frappe.ui.form.on('Cart Line', {
         calculate_line_totals(frm, cdt, cdn);
     },
 
+    /**
+     * Cascading discount tier 1 change handler
+     */
+    discount_1: function(frm, cdt, cdn) {
+        calculate_line_totals(frm, cdt, cdn);
+    },
+
+    /**
+     * Cascading discount tier 2 change handler
+     */
+    discount_2: function(frm, cdt, cdn) {
+        calculate_line_totals(frm, cdt, cdn);
+    },
+
+    /**
+     * Cascading discount tier 3 change handler
+     */
+    discount_3: function(frm, cdt, cdn) {
+        calculate_line_totals(frm, cdt, cdn);
+    },
+
+    /**
+     * Show discount tiers toggle handler - clears D2/D3 when toggled off
+     */
+    show_discount_tiers: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        if (!row.show_discount_tiers) {
+            // Clear discount 2 and 3 when hiding tiers
+            frappe.model.set_value(cdt, cdn, 'discount_2', 0);
+            frappe.model.set_value(cdt, cdn, 'discount_3', 0);
+        }
+        calculate_line_totals(frm, cdt, cdn);
+    },
+
     // When row is added, recalculate totals
     items_add: function(frm, cdt, cdn) {
         calculate_cart_totals(frm);
@@ -380,95 +414,128 @@ frappe.ui.form.on('Cart Line', {
 
 /**
  * Calculate line totals for a cart line item.
- * CRITICAL: Always use frappe.model.set_value for child table updates
+ * Handles both regular discount (discount_type/discount_value) and
+ * cascading discount tiers (discount_1/2/3).
+ * Uses flt() on ALL numeric operations per Pattern 1.
+ * CRITICAL: Always use frappe.model.set_value for child table updates.
  */
 function calculate_line_totals(frm, cdt, cdn) {
-    let row = locals[cdt][cdn];
+    var row = locals[cdt][cdn];
 
-    let qty = flt(row.qty);
-    let unit_price = flt(row.unit_price);
-    let discount_value = flt(row.discount_value);
-    let tax_rate = flt(row.tax_rate);
+    var qty = flt(row.qty);
+    var unit_price = flt(row.unit_price);
+    var discount_value = flt(row.discount_value);
+    var tax_rate = flt(row.tax_rate);
 
-    // Calculate discount based on type
-    let discount_amount_per_unit = 0;
-    if (row.discount_type === 'Percentage' && discount_value > 0) {
-        discount_amount_per_unit = unit_price * (discount_value / 100);
-    } else if (row.discount_type === 'Fixed Amount' && discount_value > 0) {
-        discount_amount_per_unit = discount_value;
+    // Calculate discount based on type (regular discount)
+    var discount_amount_per_unit = 0;
+    if (row.discount_type === 'Percentage' && flt(discount_value) > 0) {
+        discount_amount_per_unit = flt(flt(unit_price) * flt(discount_value) / 100);
+    } else if (row.discount_type === 'Fixed Amount' && flt(discount_value) > 0) {
+        discount_amount_per_unit = flt(discount_value);
     }
 
-    let discounted_price = Math.max(0, unit_price - discount_amount_per_unit);
-    let line_subtotal = qty * discounted_price;
-    let total_discount = discount_amount_per_unit * qty;
+    var discounted_price = flt(Math.max(0, flt(unit_price) - flt(discount_amount_per_unit)));
+    var total_discount = flt(flt(discount_amount_per_unit) * flt(qty));
+
+    // Apply cascading discount tiers if set (discount_1, discount_2, discount_3)
+    var d1 = flt(row.discount_1);
+    var d2 = flt(row.discount_2);
+    var d3 = flt(row.discount_3);
+    var effective_discount_pct = 0;
+
+    if (d1 || d2 || d3) {
+        var base_price = flt(discounted_price);
+        var price_after_d1 = flt(flt(base_price) * (1 - flt(d1) / 100));
+        var price_after_d2 = flt(flt(price_after_d1) * (1 - flt(d2) / 100));
+        var final_price = flt(flt(price_after_d2) * (1 - flt(d3) / 100));
+
+        // Calculate cascading discount amount
+        var cascading_discount_per_unit = flt(flt(base_price) - flt(final_price));
+        total_discount = flt(flt(total_discount) + flt(flt(cascading_discount_per_unit) * flt(qty)));
+        discounted_price = flt(final_price);
+
+        // Calculate effective discount percentage
+        if (flt(unit_price) > 0) {
+            effective_discount_pct = flt(flt(flt(unit_price) - flt(discounted_price)) / flt(unit_price) * 100);
+        }
+    }
+
+    var line_subtotal = flt(flt(qty) * flt(discounted_price));
 
     // Calculate tax
-    let taxable_amount = line_subtotal;
-    let tax_amount = 0;
+    var taxable_amount = flt(line_subtotal);
+    var tax_amount = 0;
 
     if (row.price_includes_tax) {
         // Extract tax from price (VAT inclusive)
-        taxable_amount = line_subtotal / (1 + tax_rate / 100);
-        tax_amount = line_subtotal - taxable_amount;
+        if (flt(tax_rate) > 0) {
+            taxable_amount = flt(flt(line_subtotal) / (1 + flt(tax_rate) / 100));
+            tax_amount = flt(flt(line_subtotal) - flt(taxable_amount));
+        }
     } else {
         // Add tax to price (VAT exclusive)
-        tax_amount = line_subtotal * (tax_rate / 100);
+        if (flt(tax_rate) > 0) {
+            tax_amount = flt(flt(line_subtotal) * flt(tax_rate) / 100);
+        }
     }
 
     // Final line total (subtotal + tax for VAT exclusive, or just subtotal for VAT inclusive)
-    let line_total = row.price_includes_tax ? line_subtotal : (line_subtotal + tax_amount);
+    var line_total = row.price_includes_tax ? flt(line_subtotal) : flt(flt(line_subtotal) + flt(tax_amount));
 
     // Update all calculated fields using frappe.model.set_value
     // CRITICAL: Never use direct assignment for child table fields
-    frappe.model.set_value(cdt, cdn, 'discount_amount', total_discount);
-    frappe.model.set_value(cdt, cdn, 'discounted_price', discounted_price);
-    frappe.model.set_value(cdt, cdn, 'line_total', line_total);
-    frappe.model.set_value(cdt, cdn, 'taxable_amount', taxable_amount);
-    frappe.model.set_value(cdt, cdn, 'tax_amount', tax_amount);
+    frappe.model.set_value(cdt, cdn, 'discount_amount', flt(total_discount));
+    frappe.model.set_value(cdt, cdn, 'discounted_price', flt(discounted_price));
+    frappe.model.set_value(cdt, cdn, 'effective_discount_pct', flt(effective_discount_pct));
+    frappe.model.set_value(cdt, cdn, 'line_total', flt(line_total));
+    frappe.model.set_value(cdt, cdn, 'taxable_amount', flt(taxable_amount));
+    frappe.model.set_value(cdt, cdn, 'tax_amount', flt(tax_amount));
 
     // Recalculate cart totals
     calculate_cart_totals(frm);
 }
 
 /**
- * Calculate cart totals from all items
+ * Calculate cart totals from all items.
+ * Uses flt() on ALL numeric operations per Pattern 1.
  */
 function calculate_cart_totals(frm) {
-    let items = frm.doc.items || [];
+    var items = frm.doc.items || [];
 
-    let subtotal = 0;
-    let total_discount = 0;
-    let total_tax = 0;
-    let total_qty = 0;
-    let total_weight = 0;
-    let item_count = items.length;
+    var subtotal = 0;
+    var total_discount = 0;
+    var total_tax = 0;
+    var total_qty = 0;
+    var total_weight = 0;
+    var item_count = items.length;
 
     items.forEach(function(item) {
-        let line_subtotal = flt(item.qty) * flt(item.discounted_price || item.unit_price);
-        subtotal += line_subtotal;
+        var line_subtotal = flt(flt(item.qty) * flt(item.discounted_price || item.unit_price));
+        subtotal += flt(line_subtotal);
         total_discount += flt(item.discount_amount);
         total_tax += flt(item.tax_amount);
         total_qty += flt(item.qty);
-        total_weight += flt(item.weight) * flt(item.qty);
+        total_weight += flt(flt(item.weight) * flt(item.qty));
     });
 
     // Apply cart-level discounts (coupon, promotion)
-    let coupon_discount = flt(frm.doc.coupon_discount);
-    let promotion_discount = flt(frm.doc.promotion_discount);
-    let order_discount = coupon_discount + promotion_discount;
+    var coupon_discount = flt(frm.doc.coupon_discount);
+    var promotion_discount = flt(frm.doc.promotion_discount);
+    var order_discount = flt(flt(coupon_discount) + flt(promotion_discount));
 
     // Calculate shipping (estimated)
-    let shipping_total = flt(frm.doc.shipping_estimate);
+    var shipping_total = flt(frm.doc.shipping_estimate);
 
     // Calculate grand total
-    let grand_total = subtotal - order_discount + total_tax + shipping_total;
+    var grand_total = flt(flt(subtotal) - flt(order_discount) + flt(total_tax) + flt(shipping_total));
 
     // Update parent totals
-    frm.set_value('subtotal', subtotal);
-    frm.set_value('total_discount', total_discount + order_discount);
-    frm.set_value('tax_total', total_tax);
-    frm.set_value('grand_total', grand_total);
+    frm.set_value('subtotal', flt(subtotal));
+    frm.set_value('total_discount', flt(flt(total_discount) + flt(order_discount)));
+    frm.set_value('tax_total', flt(total_tax));
+    frm.set_value('grand_total', flt(grand_total));
     frm.set_value('item_count', item_count);
-    frm.set_value('total_qty', total_qty);
-    frm.set_value('total_weight', total_weight);
+    frm.set_value('total_qty', flt(total_qty));
+    frm.set_value('total_weight', flt(total_weight));
 }

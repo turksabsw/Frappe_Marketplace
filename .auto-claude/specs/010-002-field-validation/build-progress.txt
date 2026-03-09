@@ -645,3 +645,88 @@ tax calc, cascading + coupon ordering), Import OK verified
 Commit: 909c2df
 
 === END SESSION 16 ===
+
+=== SESSION 17 (subtask-5-1) ===
+
+Completed subtask-5-1: Update order.js (Phase 5 - JavaScript Client-Side Code)
+
+Changes made:
+
+- G1 (Verified - no changes needed):
+  - calculate_totals() uses flt() on all 25 numeric operations ✓
+  - items_add and items_remove handlers call calculate_totals(frm) ✓
+  - quantity and unit_price handlers compute row.amount with flt() and call calculate_totals ✓
+  - Row amount: flt(row.quantity) * flt(row.unit_price) ✓
+
+- G2 (Verified - no changes needed):
+  - Role-based auth in refresh handler with Turkish role names ✓
+  - is_admin check: Satici Admin || Alici Admin || System Manager ✓
+  - 7 set_df_property calls locking admin fields (status, payment_status,
+    internal_notes, cancelled_by, refund_status) and hiding internal_notes ✓
+
+- G3 (Changes made):
+  - Replaced discount_percentage handler with discount_1, discount_2, discount_3 handlers
+  - Added show_discount_tiers toggle handler:
+    - Clears discount_2 and discount_3 to 0 when toggled off
+    - Calls calculate_totals after clearing
+  - Updated calculate_totals() with cascading discount formula:
+    - var d1/d2/d3 = flt(frm.doc.discount_1/2/3)
+    - price_after_d1 = flt(flt(subtotal) * (1 - d1 / 100))
+    - price_after_d2 = flt(price_after_d1 * (1 - d2 / 100))
+    - final_price = flt(price_after_d2 * (1 - d3 / 100))
+    - discount_amount = flt(flt(subtotal) - final_price)
+    - effective_discount_pct = flt(discount_amount / flt(subtotal) * 100)
+  - Zero-division guard: if (flt(subtotal) > 0) before discount calc
+  - All set_value calls wrapped with flt() for subtotal, discount_amount,
+    effective_discount_pct, tax_amount, total_amount
+  - Removed all references to discount_percentage
+
+Verification: grep -c 'discount_1' = 2 ✓, 25 flt() calls ✓, all G1/G2/G3 checks passed
+Commit: d3da83e
+
+=== END SESSION 17 ===
+
+=== SESSION 18 (subtask-5-2) ===
+
+Completed subtask-5-2: Update cart.js (Phase 5 - JavaScript Client-Side Code)
+
+Changes made:
+
+- G1 (flt() wrapping fixed):
+  - calculate_line_totals(): All intermediate calculations now wrapped in flt():
+    - discount_amount_per_unit = flt(flt(unit_price) * flt(discount_value) / 100)
+    - discounted_price = flt(Math.max(0, flt(unit_price) - flt(discount_amount_per_unit)))
+    - total_discount = flt(flt(discount_amount_per_unit) * flt(qty))
+    - line_subtotal = flt(flt(qty) * flt(discounted_price))
+    - taxable_amount, tax_amount, line_total all wrapped in flt()
+    - All frappe.model.set_value calls wrapped in flt()
+    - Added zero-division guard: if (flt(tax_rate) > 0) before tax calculations
+  - calculate_cart_totals(): All operations wrapped in flt():
+    - line_subtotal = flt(flt(item.qty) * flt(item.discounted_price || item.unit_price))
+    - subtotal += flt(line_subtotal)
+    - total_weight += flt(flt(item.weight) * flt(item.qty))
+    - order_discount = flt(flt(coupon_discount) + flt(promotion_discount))
+    - grand_total = flt(flt(subtotal) - flt(order_discount) + flt(total_tax) + flt(shipping_total))
+    - All frm.set_value calls wrapped in flt()
+  - Total flt() calls: 55 (up from ~20 before)
+
+- G1 (Child table handlers verified):
+  - qty, unit_price, discount_value, discount_type, tax_rate → calculate_line_totals ✓
+  - items_add, items_remove → calculate_cart_totals ✓
+
+- G3 (Cascading discount formula added to Cart Line):
+  - Added discount_1, discount_2, discount_3 handlers on Cart Line → calculate_line_totals
+  - Added show_discount_tiers handler → clears D2/D3 to 0 when toggled off
+  - Updated calculate_line_totals() with cascading formula:
+    - Applied AFTER regular discount (discount_type/discount_value)
+    - var price_after_d1 = flt(flt(base_price) * (1 - flt(d1) / 100))
+    - var price_after_d2 = flt(flt(price_after_d1) * (1 - flt(d2) / 100))
+    - var final_price = flt(flt(price_after_d2) * (1 - flt(d3) / 100))
+    - Computes cascading_discount_per_unit, total_discount, effective_discount_pct
+    - Sets effective_discount_pct via frappe.model.set_value
+    - Zero-division guard: if (flt(unit_price) > 0) for effective_discount_pct
+
+Verification: 23 calculate references ✓, 55 flt() calls ✓, 15 cascading discount references ✓,
+0 console.log ✓
+
+=== END SESSION 18 ===

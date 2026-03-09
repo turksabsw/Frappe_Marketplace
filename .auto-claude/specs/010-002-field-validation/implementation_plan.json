@@ -559,8 +559,8 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "G1: Verified calculate_totals uses flt() on all 25 numeric ops; items_add/items_remove/quantity/unit_price all call calculate_totals. G2: Verified role-based auth with Satici Admin/Alici Admin/System Manager; 7 set_df_property calls for admin fields. G3: Replaced discount_percentage handler with discount_1/2/3 handlers; added show_discount_tiers toggle (clears d2/d3 when hidden); updated calculate_totals with cascading formula: price_after_d1 = flt(subtotal * (1-d1/100)), price_after_d2 = flt(price_after_d1 * (1-d2/100)), final_price = flt(price_after_d2 * (1-d3/100)); computes effective_discount_pct; zero-division guard on subtotal.",
-          "updated_at": "2026-03-09T18:00:00.000000+00:00"
+          "notes": "G1: Verified calculate_totals uses flt() on all 25 numeric ops; items_add/items_remove/quantity/unit_price all call calculate_totals. G2: Verified role-based auth with Satici Admin/Alici Admin/System Manager; 7 set_df_property calls for admin fields. G3: Replaced discount_percentage handler with discount_1/2/3 handlers; added show_discount_tiers toggle (clears d2/d3 when hidden); updated calculate_totals with cascading formula; computes effective_discount_pct; zero-division guard on subtotal. Commit: d3da83e",
+          "updated_at": "2026-03-09T10:40:20.395430+00:00"
         },
         {
           "id": "subtask-5-2",
@@ -578,7 +578,7 @@
             "command": "cd frappe-bench && grep -c 'calculate' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart/cart.js && echo 'OK'",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-5-3",
@@ -948,12 +948,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T10:37:44.919Z",
+  "updated_at": "2026-03-09T10:40:50.895Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T08:10:19.348519+00:00"
   },
-  "last_updated": "2026-03-09T10:24:07.156088+00:00"
+  "last_updated": "2026-03-09T10:40:20.395439+00:00"
 }
