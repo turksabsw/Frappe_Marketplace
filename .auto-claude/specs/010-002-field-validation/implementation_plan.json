@@ -956,17 +956,90 @@
       ]
     }
   },
-  "qa_signoff": null,
-  "status": "in_progress",
-  "planStatus": "in_progress",
-  "xstateState": "coding",
-  "executionPhase": "coding",
-  "updated_at": "2026-03-09T11:21:47.948Z",
-  "lastEvent": {
-    "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
-    "sequence": 0,
-    "type": "PLANNING_COMPLETE",
-    "timestamp": "2026-03-09T08:10:19.348519+00:00"
+  "qa_signoff": {
+    "status": "approved",
+    "qa_session": 0,
+    "issues_found": [
+      {
+        "description": "3 minor issues (non-blocking): (1) Direct child table row assignment in some JS files uses row.field=value instead of frappe.model.set_value - works correctly, pre-existing pattern. (2) d1/100 not separately flt()-wrapped in cascading formula - safe since outer expression is wrapped. (3) Cart.py validate() missing _guard_system_fields - by design for transient session documents."
+      }
+    ],
+    "tests_passed": {},
+    "timestamp": "2026-03-09T11:50:35.082869+00:00",
+    "ready_for_qa_revalidation": false
   },
-  "last_updated": "2026-03-09T11:21:18.560563+00:00"
+  "status": "human_review",
+  "planStatus": "review",
+  "xstateState": "human_review",
+  "executionPhase": "complete",
+  "updated_at": "2026-03-09T11:50:52.219Z",
+  "lastEvent": {
+    "eventId": "ed115a04-4de3-4a57-9270-77fc60d76f7e",
+    "sequence": 5,
+    "type": "QA_PASSED",
+    "timestamp": "2026-03-09T11:50:52.207373+00:00"
+  },
+  "last_updated": "2026-03-09T11:50:35.082881+00:00",
+  "qa_iteration_history": [
+    {
+      "iteration": 1,
+      "status": "rejected",
+      "timestamp": "2026-03-09T11:38:26.937076+00:00",
+      "issues": [
+        {
+          "type": "critical",
+          "title": "rfq_quote.py _guard_system_fields blocks calculate_totals and create_revision",
+          "location": "rfq_quote.py:44-52",
+          "fix_required": "Remove discount_amount, total_amount, revision_count, last_revised_at, accepted_at, rejected_at from system_fields guard list"
+        },
+        {
+          "type": "critical",
+          "title": "marketplace_order.py missing cascading discount calculation (JS/Python mismatch)",
+          "location": "marketplace_order.py:277-317",
+          "fix_required": "Add cascading discount formula using discount_1/2/3 fields following order.py pattern"
+        },
+        {
+          "type": "critical",
+          "title": "marketplace_order.py missing refetch_denormalized_fields()",
+          "location": "marketplace_order.py:56-65",
+          "fix_required": "Add refetch_denormalized_fields method for buyer_name, buyer_email, organization_name, tenant_name"
+        },
+        {
+          "type": "critical",
+          "title": "marketplace_order.js calculate_item_amounts missing flt() on all arithmetic",
+          "location": "marketplace_order.js:517-540",
+          "fix_required": "Wrap all 6 arithmetic results and 5 set_value calls in flt()"
+        },
+        {
+          "type": "critical",
+          "title": "rfq.js field name mismatch qty vs quantity",
+          "location": "rfq.js:291-298",
+          "fix_required": "Change qty to quantity in handler name, row.qty, and set_value call"
+        },
+        {
+          "type": "critical",
+          "title": "marketplace_order.js calculate_order_totals missing flt() on results and set_value",
+          "location": "marketplace_order.js:549-615",
+          "fix_required": "Wrap arithmetic results and all set_value calls in flt()"
+        }
+      ],
+      "duration_seconds": 719.2
+    },
+    {
+      "iteration": 2,
+      "status": "approved",
+      "timestamp": "2026-03-09T11:50:52.205941+00:00",
+      "issues": [],
+      "duration_seconds": 538.59
+    }
+  ],
+  "qa_stats": {
+    "total_iterations": 2,
+    "last_iteration": 2,
+    "last_status": "approved",
+    "issues_by_type": {
+      "critical": 6
+    }
+  },
+  "reviewReason": "completed"
 }
