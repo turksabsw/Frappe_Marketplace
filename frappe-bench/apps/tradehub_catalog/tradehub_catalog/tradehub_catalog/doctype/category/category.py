@@ -30,6 +30,7 @@ class Category(NestedSet):
         """Validate category data before saving."""
         self.validate_commission_rates()
         self.validate_parent_category()
+        self.validate_deactivation()
         self.generate_route()
 
     def on_update(self):
@@ -70,6 +71,38 @@ class Category(NestedSet):
             parent = frappe.get_doc("Category", self.parent_category)
             if not parent.is_active:
                 frappe.throw(_("Parent category must be active"))
+
+    def validate_deactivation(self):
+        """Prevent deactivation if active Listings or active sub-categories exist."""
+        if cint(self.is_active):
+            return
+
+        # Only check when transitioning from active to inactive
+        if not self.is_new():
+            db_is_active = frappe.db.get_value("Category", self.name, "is_active")
+            if not cint(db_is_active):
+                # Already inactive, no need to validate
+                return
+
+        # Check for active sub-categories
+        active_children = frappe.db.count(
+            "Category",
+            {"parent_category": self.name, "is_active": 1}
+        )
+        if active_children:
+            frappe.throw(
+                _("Cannot deactivate Category with {0} active sub-categories. Please deactivate child categories first.").format(active_children)
+            )
+
+        # Check for active listings
+        active_listings = frappe.db.count(
+            "Listing",
+            {"category": self.name, "is_active": 1}
+        )
+        if active_listings:
+            frappe.throw(
+                _("Cannot deactivate Category with {0} active listings. Please deactivate or move listings first.").format(active_listings)
+            )
 
     def generate_route(self):
         """Generate URL route for category page if not set."""
