@@ -259,11 +259,17 @@ frappe.ui.form.on('RFQ', {
         if (frm.is_new() && !frm.doc.created_date) {
             frm.set_value('created_date', frappe.datetime.get_today());
         }
+
+        // Recalculate totals before save
+        calculate_totals(frm);
     }
 });
 
 // RFQ Item child table events
 frappe.ui.form.on('RFQ Item', {
+    /**
+     * Listing field change handler - fetches item details from listing
+     */
     listing: function(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
         if (row.listing) {
@@ -279,11 +285,53 @@ frappe.ui.form.on('RFQ Item', {
         }
     },
 
+    /**
+     * Quantity change handler - validates and recalculates totals
+     */
     qty: function(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
         if (row.qty <= 0) {
             frappe.model.set_value(cdt, cdn, 'qty', 1);
             frappe.msgprint(__('Quantity must be greater than zero'));
         }
+        calculate_totals(frm);
+    },
+
+    /**
+     * Target price change handler - recalculates totals
+     */
+    target_price: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Item row added handler
+     */
+    items_add: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Item row removed handler
+     */
+    items_remove: function(frm, cdt, cdn) {
+        calculate_totals(frm);
     }
 });
+
+/**
+ * Calculate RFQ totals from child table items
+ * Sums up total quantity from all RFQ items
+ * @param {object} frm - Form object
+ */
+function calculate_totals(frm) {
+    var total_quantity = 0;
+
+    if (frm.doc.items) {
+        frm.doc.items.forEach(function(item) {
+            total_quantity += flt(item.quantity);
+        });
+    }
+
+    frm.set_value('quantity', flt(total_quantity));
+}

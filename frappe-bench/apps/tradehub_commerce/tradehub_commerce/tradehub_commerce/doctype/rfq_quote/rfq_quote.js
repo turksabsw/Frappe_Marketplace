@@ -182,6 +182,16 @@ frappe.ui.form.on('RFQ Quote Item', {
         calculate_item_total(frm, cdt, cdn);
     },
 
+    /**
+     * Item row added handler
+     */
+    items_add: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Item row removed handler
+     */
     items_remove: function(frm) {
         // Recalculate totals when items are removed
         calculate_totals(frm);

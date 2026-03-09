@@ -72,7 +72,7 @@ frappe.ui.form.on('Escrow Account', {
 
         // Make tenant field read-only when seller is selected
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
-    
+
         // =====================================================
         // Role-Based Field Authorization
         // =====================================================
@@ -93,6 +93,13 @@ frappe.ui.form.on('Escrow Account', {
             // Hide internal notes from non-admin users
             frm.set_df_property('internal_notes', 'hidden', 1);
         }
+    },
+
+    /**
+     * Before save handler - recalculates totals
+     */
+    before_save: function(frm) {
+        calculate_totals(frm);
     },
 
     // =====================================================
@@ -122,3 +129,76 @@ frappe.ui.form.on('Escrow Account', {
         }
     }
 });
+
+/**
+ * Child table event handlers for Escrow Partial Release
+ */
+frappe.ui.form.on('Escrow Partial Release', {
+    /**
+     * Amount change handler - recalculates totals
+     */
+    amount: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        if (flt(row.amount) < 0) {
+            frappe.model.set_value(cdt, cdn, 'amount', 0);
+            frappe.msgprint(__('Release amount cannot be negative'));
+        }
+        calculate_totals(frm);
+    },
+
+    /**
+     * Status change handler - recalculates totals (only completed releases count)
+     */
+    status: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Partial release row added handler
+     */
+    partial_releases_table_add: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Partial release row removed handler
+     */
+    partial_releases_table_remove: function(frm, cdt, cdn) {
+        calculate_totals(frm);
+    }
+});
+
+/**
+ * Calculate escrow account totals from partial releases
+ * Sums up completed release amounts and updates held/pending amounts
+ * @param {object} frm - Form object
+ */
+function calculate_totals(frm) {
+    var total_released = 0;
+
+    if (frm.doc.partial_releases_table) {
+        frm.doc.partial_releases_table.forEach(function(release) {
+            // Only count completed releases toward released amount
+            if (release.status === 'Completed') {
+                total_released += flt(release.amount);
+            }
+        });
+    }
+
+    frm.set_value('released_amount', flt(total_released));
+
+    // Calculate held amount: total - released - refunded
+    var held = flt(frm.doc.total_amount) - flt(total_released) - flt(frm.doc.refunded_amount);
+    frm.set_value('held_amount', flt(held));
+
+    // Calculate pending release: sum of pending releases
+    var pending_release = 0;
+    if (frm.doc.partial_releases_table) {
+        frm.doc.partial_releases_table.forEach(function(release) {
+            if (release.status === 'Pending') {
+                pending_release += flt(release.amount);
+            }
+        });
+    }
+    frm.set_value('pending_release_amount', flt(pending_release));
+}
