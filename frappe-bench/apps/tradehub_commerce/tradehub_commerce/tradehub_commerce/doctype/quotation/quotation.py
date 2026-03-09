@@ -308,30 +308,34 @@ class Quotation(Document):
         # Calculate subtotal from items
         subtotal = 0
         for item in self.items:
-            item_amount = flt(item.quantity) * flt(item.unit_price)
-            item.amount = item_amount
-            subtotal += item_amount
+            item.amount = flt(flt(item.quantity, 2) * flt(item.unit_price, 2), 2)
+            subtotal += flt(item.amount, 2)
 
-        self.subtotal = subtotal
+        self.subtotal = flt(subtotal, 2)
 
         # Calculate discount
-        if flt(self.discount_percentage) > 0:
-            self.discount_amount = subtotal * flt(self.discount_percentage) / 100
+        if flt(self.discount_percentage, 2) > 0:
+            self.discount_amount = flt(
+                flt(self.subtotal, 2) * flt(self.discount_percentage, 2) / 100, 2
+            )
         else:
             self.discount_amount = 0
 
         # Calculate total
-        self.total_amount = (
-            subtotal
-            - flt(self.discount_amount)
-            + flt(self.tax_amount)
-            + flt(self.shipping_cost)
+        self.total_amount = flt(
+            flt(self.subtotal, 2)
+            - flt(self.discount_amount, 2)
+            + flt(self.tax_amount, 2)
+            + flt(self.shipping_cost, 2),
+            2
         )
 
     def calculate_advance_amount(self):
         """Calculate advance payment amount."""
-        if flt(self.advance_percentage) > 0 and flt(self.total_amount) > 0:
-            self.advance_amount = flt(self.total_amount) * flt(self.advance_percentage) / 100
+        if flt(self.advance_percentage, 2) > 0 and flt(self.total_amount, 2) > 0:
+            self.advance_amount = flt(
+                flt(self.total_amount, 2) * flt(self.advance_percentage, 2) / 100, 2
+            )
         else:
             self.advance_amount = 0
 

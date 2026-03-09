@@ -284,33 +284,36 @@ class MarketplaceOrder(Document):
             # Ensure item totals are calculated
             item.calculate_totals()
 
-            subtotal += flt(item.line_subtotal) - flt(item.discount_amount)
-            tax_amount += flt(item.tax_amount)
-            total_commission += flt(item.commission_amount)
+            subtotal += flt(flt(item.line_subtotal, 2) - flt(item.discount_amount, 2), 2)
+            tax_amount += flt(item.tax_amount, 2)
+            total_commission += flt(item.commission_amount, 2)
 
-        self.subtotal = subtotal
-        self.tax_amount = tax_amount
-        self.total_commission = total_commission
+        self.subtotal = flt(subtotal, 2)
+        self.tax_amount = flt(tax_amount, 2)
+        self.total_commission = flt(total_commission, 2)
 
         # Calculate discount totals
-        self.discount_amount = (
-            flt(self.coupon_discount)
-            + flt(self.promotion_discount)
-            + flt(self.store_credit_used)
+        self.discount_amount = flt(
+            flt(self.coupon_discount, 2)
+            + flt(self.promotion_discount, 2)
+            + flt(self.store_credit_used, 2),
+            2
         )
 
         # Grand total
-        self.grand_total = (
-            flt(self.subtotal)
-            - flt(self.discount_amount)
-            + flt(self.shipping_amount)
-            + (flt(self.tax_amount) if not self.price_includes_tax else 0)
+        self.grand_total = flt(
+            flt(self.subtotal, 2)
+            - flt(self.discount_amount, 2)
+            + flt(self.shipping_amount, 2)
+            + (flt(self.tax_amount, 2) if not self.price_includes_tax else 0),
+            2
         )
 
         # Commission rate (average)
-        if flt(self.subtotal) > 0:
-            self.commission_rate = (
-                flt(self.total_commission) / flt(self.subtotal) * 100
+        if flt(self.subtotal, 2) > 0:
+            self.commission_rate = flt(
+                flt(self.total_commission, 2) / flt(self.subtotal, 2) * 100,
+                2
             )
 
     def update_seller_summary(self):
