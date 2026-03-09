@@ -61,6 +61,7 @@ class Listing(Document):
         self.validate_prices()
         self.validate_inventory()
         self.validate_category()
+        self.validate_condition_note()
         self.validate_auction_settings()
         self.validate_b2b_settings()
         self.validate_visibility_dates()
@@ -327,6 +328,25 @@ class Listing(Document):
                     _("Subcategory {0} is not a child of Category {1}").format(
                         self.subcategory, self.category
                     )
+                )
+
+    def validate_condition_note(self):
+        """Validate condition_note is at least 20 characters for Used/Renewed conditions."""
+        conditions_requiring_note = [
+            "Used - Like New",
+            "Used - Good",
+            "Used - Acceptable",
+            "Renewed",
+        ]
+
+        if getattr(self, "condition", None) in conditions_requiring_note:
+            condition_note = getattr(self, "condition_note", None) or ""
+            if len(condition_note.strip()) < 20:
+                frappe.throw(
+                    _("Condition Note must be at least 20 characters for {0} condition").format(
+                        self.condition
+                    ),
+                    title=_("Invalid Condition Note")
                 )
 
     def validate_auction_settings(self):

@@ -31,6 +31,7 @@ class PIMProduct(Document):
         self.validate_identifiers()
         self.validate_pricing()
         self.validate_dimensions()
+        self.validate_condition_note()
         self.generate_url_slug()
         self.set_product_class()
         self.update_audit_info()
@@ -156,6 +157,25 @@ class PIMProduct(Document):
                 frappe.throw(
                     _("{0} cannot be negative").format(field.title()),
                     title=_("Invalid Dimension")
+                )
+
+    def validate_condition_note(self):
+        """Validate condition_note is at least 20 characters for Used/Renewed conditions"""
+        conditions_requiring_note = [
+            "Used - Like New",
+            "Used - Good",
+            "Used - Acceptable",
+            "Renewed",
+        ]
+
+        if getattr(self, "condition", None) in conditions_requiring_note:
+            condition_note = getattr(self, "condition_note", None) or ""
+            if len(condition_note.strip()) < 20:
+                frappe.throw(
+                    _("Condition Note must be at least 20 characters for {0} condition").format(
+                        self.condition
+                    ),
+                    title=_("Invalid Condition Note")
                 )
 
     def generate_url_slug(self):
