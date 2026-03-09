@@ -142,3 +142,50 @@ Subtask 7-2: Final hooks.py consolidation
 Status: subtask-7-2 COMPLETED
 
 === END subtask-7-2 ===
+
+=== SESSION: subtask-7-3 ===
+
+Subtask 7-3: End-to-end JSON validation
+- Validated 10 DocType JSON files across tradehub_catalog and tradehub_seller
+- All files parse as valid JSON ✓
+- Module values correct for all DocTypes:
+  - tradehub_catalog (8 DocTypes): Category, Product Category, Seller Custom Category,
+    Category Attribute Set, Product Attribute Set, Category Proposal,
+    TradeHub Catalog Settings, PIM Product ✓
+  - tradehub_seller (2 DocTypes): Listing, Listing Attribute Value ✓
+- Name values match expected DocType names for all 10 files ✓
+- field_order arrays match actual field definitions (no missing/extra entries) ✓
+- No duplicate field names or field_order entries ✓
+- All Link fields have valid options references ✓
+- All Table fields have valid child DocType references ✓
+- Cross-reference validation:
+  - Listing.category/subcategory -> Product Category ✓
+  - Listing.seller_custom_category -> Seller Custom Category ✓
+  - Listing.product_attribute_sets -> Product Attribute Set ✓
+  - PIM Product.primary_category -> Product Category ✓
+  - PIM Product.product_attribute_sets -> Product Attribute Set ✓
+  - Product Category.category_attribute_sets -> Category Attribute Set ✓
+  - Listing Attribute Value.attribute_set -> Attribute Set ✓
+  - Seller Custom Category.seller -> Seller Profile ✓
+  - Seller Custom Category.marketplace_category -> Product Category ✓
+  - Category Proposal.parent_category -> Product Category ✓
+  - Category Proposal.created_category -> Product Category ✓
+- Permission checks:
+  - Category: no 'All' role, has Seller+Buyer read-only ✓
+  - Category: show_name_in_global_search = 0 ✓
+  - Category: is_active has in_standard_filter ✓
+- Feature field checks:
+  - Icon fields (icon, icon_name, icon_class, icon_color) on both Category and Product Category ✓
+  - Condition field with 8 options on both Listing and PIM Product ✓
+  - condition_note on both Listing and PIM Product ✓
+  - Origin fields (country_of_origin, city_of_origin, manufactured_by) on Listing ✓
+  - Origin fields (city_of_origin, manufactured_by) on PIM Product ✓
+  - inherit_parent_attributes on Product Category ✓
+  - TradeHub Catalog Settings: issingle=1, all rate-limit fields present ✓
+  - Child tables (Category Attribute Set, Product Attribute Set, Listing Attribute Value) all istable=1 ✓
+- No errors or warnings found
+- Verification command: All JSONs valid ✓
+
+Status: subtask-7-3 COMPLETED
+
+=== END subtask-7-3 ===
