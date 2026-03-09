@@ -6,7 +6,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate, nowdate, now_datetime, add_days
 from frappe.utils.file_manager import save_file
-import json
 import re
 
 # Import ERPNext sync utilities
@@ -51,18 +50,6 @@ class Listing(Document):
         if not self.attribute_set and self.category:
             self.set_attribute_set_from_category()
 
-        # Initialize images as empty array
-        if not self.images:
-            self.images = "[]"
-
-        # Initialize attributes as empty object
-        if not self.attributes:
-            self.attributes = "{}"
-
-        # Initialize bulk pricing tiers
-        if not self.bulk_pricing_tiers:
-            self.bulk_pricing_tiers = "[]"
-
     def validate(self):
         """Validate listing data before saving."""
         self._guard_system_fields()
@@ -82,6 +69,7 @@ class Listing(Document):
         self.calculate_available_qty()
         self.set_listing_type_flags()
         self.generate_route()
+        self.calculate_totals()
         self.update_status_based_on_inventory()
 
     def _guard_system_fields(self):
@@ -387,30 +375,19 @@ class Listing(Document):
                 )
 
             # Validate bulk pricing tiers
-            if self.bulk_pricing_enabled and self.bulk_pricing_tiers:
+            if self.bulk_pricing_enabled and self.pricing_tiers:
                 self.validate_bulk_pricing_tiers()
 
     def validate_bulk_pricing_tiers(self):
-        """Validate bulk pricing tier structure."""
-        try:
-            tiers = json.loads(self.bulk_pricing_tiers or "[]")
-        except json.JSONDecodeError:
-            frappe.throw(_("Invalid Bulk Pricing Tiers format"))
-            return
-
-        if not tiers:
+        """Validate bulk pricing tier structure using child table."""
+        if not self.pricing_tiers:
             return
 
         prev_max = 0
-        for i, tier in enumerate(tiers):
-            if "min_qty" not in tier or "price" not in tier:
-                frappe.throw(
-                    _("Bulk pricing tier {0} must have min_qty and price").format(i + 1)
-                )
-
-            min_qty = flt(tier.get("min_qty"))
-            max_qty = flt(tier.get("max_qty", 0))
-            price = flt(tier.get("price"))
+        for i, tier in enumerate(self.pricing_tiers):
+            min_qty = flt(tier.min_qty)
+            max_qty = flt(tier.max_qty)
+            price = flt(tier.price, 2)
 
             if min_qty <= 0:
                 frappe.throw(
@@ -445,14 +422,11 @@ class Listing(Document):
                     frappe.throw(_("Sale End Date must be after Start Date"))
 
     def validate_images(self):
-        """Validate images JSON structure."""
-        if self.images:
-            try:
-                images = json.loads(self.images)
-                if not isinstance(images, list):
-                    frappe.throw(_("Images must be a JSON array"))
-            except json.JSONDecodeError:
-                frappe.throw(_("Invalid Images JSON format"))
+        """Validate listing images child table entries."""
+        if self.listing_images:
+            for img in self.listing_images:
+                if not img.image:
+                    frappe.throw(_("Image attachment is required for each listing image row"))
 
     def calculate_available_qty(self):
         """Calculate available quantity (stock - reserved)."""
@@ -486,6 +460,42 @@ class Listing(Document):
             elif self.status == "Out of Stock" and flt(self.available_qty) > 0:
                 self.status = "Active"
 
+    def calculate_totals(self):
+        """
+        Calculate listing totals from child tables and cascading discounts.
+
+        Uses flt(value, 2) for all currency/numeric operations.
+        Implements cascading discount formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100).
+        """
+        # Validate and normalize pricing tier values
+        if self.pricing_tiers:
+            for tier in self.pricing_tiers:
+                tier.price = flt(tier.price, 2)
+                tier.min_qty = cint(tier.min_qty)
+                tier.max_qty = cint(tier.max_qty)
+                tier.discount_percentage = flt(tier.discount_percentage, 2)
+
+        # Validate discount values (0-100 range)
+        for d in [self.discount_1, self.discount_2, self.discount_3]:
+            if flt(d) < 0 or flt(d) > 100:
+                frappe.throw(_("Discount percentage must be between 0 and 100"))
+
+        # Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+        base_price = flt(self.base_price, 2)
+        if flt(base_price, 2) > 0:
+            price_after_d1 = flt(base_price * (1 - flt(self.discount_1, 2) / 100), 2)
+            price_after_d2 = flt(price_after_d1 * (1 - flt(self.discount_2, 2) / 100), 2)
+            final_price = flt(price_after_d2 * (1 - flt(self.discount_3, 2) / 100), 2)
+            self.discount_amount = flt(base_price - final_price, 2)
+
+            # Compute effective discount percentage for display
+            self.effective_discount_pct = flt(
+                flt(self.discount_amount, 2) / flt(base_price, 2) * 100, 2
+            )
+        else:
+            self.discount_amount = 0
+            self.effective_discount_pct = 0
+
     def calculate_quality_score(self):
         """Calculate a quality score based on listing completeness."""
         score = 0
@@ -506,15 +516,11 @@ class Listing(Document):
         # Images (20 points)
         if self.primary_image:
             score += 10
-        if self.images:
-            try:
-                images = json.loads(self.images)
-                if len(images) >= 3:
-                    score += 10
-                elif len(images) >= 1:
-                    score += 5
-            except (json.JSONDecodeError, TypeError):
-                pass
+        if self.listing_images:
+            if len(self.listing_images) >= 3:
+                score += 10
+            elif len(self.listing_images) >= 1:
+                score += 5
 
         # Pricing (10 points)
         if self.selling_price and self.base_price:
@@ -541,13 +547,8 @@ class Listing(Document):
             score += 3
 
         # Attributes (10 points)
-        if self.attributes:
-            try:
-                attrs = json.loads(self.attributes)
-                if attrs and len(attrs) > 0:
-                    score += 10
-            except (json.JSONDecodeError, TypeError):
-                pass
+        if self.attribute_values and len(self.attribute_values) > 0:
+            score += 10
 
         self.quality_score = min(score, max_score)
 
@@ -794,7 +795,7 @@ class Listing(Document):
         if buyer_type == "B2B" and self.b2b_enabled:
             if flt(qty) >= flt(self.wholesale_min_qty):
                 # Check bulk pricing tiers first
-                if self.bulk_pricing_enabled and self.bulk_pricing_tiers:
+                if self.bulk_pricing_enabled and self.pricing_tiers:
                     tier_price = self.get_bulk_tier_price(qty)
                     if tier_price:
                         return tier_price
@@ -807,18 +808,21 @@ class Listing(Document):
         return flt(self.selling_price)
 
     def get_bulk_tier_price(self, qty):
-        """Get price from bulk pricing tiers."""
-        try:
-            tiers = json.loads(self.bulk_pricing_tiers or "[]")
-            for tier in sorted(tiers, key=lambda x: x.get("min_qty", 0), reverse=True):
-                min_qty = flt(tier.get("min_qty", 0))
-                max_qty = flt(tier.get("max_qty", 0))
+        """Get price from bulk pricing tiers child table."""
+        if not self.pricing_tiers:
+            return None
 
-                if flt(qty) >= min_qty:
-                    if max_qty == 0 or flt(qty) <= max_qty:
-                        return flt(tier.get("price"))
-        except (json.JSONDecodeError, TypeError):
-            pass
+        # Sort by min_qty descending to find the highest applicable tier
+        sorted_tiers = sorted(
+            self.pricing_tiers, key=lambda t: flt(t.min_qty), reverse=True
+        )
+        for tier in sorted_tiers:
+            min_qty = flt(tier.min_qty)
+            max_qty = flt(tier.max_qty)
+
+            if flt(qty) >= min_qty:
+                if max_qty == 0 or flt(qty) <= max_qty:
+                    return flt(tier.price, 2)
         return None
 
     def is_sale_active(self):
@@ -951,8 +955,14 @@ def get_listing(listing_name=None, listing_code=None):
         "min_order_qty": listing.min_order_qty,
         "max_order_qty": listing.max_order_qty,
         "primary_image": listing.primary_image,
-        "images": json.loads(listing.images or "[]"),
-        "attributes": json.loads(listing.attributes or "{}"),
+        "images": [
+            {"image": img.image, "alt_text": img.alt_text, "sort_order": img.sort_order}
+            for img in (listing.listing_images or [])
+        ],
+        "attributes": {
+            attr.attribute_name: attr.value
+            for attr in (listing.attribute_values or [])
+        },
         "route": listing.route,
         "is_visible": listing.is_visible,
         "average_rating": listing.average_rating,
