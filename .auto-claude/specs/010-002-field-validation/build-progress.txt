@@ -788,3 +788,89 @@ and should build cleanly with bench build. Actual bench build/migrate must be
 executed in the full Frappe bench environment (not isolated worktree).
 
 === END SESSION 19 ===
+
+=== SESSION 20 (subtask-6-2) ===
+
+Completed subtask-6-2: End-to-End Verification (FINAL)
+
+All 6 verification categories passed:
+
+1. __init__.py Files Intact:
+   - 233 __init__.py files found across all 7 tradehub apps ✓
+   - Zero missing __init__.py in any doctype subdirectory ✓
+   - (2 missing in erpnext stock/doctype - pre-existing, read-only app, not our concern)
+
+2. Triple-Nested Directory Structure:
+   - tradehub_core: 30 DocTypes ✓
+   - tradehub_catalog: 54 DocTypes ✓
+   - tradehub_commerce: 52 DocTypes ✓
+   - tradehub_seller: 39 DocTypes ✓
+   - tradehub_logistics: 12 DocTypes ✓
+   - tradehub_marketing: 14 DocTypes ✓
+   - tradehub_compliance: 32 DocTypes ✓
+   - All 7/7 triple-nested directories verified ✓
+
+3. No json.loads in Migrated Fields:
+   - listing.py: 0 json.loads ✓ (migrated to child tables)
+   - seller_profile.py: 0 json.loads ✓ (uses child tables)
+   - commission_plan.py: 1 json.loads ✓ (API parameter parsing, NOT migrated field)
+   - moderation_case.py: 1 json.loads ✓ (API parameter parsing, NOT migrated field)
+   - review.py: 0 json.loads ✓
+
+4. All fetch_from Fields Have read_only:1:
+   - 30 fetch_from fields checked across 10 key DocTypes ✓
+   - seller_profile: tenant_name, tier_name, district_name, neighborhood_name, organization_name ✓
+   - buyer_profile: buyer_category_name, tenant_name, organization_name ✓
+   - listing: seller_name, category_name, tenant_name ✓
+   - order: buyer_name, seller_name, tenant_name ✓
+   - sub_order: seller_name, buyer_name, tenant_name ✓
+   - cart_line: title, primary_image, seller_name ✓
+   - rfq: buyer_name, tenant_name ✓
+   - rfq_quote: seller_name, rfq_title, tenant_name ✓
+   - contract_instance: template_name, tenant_name ✓
+   - product: brand_name, category_name, family_name ✓
+   - ALL 30/30 have read_only:1 ✓
+
+5. Cascading Discount Fields in All Target DocTypes:
+   - 9/9 DocTypes have ALL 5 fields (discount_1/2/3, show_discount_tiers, effective_discount_pct) ✓
+   - order, cart_line, sub_order, sub_order_item ✓
+   - marketplace_order, marketplace_order_item ✓
+   - rfq_quote_item, quotation_item ✓
+   - listing ✓
+
+6. flt() Usage Spot-Check in Modified Python Files:
+   - order.py calculate_totals: 17 flt() calls ✓
+   - cart.py calculate_totals: 34 flt() calls ✓
+   - sub_order.py calculate_totals: 39 flt() calls ✓
+   - listing.py calculate_totals: 12 flt() calls ✓
+   - shipping_rule.py: 85 flt() calls ✓
+   - All 11 Python files: AST syntax check PASS ✓
+   - All 8 JS files: node --check PASS ✓
+   - order.js: Cascading discount formula verified (discount_1/2/3 handlers + calculate_totals) ✓
+   - cart.js: Cascading discount formula verified (discount_1/2/3 handlers + calculate_line_totals) ✓
+
+Additional Checks:
+   - patches.txt: commerce(2), seller(2), compliance(2), logistics(1) entries ✓
+   - All patch files referenced in patches.txt exist on disk ✓
+
+Conclusion: ALL end-to-end verification checks PASS. The implementation is complete
+and structurally sound. All 32 subtasks across 6 phases are now completed.
+Actual bench migrate/build/test must be run in the full Frappe bench environment.
+
+=== END SESSION 20 ===
+
+=== BUILD COMPLETE ===
+
+Total commits: 35 (from main branch)
+Total subtasks: 32 completed
+Total phases: 6 completed
+Total files modified: ~50+ across 7 apps
+
+Gorev Completion Summary:
+- Gorev 1 (Child Table Calculations): ✓ All calculate_totals in Python + JS with flt()
+- Gorev 2 (Field Authorization): ✓ read_only, set_only_once, permlevel, _guard_system_fields
+- Gorev 3 (Cascading Discounts): ✓ 9 DocTypes with discount_1/2/3, formula in Python + JS
+- Gorev 4 (JSON to Child Tables): ✓ listing.py migrated, no json.loads for migrated fields
+- Gorev 5 (fetch_from): ✓ 30+ fields with fetch_from + read_only:1, refetch_denormalized_fields
+
+=== END BUILD ===
