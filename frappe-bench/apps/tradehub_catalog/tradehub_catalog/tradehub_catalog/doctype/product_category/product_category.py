@@ -52,6 +52,7 @@ class ProductCategory(NestedSet):
         self.validate_circular_reference()
         self.validate_seo_fields()
         self.validate_icon()
+        self.validate_category_attribute_sets()
 
         # Update computed fields
         self.set_level()
@@ -168,6 +169,20 @@ class ProductCategory(NestedSet):
             frappe.msgprint(
                 _("SEO Description exceeds recommended length of 160 characters"),
                 indicator="orange"
+            )
+
+    def validate_category_attribute_sets(self):
+        """Validate that only one row in category_attribute_sets has is_default=1."""
+        if not self.category_attribute_sets:
+            return
+
+        default_rows = [
+            row for row in self.category_attribute_sets if cint(row.is_default)
+        ]
+        if len(default_rows) > 1:
+            frappe.throw(
+                _("Only one Attribute Set can be marked as default in Category Attribute Sets. "
+                  "Found {0} rows marked as default.").format(len(default_rows))
             )
 
     def validate_icon(self):
