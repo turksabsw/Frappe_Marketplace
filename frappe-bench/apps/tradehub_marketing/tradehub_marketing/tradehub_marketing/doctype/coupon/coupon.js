@@ -72,6 +72,19 @@ frappe.ui.form.on('Coupon', {
         // Update discount_value label based on type
         frm.trigger('update_discount_labels');
         frm.trigger('toggle_bogo_sections');
+        frm.trigger('validate_discount_value');
+    },
+
+    discount_value: function(frm) {
+        frm.trigger('validate_discount_value');
+    },
+
+    max_discount_amount: function(frm) {
+        frm.set_value('max_discount_amount', flt(frm.doc.max_discount_amount));
+    },
+
+    min_order_amount: function(frm) {
+        frm.set_value('min_order_amount', flt(frm.doc.min_order_amount));
     },
 
     onload: function(frm) {
@@ -218,15 +231,36 @@ frappe.ui.form.on('Coupon', {
         frm.trigger('toggle_bogo_sections');
     },
 
+    validate_discount_value: function(frm) {
+        // Validate discount value based on type
+        var discount_type = frm.doc.discount_type;
+        var discount_value = flt(frm.doc.discount_value);
+
+        if (discount_type === 'Percentage') {
+            if (discount_value < 0 || discount_value > 100) {
+                frappe.msgprint({
+                    title: __('Invalid Discount'),
+                    message: __('Discount percentage must be between 0 and 100'),
+                    indicator: 'orange'
+                });
+                frm.set_value('discount_value', Math.min(Math.max(flt(discount_value), 0), 100));
+            }
+        } else if (discount_type === 'Fixed Amount') {
+            if (discount_value < 0) {
+                frm.set_value('discount_value', 0);
+            }
+        }
+    },
+
     setup_bogo_preview: function(frm) {
         if (frm.doc.discount_type === 'Buy X Get Y' && !frm.is_new()) {
             // Add BOGO preview section in the form
-            let buy_qty = frm.doc.buy_quantity || 1;
-            let get_qty = frm.doc.get_quantity || 1;
-            let get_pct = frm.doc.get_discount_percent || 100;
+            let buy_qty = flt(frm.doc.buy_quantity) || 1;
+            let get_qty = flt(frm.doc.get_quantity) || 1;
+            let get_pct = flt(frm.doc.get_discount_percent) || 100;
 
             let promo_text = '';
-            if (get_pct >= 100) {
+            if (flt(get_pct) >= 100) {
                 promo_text = __('Buy {0}, Get {1} FREE', [buy_qty, get_qty]);
             } else {
                 promo_text = __('Buy {0}, Get {1} at {2}% off', [buy_qty, get_qty, get_pct]);
@@ -312,25 +346,93 @@ frappe.ui.form.on('Coupon', {
     }
 });
 
-// Child table handlers for BOGO products
+/**
+ * Child table event handlers for Coupon Product Item
+ */
 frappe.ui.form.on('Coupon Product Item', {
-    product: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
-        if (row.product) {
+    /**
+     * Product (listing) field change handler - fetch product details
+     */
+    listing: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        if (row.listing) {
             // Fetch product details
-            frappe.db.get_value('Listing', row.product, ['listing_title', 'selling_price'], function(r) {
+            frappe.db.get_value('Listing', row.listing, ['listing_title', 'selling_price'], function(r) {
                 if (r) {
-                    frappe.model.set_value(cdt, cdn, 'product_name', r.listing_title);
+                    frappe.model.set_value(cdt, cdn, 'listing_title', r.listing_title);
                 }
             });
+        } else {
+            frappe.model.set_value(cdt, cdn, 'listing_title', '');
         }
+    },
+
+    /**
+     * Row added handler
+     */
+    applicable_products_add: function(frm, cdt, cdn) {
+        frm.refresh_field('applicable_products');
+    },
+
+    /**
+     * Row removed handler
+     */
+    applicable_products_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('applicable_products');
+    },
+
+    /**
+     * BOGO buy products row added
+     */
+    bogo_buy_products_add: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_buy_products');
+    },
+
+    /**
+     * BOGO buy products row removed
+     */
+    bogo_buy_products_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_buy_products');
+    },
+
+    /**
+     * BOGO get products row added
+     */
+    bogo_get_products_add: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_get_products');
+    },
+
+    /**
+     * BOGO get products row removed
+     */
+    bogo_get_products_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_get_products');
+    },
+
+    /**
+     * Excluded products row added
+     */
+    excluded_products_add: function(frm, cdt, cdn) {
+        frm.refresh_field('excluded_products');
+    },
+
+    /**
+     * Excluded products row removed
+     */
+    excluded_products_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('excluded_products');
     }
 });
 
-// Child table handlers for BOGO categories
+/**
+ * Child table event handlers for Coupon Category Item
+ */
 frappe.ui.form.on('Coupon Category Item', {
+    /**
+     * Category field change handler - fetch category details
+     */
     category: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
+        var row = locals[cdt][cdn];
         if (row.category) {
             // Fetch category details
             frappe.db.get_value('Category', row.category, 'category_name', function(r) {
@@ -338,6 +440,50 @@ frappe.ui.form.on('Coupon Category Item', {
                     frappe.model.set_value(cdt, cdn, 'category_name', r.category_name);
                 }
             });
+        } else {
+            frappe.model.set_value(cdt, cdn, 'category_name', '');
         }
+    },
+
+    /**
+     * Applicable categories row added
+     */
+    applicable_categories_add: function(frm, cdt, cdn) {
+        frm.refresh_field('applicable_categories');
+    },
+
+    /**
+     * Applicable categories row removed
+     */
+    applicable_categories_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('applicable_categories');
+    },
+
+    /**
+     * BOGO categories row added
+     */
+    bogo_categories_add: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_categories');
+    },
+
+    /**
+     * BOGO categories row removed
+     */
+    bogo_categories_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('bogo_categories');
+    },
+
+    /**
+     * Excluded categories row added
+     */
+    excluded_categories_add: function(frm, cdt, cdn) {
+        frm.refresh_field('excluded_categories');
+    },
+
+    /**
+     * Excluded categories row removed
+     */
+    excluded_categories_remove: function(frm, cdt, cdn) {
+        frm.refresh_field('excluded_categories');
     }
 });

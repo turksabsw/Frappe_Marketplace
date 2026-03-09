@@ -128,5 +128,113 @@ frappe.ui.form.on('Group Buy', {
                 }
             });
         }
+    },
+
+    /**
+     * Max price change handler - recalculates tier discount percentages
+     */
+    max_price: function(frm) {
+        calculate_tier_discounts(frm);
+    },
+
+    /**
+     * Current quantity change handler
+     */
+    current_quantity: function(frm) {
+        frm.set_value('current_quantity', flt(frm.doc.current_quantity));
+    },
+
+    /**
+     * Current price change handler
+     */
+    current_price: function(frm) {
+        frm.set_value('current_price', flt(frm.doc.current_price));
     }
 });
+
+/**
+ * Child table event handlers for Group Buy Tier
+ */
+frappe.ui.form.on('Group Buy Tier', {
+    /**
+     * Unit price change handler - calculates discount percent from max_price
+     */
+    unit_price: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        calculate_tier_discount_row(frm, row, cdt, cdn);
+        frm.refresh_field('tiers');
+    },
+
+    /**
+     * Min quantity change handler
+     */
+    min_quantity: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.min_quantity = flt(row.min_quantity);
+        frm.refresh_field('tiers');
+    },
+
+    /**
+     * Max quantity change handler
+     */
+    max_quantity: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.max_quantity = flt(row.max_quantity);
+        frm.refresh_field('tiers');
+    },
+
+    /**
+     * Share percent change handler
+     */
+    share_percent: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.share_percent = flt(row.share_percent);
+        frm.refresh_field('tiers');
+    },
+
+    /**
+     * Tier row added handler
+     */
+    tiers_add: function(frm, cdt, cdn) {
+        calculate_tier_discounts(frm);
+    },
+
+    /**
+     * Tier row removed handler
+     */
+    tiers_remove: function(frm, cdt, cdn) {
+        calculate_tier_discounts(frm);
+    }
+});
+
+/**
+ * Calculate discount percentages for all tier rows
+ * Discount = (max_price - unit_price) / max_price * 100
+ * @param {object} frm - Form object
+ */
+function calculate_tier_discounts(frm) {
+    if (frm.doc.tiers) {
+        frm.doc.tiers.forEach(function(row) {
+            calculate_tier_discount_row(frm, row);
+        });
+        frm.refresh_field('tiers');
+    }
+}
+
+/**
+ * Calculate discount percentage for a single tier row
+ * @param {object} frm - Form object
+ * @param {object} row - Child table row
+ * @param {string} cdt - Child DocType (optional)
+ * @param {string} cdn - Child DocName (optional)
+ */
+function calculate_tier_discount_row(frm, row, cdt, cdn) {
+    var max_price = flt(frm.doc.max_price);
+    var unit_price = flt(row.unit_price);
+
+    if (flt(max_price) > 0) {
+        row.discount_percent = flt((flt(max_price) - flt(unit_price)) / flt(max_price) * 100);
+    } else {
+        row.discount_percent = 0;
+    }
+}

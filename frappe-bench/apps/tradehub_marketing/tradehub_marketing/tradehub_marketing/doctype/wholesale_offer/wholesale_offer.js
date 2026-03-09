@@ -104,3 +104,64 @@ frappe.ui.form.on('Wholesale Offer', {
         }
     }
 });
+
+/**
+ * Child table event handlers for Wholesale Offer Product
+ */
+frappe.ui.form.on('Wholesale Offer Product', {
+    /**
+     * Quantity change handler - recalculates total_price
+     */
+    quantity: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.total_price = flt(flt(row.quantity) * flt(row.unit_price));
+        frm.refresh_field('products');
+        calculate_wholesale_totals(frm);
+    },
+
+    /**
+     * Unit price change handler - recalculates total_price
+     */
+    unit_price: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.total_price = flt(flt(row.quantity) * flt(row.unit_price));
+        frm.refresh_field('products');
+        calculate_wholesale_totals(frm);
+    },
+
+    /**
+     * Product row added handler
+     */
+    products_add: function(frm, cdt, cdn) {
+        calculate_wholesale_totals(frm);
+    },
+
+    /**
+     * Product row removed handler
+     */
+    products_remove: function(frm, cdt, cdn) {
+        calculate_wholesale_totals(frm);
+    }
+});
+
+/**
+ * Calculate wholesale offer totals from product rows
+ * @param {object} frm - Form object
+ */
+function calculate_wholesale_totals(frm) {
+    var total_quantity = 0;
+    var total_value = 0;
+    var total_products = 0;
+
+    if (frm.doc.products) {
+        frm.doc.products.forEach(function(product) {
+            total_products += 1;
+            total_quantity += flt(product.quantity);
+            total_value += flt(product.total_price);
+        });
+    }
+
+    frm.set_value('total_products', total_products);
+    frm.set_value('total_quantity', flt(total_quantity));
+    frm.set_value('total_value', flt(total_value));
+}

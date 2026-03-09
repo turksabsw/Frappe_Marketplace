@@ -201,14 +201,59 @@ frappe.ui.form.on('Marketplace Shipment', {
 
     package_length: function(frm) {
         calculate_volume(frm);
+        calculate_volumetric_weight(frm);
     },
 
     package_width: function(frm) {
         calculate_volume(frm);
+        calculate_volumetric_weight(frm);
     },
 
     package_height: function(frm) {
         calculate_volume(frm);
+        calculate_volumetric_weight(frm);
+    },
+
+    /**
+     * Shipping cost change handler - recalculates total cost
+     */
+    shipping_cost: function(frm) {
+        calculate_shipping_costs(frm);
+    },
+
+    /**
+     * Insurance cost change handler - recalculates total cost
+     */
+    insurance_cost: function(frm) {
+        calculate_shipping_costs(frm);
+    },
+
+    /**
+     * Handling cost change handler - recalculates total cost
+     */
+    handling_cost: function(frm) {
+        calculate_shipping_costs(frm);
+    },
+
+    /**
+     * Additional charges change handler - recalculates total cost
+     */
+    additional_charges: function(frm) {
+        calculate_shipping_costs(frm);
+    },
+
+    /**
+     * Total weight change handler
+     */
+    total_weight: function(frm) {
+        frm.set_value('total_weight', flt(frm.doc.total_weight));
+    },
+
+    /**
+     * Declared value change handler
+     */
+    declared_value: function(frm) {
+        frm.set_value('declared_value', flt(frm.doc.declared_value));
     }
 });
 
@@ -424,10 +469,52 @@ function generate_tracking_url(frm) {
     });
 }
 
+/**
+ * Calculate package volume from dimensions using flt()
+ * @param {object} frm - Form object
+ */
 function calculate_volume(frm) {
     // Auto-calculate volume if all dimensions are provided
-    if (frm.doc.package_length && frm.doc.package_width && frm.doc.package_height) {
-        const volume = frm.doc.package_length * frm.doc.package_width * frm.doc.package_height;
-        frm.set_value('total_volume', volume);
+    var length = flt(frm.doc.package_length);
+    var width = flt(frm.doc.package_width);
+    var height = flt(frm.doc.package_height);
+
+    if (length > 0 && width > 0 && height > 0) {
+        var volume = flt(flt(length) * flt(width) * flt(height));
+        frm.set_value('total_volume', flt(volume));
+    } else {
+        frm.set_value('total_volume', 0);
     }
+}
+
+/**
+ * Calculate volumetric weight from dimensions
+ * Standard formula: (L x W x H) / 5000 (for cm to kg)
+ * @param {object} frm - Form object
+ */
+function calculate_volumetric_weight(frm) {
+    var length = flt(frm.doc.package_length);
+    var width = flt(frm.doc.package_width);
+    var height = flt(frm.doc.package_height);
+
+    if (length > 0 && width > 0 && height > 0) {
+        // Standard volumetric divisor: 5000 (cm³ to kg)
+        var volumetric_weight = flt(flt(length) * flt(width) * flt(height) / 5000);
+        frm.set_value('volumetric_weight', flt(volumetric_weight));
+    } else {
+        frm.set_value('volumetric_weight', 0);
+    }
+}
+
+/**
+ * Calculate total shipping costs
+ * Total = shipping_cost + insurance_cost + handling_cost + additional_charges
+ * @param {object} frm - Form object
+ */
+function calculate_shipping_costs(frm) {
+    var total_cost = flt(flt(frm.doc.shipping_cost)
+        + flt(frm.doc.insurance_cost)
+        + flt(frm.doc.handling_cost)
+        + flt(frm.doc.additional_charges));
+    frm.set_value('total_cost', flt(total_cost));
 }
