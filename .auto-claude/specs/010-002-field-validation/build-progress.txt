@@ -595,3 +595,53 @@ Verification: 11/11 AST checks passed (syntax, method existence, call ordering,
 field coverage, source DocType correctness)
 
 === END SESSION 15 ===
+
+=== SESSION 16 (subtask-4-8) ===
+
+Completed subtask-4-8: Update shipping_rule.py (logistics) and coupon.py (marketing)
+
+Changes made to shipping_rule.py (G1 - Rate tier calculation with flt(value, 2)):
+- validate_rate_tiers(): Added flt(value, 2) normalization of tier.threshold_from,
+  tier.threshold_to, and tier.rate during validation. All comparison ops use flt(value, 2).
+- calculate_shipping(): All intermediate calculations wrapped with flt(value, 2):
+  shipping_amount, handling, packaging, insurance, express_surcharge, subtotal, tax, total.
+  Breakdown dict values all use flt(value, 2). Weight charge calculation fixed.
+- calculate_base_shipping(): All 7 calculation methods now use flt(value, 2):
+  - Fixed: flt(self.base_rate, 2)
+  - Weight Based: flt(flt(base, 2) + flt(weight * flt(per_kg, 2), 2), 2)
+  - Price Percentage: flt(flt(amount, 2) * flt(rate, 2) / 100, 2)
+  - Item Count: flt(flt(base, 2) + flt(count * flt(per_item, 2), 2), 2)
+  - Weight/Price Tiered: flt(get_tiered_rate(value), 2)
+  - Combined: flt(base + weight_charge + item_charge, 2)
+- get_tiered_rate(): All tier thresholds and rates use flt(value, 2)
+- get_percentage_rate(): Same pattern as get_tiered_rate
+- calculate_handling_fee(): flt(amount * rate / 100, 2)
+- calculate_insurance(): flt(amount * rate / 100, 2)
+
+Changes made to coupon.py (G3 - Coupon discount AFTER cascading):
+- Added flt import from frappe.utils
+- calculate_discount(): Added flt(value, 2) to all calculations:
+  - Percentage: flt(applicable * discount_value / 100, 2) with max cap
+  - Fixed: flt(min(value, applicable), 2)
+  - BOGO: flt(calculate_bogo_discount(items), 2)
+  - Added clear docstring about discount ordering: cascading first, then coupon
+- calculate_discount_after_cascading(): NEW METHOD
+  - Takes subtotal + discount_1/2/3 + optional applicable_amount/cart_items
+  - Applies cascading formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+  - Then applies coupon discount on post-cascading amount
+  - Returns dict with cascading_discount_amount, post_cascading_amount,
+    coupon_discount_amount, final_amount, total_discount_amount
+  - Guards against negative final amount
+- calculate_bogo_discount(): All item rates and discount calculations use flt(value, 2)
+  - Same-product BOGO: flt(discounted_items * flt(rate, 2) * flt(get_discount, 2), 2)
+  - Multi-product BOGO: flt accumulation with flt(value, 2) on each step
+- apply_coupon_to_order API: Updated to use flt(order.total_amount, 2) and flt on
+  discount_amount. Added clear documentation that total_amount already includes
+  cascading discounts, so coupon applies after them.
+
+Verification: Syntax OK (AST parse), all required methods present,
+flt imported in coupon.py, functional tests passed (tier lookup, weight calc,
+tax calc, cascading + coupon ordering), Import OK verified
+Commit: 909c2df
+
+=== END SESSION 16 ===

@@ -488,7 +488,8 @@
             "expected": "Import OK"
           },
           "status": "completed",
-          "updated_at": "2026-03-09T12:00:00.000000+00:00"
+          "updated_at": "2026-03-09T10:24:07.156078+00:00",
+          "notes": "Verification subtask - all code already in place, no changes needed. G2: _guard_system_fields exists and is called first in validate() with is_new() check, has_value_changed(), and frappe.PermissionError (guards 12 system fields). G5: refetch_denormalized_fields covers buyer_category_name (from Buyer Category), tenant_name (from Tenant), organization_name (from Organization). Pattern 9 ordering verified. 11/11 AST checks passed. Commit: 64b4957"
         },
         {
           "id": "subtask-4-8",
@@ -505,7 +506,9 @@
             "command": "cd frappe-bench && python -c \"from tradehub_logistics.tradehub_logistics.doctype.shipping_rule.shipping_rule import ShippingRule; from tradehub_marketing.tradehub_marketing.doctype.coupon.coupon import Coupon; print('Import OK')\"",
             "expected": "Import OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "shipping_rule.py (G1): Added flt(value, 2) to all calculation methods - calculate_shipping, calculate_base_shipping, get_tiered_rate, get_percentage_rate, calculate_handling_fee, calculate_insurance, validate_rate_tiers. All currency arithmetic wraps both operands and results. coupon.py (G3): Added flt import and flt(value, 2) to all discount calculations. Added calculate_discount_after_cascading() method implementing correct discount ordering (cascading first, then coupon). Updated apply_coupon_to_order API. Updated calculate_bogo_discount with flt(value, 2). Commit 909c2df.",
+          "updated_at": "2026-03-09T16:00:00.000000+00:00"
         },
         {
           "id": "subtask-4-9",
@@ -944,12 +947,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T10:21:44.723Z",
+  "updated_at": "2026-03-09T10:24:39.679Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T08:10:19.348519+00:00"
   },
-  "last_updated": "2026-03-09T10:21:13.309128+00:00"
+  "last_updated": "2026-03-09T10:24:07.156088+00:00"
 }
