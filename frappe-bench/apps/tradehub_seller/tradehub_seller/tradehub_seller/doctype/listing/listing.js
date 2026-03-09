@@ -237,12 +237,17 @@ frappe.ui.form.on('Listing', {
 
             // Load attributes child table based on category's attribute_set
             load_category_attributes(frm);
+
+            // Auto-assign attribute sets from category to product_attribute_sets
+            load_category_attribute_sets(frm);
         } else {
             // Category was cleared, clear dependent fields
             frm.set_value('subcategory', null);
             frm.set_value('attribute_set', null);
             // Clear fetch_from fields dependent on category
             frm.set_value('category_name', '');
+            // Remove auto-assigned attribute sets
+            remove_auto_attribute_sets(frm);
         }
     },
 
@@ -491,6 +496,134 @@ function populate_attributes_table(frm, attribute_items) {
     if (attribute_items.length > 0) {
         frappe.show_alert({
             message: __('Loaded {0} attributes from Attribute Set', [attribute_items.length]),
+            indicator: 'green'
+        });
+    }
+}
+
+/**
+ * Load attribute sets from the selected category into the product_attribute_sets child table.
+ * Auto-assigned entries (source='Auto') are replaced; Manual entries are preserved.
+ * Shows a confirmation dialog if existing Auto entries would be replaced.
+ *
+ * @param {object} frm - Form object
+ */
+function load_category_attribute_sets(frm) {
+    if (!frm.doc.category) return;
+
+    // Fetch the category document with its attribute sets child table
+    frappe.call({
+        method: 'frappe.client.get',
+        args: {
+            doctype: 'Product Category',
+            name: frm.doc.category
+        },
+        callback: function(response) {
+            if (!response.message) return;
+
+            var category_doc = response.message;
+            var category_attr_sets = category_doc.category_attribute_sets || [];
+
+            if (category_attr_sets.length === 0) {
+                // No attribute sets defined for this category, remove existing Auto entries
+                remove_auto_attribute_sets(frm);
+                return;
+            }
+
+            // Check if there are existing Auto entries that would be replaced
+            var existing_auto = (frm.doc.product_attribute_sets || []).filter(function(row) {
+                return row.source === 'Auto';
+            });
+
+            if (existing_auto.length > 0) {
+                // Show confirmation dialog before replacing
+                frappe.confirm(
+                    __('Changing category will replace {0} auto-assigned attribute set(s). Manual entries will be preserved. Continue?', [existing_auto.length]),
+                    function() {
+                        // Yes - replace auto entries
+                        update_auto_attribute_sets(frm, category_attr_sets);
+                    },
+                    function() {
+                        // No - keep existing
+                    }
+                );
+            } else {
+                // No existing auto entries, just add new ones
+                update_auto_attribute_sets(frm, category_attr_sets);
+            }
+        }
+    });
+}
+
+/**
+ * Remove all Auto-sourced entries from product_attribute_sets, preserving Manual entries.
+ *
+ * @param {object} frm - Form object
+ */
+function remove_auto_attribute_sets(frm) {
+    var rows = frm.doc.product_attribute_sets || [];
+    var manual_rows = rows.filter(function(row) {
+        return row.source === 'Manual';
+    });
+
+    // Only modify if there are Auto entries to remove
+    if (manual_rows.length !== rows.length) {
+        frm.clear_table('product_attribute_sets');
+        // Re-add manual rows
+        manual_rows.forEach(function(manual_row) {
+            var new_row = frm.add_child('product_attribute_sets');
+            new_row.attribute_set = manual_row.attribute_set;
+            new_row.attribute_set_name = manual_row.attribute_set_name;
+            new_row.source = 'Manual';
+            new_row.is_active = manual_row.is_active;
+            new_row.display_order = manual_row.display_order;
+        });
+        frm.refresh_field('product_attribute_sets');
+    }
+}
+
+/**
+ * Update Auto attribute sets: remove existing Auto entries and add new ones from category.
+ * Manual entries are preserved.
+ *
+ * @param {object} frm - Form object
+ * @param {Array} category_attr_sets - Category Attribute Set child table rows
+ */
+function update_auto_attribute_sets(frm, category_attr_sets) {
+    // Collect manual entries to preserve
+    var manual_rows = (frm.doc.product_attribute_sets || []).filter(function(row) {
+        return row.source === 'Manual';
+    });
+
+    // Clear the table
+    frm.clear_table('product_attribute_sets');
+
+    // Re-add manual entries first
+    manual_rows.forEach(function(manual_row) {
+        var new_row = frm.add_child('product_attribute_sets');
+        new_row.attribute_set = manual_row.attribute_set;
+        new_row.attribute_set_name = manual_row.attribute_set_name;
+        new_row.source = 'Manual';
+        new_row.is_active = manual_row.is_active;
+        new_row.display_order = manual_row.display_order;
+    });
+
+    // Add new Auto entries from category attribute sets
+    category_attr_sets.forEach(function(cat_attr_set) {
+        var new_row = frm.add_child('product_attribute_sets');
+        new_row.attribute_set = cat_attr_set.attribute_set;
+        new_row.attribute_set_name = cat_attr_set.attribute_set_name;
+        new_row.source = 'Auto';
+        new_row.source_category = frm.doc.category;
+        new_row.is_active = 1;
+        new_row.display_order = cat_attr_set.display_order || 0;
+    });
+
+    frm.refresh_field('product_attribute_sets');
+
+    if (category_attr_sets.length > 0) {
+        frappe.show_alert({
+            message: __('Loaded {0} attribute set(s) from Category', [category_attr_sets.length]),
             indicator: 'green'
         });
     }
