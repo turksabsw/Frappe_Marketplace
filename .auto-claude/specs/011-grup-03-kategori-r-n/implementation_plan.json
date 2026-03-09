@@ -737,8 +737,8 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "Created 4 fixture files in fixtures/ directory: workflow_state.json (4 states: Draft, Pending Review, Approved, Rejected with icons and styles), workflow_action_master.json (4 actions: Submit for Review, Approve, Reject, Revise), workflow.json (Category Proposal workflow with 4 states and 4 transitions: Draft->Pending Review by Seller, Pending Review->Approved/Rejected by System Manager, Rejected->Draft by Seller), notification.json (3 email+system notifications: Proposal Submitted to System Manager, Proposal Approved to owner, Proposal Rejected to owner). All JSON validated successfully.",
-          "updated_at": "2026-03-09T19:00:00.000000+00:00"
+          "notes": "Created 4 fixture files in fixtures/ directory: workflow_state.json (4 states: Draft, Pending Review, Approved, Rejected with icons and styles), workflow_action_master.json (4 actions: Submit for Review, Approve, Reject, Revise), workflow.json (Category Proposal workflow with 4 states and 4 transitions: Draft->Pending Review by Seller, Pending Review->Approved/Rejected by System Manager, Rejected->Draft by Seller), notification.json (3 email+system notifications: Proposal Submitted to System Manager, Proposal Approved to owner, Proposal Rejected to owner). All JSON validated successfully. Committed as 1bc0628.",
+          "updated_at": "2026-03-09T15:17:57.320791+00:00"
         },
         {
           "id": "subtask-6-6",
@@ -756,7 +756,9 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/hooks.py').read(); assert 'Category Proposal' in content; assert 'remind_pending_proposals' in content; assert 'fixtures' in content; assert 'Workflow State' in content or 'workflow_state' in content.lower(); print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added Category Proposal to permission_query_conditions and has_permission dicts in hooks.py. Added remind_pending_proposals to daily scheduler_events. Added fixtures list with ordered entries: Workflow State, Workflow Action Master, Workflow (filtered by Category Proposal), Notification (filtered by Category Proposal). Also added remind_pending_proposals() function to category_proposal.py. Committed as d0004ad.",
+          "updated_at": "2026-03-09T15:25:00.000000+00:00"
         }
       ]
     },
@@ -789,7 +791,9 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/patches.txt').read(); assert 'migrate_category_to_product_category' in content; assert 'migrate_attribute_set_to_child_table' in content; assert 'backfill_condition_field' in content; lines=[l.strip() for l in content.strip().split('\\n') if l.strip()]; cat_idx=next(i for i,l in enumerate(lines) if 'migrate_category' in l); attr_idx=next(i for i,l in enumerate(lines) if 'attribute_set' in l); cond_idx=next(i for i,l in enumerate(lines) if 'backfill_condition' in l); assert cat_idx < attr_idx < cond_idx, 'Wrong patch order'; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Registered all 3 patches in tradehub_catalog/patches.txt in correct order: (1) migrate_category_to_product_category, (2) migrate_attribute_set_to_child_table, (3) backfill_condition_field. patches/__init__.py already existed. Verification passed.",
+          "updated_at": "2026-03-09T15:21:46.689234+00:00"
         },
         {
           "id": "subtask-7-2",
@@ -805,7 +809,9 @@
             "command": "cd frappe-bench && python -c \"exec(open('apps/tradehub_catalog/tradehub_catalog/hooks.py').read()); print('Hooks syntax OK')\"",
             "expected": "Hooks syntax OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Final hooks.py consolidation verified. All configurations confirmed correct: (1) permission_query_conditions for Seller Custom Category and Category Proposal, (2) has_permission for both DocTypes, (3) scheduler_events with hourly media_processor and daily ranking + remind_pending_proposals, (4) fixtures in correct order (Workflow State, Workflow Action Master, Workflow filtered, Notification filtered), (5) app_include_css/js for category_icon assets, (6) No syntax errors. All referenced Python modules, CSS/JS assets, and fixture files verified to exist with correct function signatures.",
+          "updated_at": "2026-03-09T15:30:00.000000+00:00"
         },
         {
           "id": "subtask-7-3",
@@ -1016,12 +1022,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T15:13:51.581Z",
+  "updated_at": "2026-03-09T15:22:20.803Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T13:54:26.482149+00:00"
   },
-  "last_updated": "2026-03-09T15:05:50.556814+00:00"
+  "last_updated": "2026-03-09T15:21:46.689242+00:00"
 }
