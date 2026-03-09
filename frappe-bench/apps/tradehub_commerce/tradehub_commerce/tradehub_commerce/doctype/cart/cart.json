@@ -98,21 +98,21 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nCheckout\nConverted\nAbandoned\nExpired\nMerged",
-   "reqd": 1,
-   "permlevel": 1
+   "permlevel": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_basic",
    "fieldtype": "Column Break"
   },
   {
+   "description": "The user who owns this cart",
    "fieldname": "buyer",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Buyer",
    "options": "User",
-   "description": "The user who owns this cart",
    "set_only_once": 1
   },
   {
@@ -124,20 +124,20 @@
   },
   {
    "depends_on": "eval:doc.buyer_type=='Organization'",
+   "description": "Organization account for B2B purchases",
    "fieldname": "organization",
    "fieldtype": "Link",
    "label": "Organization",
    "options": "Organization",
-   "description": "Organization account for B2B purchases",
    "set_only_once": 1
   },
   {
+   "description": "Multi-tenant isolation",
    "fieldname": "tenant",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Tenant",
    "options": "Tenant",
-   "description": "Multi-tenant isolation",
    "read_only": 1
   },
   {
@@ -159,11 +159,11 @@
    "label": "Seller Summary"
   },
   {
+   "description": "Seller-wise item groupings and subtotals",
    "fieldname": "seller_summary_table",
    "fieldtype": "Table",
    "label": "Seller Summary",
-   "options": "Cart Seller Summary",
-   "description": "Seller-wise item groupings and subtotals"
+   "options": "Cart Seller Summary"
   },
   {
    "description": "[DEPRECATED] Seller-wise item groupings and subtotals (JSON) - use Seller Summary table instead",
@@ -377,12 +377,12 @@
    "read_only": 1
   },
   {
+   "description": "The order created from this cart",
    "fieldname": "marketplace_order",
    "fieldtype": "Link",
    "label": "Marketplace Order",
    "options": "Marketplace Order",
-   "read_only": 1,
-   "description": "The order created from this cart"
+   "read_only": 1
   },
   {
    "fieldname": "column_break_conversion",
@@ -430,7 +430,8 @@
   {
    "fieldname": "last_activity",
    "fieldtype": "Datetime",
-   "label": "Last Activity"
+   "label": "Last Activity",
+   "read_only": 1
   },
   {
    "fieldname": "system_tab",
@@ -449,7 +450,8 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Naming Series",
-   "options": "CART-.#####"
+   "options": "CART-.#####",
+   "read_only": 1
   },
   {
    "fieldname": "notes",
@@ -459,59 +461,59 @@
   {
    "fieldname": "item_count",
    "fieldtype": "Int",
-   "label": "Item Count",
    "in_list_view": 0,
+   "label": "Item Count",
    "read_only": 1
   },
   {
    "fieldname": "total_qty",
    "fieldtype": "Float",
-   "label": "Total Quantity",
    "in_list_view": 0,
+   "label": "Total Quantity",
    "read_only": 1
   },
   {
    "fieldname": "total_weight",
    "fieldtype": "Float",
-   "label": "Total Weight",
    "in_list_view": 0,
+   "label": "Total Weight",
    "read_only": 1
   },
   {
    "fieldname": "total_discount",
    "fieldtype": "Currency",
-   "label": "Total Discount",
    "in_list_view": 0,
+   "label": "Total Discount",
    "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "tax_total",
    "fieldtype": "Currency",
-   "label": "Tax Total",
    "in_list_view": 0,
+   "label": "Tax Total",
    "options": "currency",
    "read_only": 1
   },
   {
+   "fetch_from": "buyer.full_name",
    "fieldname": "buyer_name",
    "fieldtype": "Data",
    "label": "Buyer Name",
-   "fetch_from": "buyer.full_name",
    "read_only": 1
   },
   {
+   "fetch_from": "organization.organization_name",
    "fieldname": "organization_name",
    "fieldtype": "Data",
    "label": "Organization Name",
-   "fetch_from": "organization.organization_name",
    "read_only": 1
   },
   {
+   "fetch_from": "tenant.tenant_name",
    "fieldname": "tenant_name",
    "fieldtype": "Data",
    "label": "Tenant Name",
-   "fetch_from": "tenant.tenant_name",
    "read_only": 1
   }
  ],

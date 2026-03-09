@@ -27,6 +27,11 @@
   "column_break_discount",
   "discount_amount",
   "discounted_price",
+  "discount_1",
+  "show_discount_tiers",
+  "discount_2",
+  "discount_3",
+  "effective_discount_pct",
   "tax_section",
   "tax_rate",
   "tax_amount",
@@ -56,53 +61,53 @@
    "reqd": 1
   },
   {
+   "description": "Specific variant if applicable",
    "fieldname": "listing_variant",
    "fieldtype": "Link",
    "label": "Listing Variant",
-   "options": "Listing Variant",
-   "description": "Specific variant if applicable"
+   "options": "Listing Variant"
   },
   {
+   "description": "Auto-filled from listing",
    "fieldname": "seller",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Seller",
    "options": "Seller Profile",
-   "read_only": 1,
-   "description": "Auto-filled from listing"
-  },
-  {
-   "fieldname": "seller_name",
-   "fieldtype": "Data",
-   "label": "Seller Name",
-   "fetch_from": "seller.seller_name",
    "read_only": 1
   },
   {
+   "fetch_from": "seller.seller_name",
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "listing.title",
    "fieldname": "title",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Product Title",
-   "read_only": 1,
-   "fetch_from": "listing.title"
+   "read_only": 1
   },
   {
    "fieldname": "column_break_product",
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "listing.sku",
    "fieldname": "sku",
    "fieldtype": "Data",
    "label": "SKU",
-   "read_only": 1,
-   "fetch_from": "listing.sku"
+   "read_only": 1
   },
   {
+   "fetch_from": "listing.primary_image",
    "fieldname": "primary_image",
    "fieldtype": "Attach Image",
    "label": "Image",
-   "read_only": 1,
-   "fetch_from": "listing.primary_image"
+   "read_only": 1
   },
   {
    "default": "Nos",
@@ -201,6 +206,44 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "description": "First tier discount percentage",
+   "fieldname": "discount_1",
+   "fieldtype": "Percent",
+   "label": "Discount 1 (%)"
+  },
+  {
+   "default": "0",
+   "description": "Enable to show additional discount tiers (Discount 2 and 3)",
+   "fieldname": "show_discount_tiers",
+   "fieldtype": "Check",
+   "label": "Show Discount Tiers"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Second tier discount percentage (applied after Discount 1)",
+   "fieldname": "discount_2",
+   "fieldtype": "Percent",
+   "label": "Discount 2 (%)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Third tier discount percentage (applied after Discount 2)",
+   "fieldname": "discount_3",
+   "fieldtype": "Percent",
+   "label": "Discount 3 (%)"
+  },
+  {
+   "default": "0",
+   "description": "Calculated effective discount percentage from all tiers",
+   "fieldname": "effective_discount_pct",
+   "fieldtype": "Percent",
+   "label": "Effective Discount %",
+   "read_only": 1
+  },
+  {
    "collapsible": 1,
    "fieldname": "tax_section",
    "fieldtype": "Section Break",
@@ -288,12 +331,14 @@
    "description": "Stock has been reserved for this cart item",
    "fieldname": "stock_reserved",
    "fieldtype": "Check",
-   "label": "Stock Reserved"
+   "label": "Stock Reserved",
+   "read_only": 1
   },
   {
    "fieldname": "reserved_at",
    "fieldtype": "Datetime",
-   "label": "Reserved At"
+   "label": "Reserved At",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_stock",
