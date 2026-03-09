@@ -42,6 +42,18 @@ export const panelSections = {
       ],
     },
     {
+      title: 'Modül Dashboard',
+      items: [
+        { label: 'Siparişler', icon: 'fas fa-bag-shopping', route: '/dashboard/orders' },
+        { label: 'Ödemeler', icon: 'fas fa-credit-card', route: '/dashboard/payments' },
+        { label: 'Satıcılar', icon: 'fas fa-store', route: '/dashboard/sellers' },
+        { label: 'Katalog', icon: 'fas fa-cube', route: '/dashboard/catalog' },
+        { label: 'Lojistik', icon: 'fas fa-truck-fast', route: '/dashboard/logistics' },
+        { label: 'Pazarlama', icon: 'fas fa-rocket', route: '/dashboard/marketing' },
+        { label: 'Uyumluluk', icon: 'fas fa-shield-halved', route: '/dashboard/compliance' },
+      ],
+    },
+    {
       title: 'Performans Metrikleri',
       items: [
         { label: 'Satıcı KPI', icon: 'fas fa-gauge', doctype: 'Seller KPI' },
