@@ -350,3 +350,74 @@ and should apply cleanly during bench migrate. Actual migration must be run
 in the full Frappe bench environment (not isolated worktree).
 
 === END SESSION 9 ===
+
+=== SESSION 10 (subtask-4-1) ===
+
+Completed subtask-4-1: Update order.py (Phase 4 - Python Server-Side Code)
+
+Changes made:
+- order.py calculate_totals() (G1): Fixed item.amount calculation to use
+  flt(flt(item.quantity, 2) * flt(item.unit_price, 2), 2) with outer wrapping.
+  Fixed subtotal aggregation: subtotal += flt(item.amount, 2).
+  Fixed self.subtotal = flt(subtotal, 2).
+  All numeric ops now properly wrapped in flt(..., 2).
+
+- order.py validate() (G2): Verified _guard_system_fields and _guard_primary_links
+  are called first in validate() - already correctly ordered per Pattern 9.
+
+- order.py calculate_totals() (G3): Replaced single discount_percentage calculation
+  with cascading formula:
+    price_after_d1 = flt(subtotal * (1 - d1/100), 2)
+    price_after_d2 = flt(price_after_d1 * (1 - d2/100), 2)
+    final_price = flt(price_after_d2 * (1 - d3/100), 2)
+  Added discount validation (0-100 range).
+  Computes effective_discount_pct for display.
+
+- order.py refetch_denormalized_fields() (G5): Fixed field name mismatches:
+  - seller_tier_name -> seller_tier (matches order.json fieldname)
+  - quotation_total -> quotation_amount (matches order.json fieldname)
+
+Verification: 16/16 pattern checks passed, syntax OK, Pattern 9 ordering verified
+Commit: 80a6aac
+
+=== END SESSION 10 ===
+
+=== SESSION 11 (subtask-4-2) ===
+
+Completed subtask-4-2: Update cart.py and sub_order.py (Phase 4 - Python Server-Side Code)
+
+Changes made to cart.py:
+- validate() reordered per Pattern 9: moved check_expiry() before calculate_totals()
+  so status validation happens before calculations
+- calculate_totals() (G1): All numeric ops wrapped with flt(value, 2):
+  - subtotal/tax_amount aggregation: flt(item.line_total, 2), flt(item.tax_amount, 2)
+  - self.subtotal = flt(subtotal, 2), self.tax_amount = flt(tax_amount, 2)
+  - discount_amount, total_savings, grand_total all wrapped with flt(..., 2)
+  - savings calculation uses flt(item.compare_at_price, 2), flt(item.unit_price, 2)
+  - Added if self.items guard before iterating
+- calculate_totals() (G3): Added cascading discount per cart line item
+  (discount_1/2/3 fields are on CartLine child table):
+  - Validates 0-100 range for each discount tier
+  - Formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+  - Sets item.discount_amount, item.effective_discount_pct, item.discounted_price
+  - Recalculates item.line_total with cascading discount applied
+
+Changes made to sub_order.py:
+- validate() already follows Pattern 9 correctly - no changes needed
+- calculate_totals() (G1): Fixed missing flt precision:
+  - flt(item.discount_value) -> flt(item.discount_value, 2)
+  - flt(taxable_amount * flt(item.tax_rate) / 100, 2) ->
+    flt(flt(taxable_amount, 2) * flt(item.tax_rate, 2) / 100, 2)
+  - flt(taxable_amount + flt(item.tax_amount, 2), 2) ->
+    flt(flt(taxable_amount, 2) + flt(item.tax_amount, 2), 2)
+  - Same fixes for commission_rate
+- calculate_totals() (G3): Added cascading discount at parent level:
+  - Validates 0-100 range for discount_1/2/3
+  - Cascading formula identical to order.py
+  - Total discount = item-level discounts + cascading parent discount
+  - Computes effective_discount_pct for display
+  - Zero-division guard on subtotal
+
+Verification: Syntax OK, AST parse OK, formula tests passed (10/5/2% = 16.21%)
+
+=== END SESSION 11 ===

@@ -50,14 +50,20 @@ class Cart(Document):
             self.seller_summary = "{}"
 
     def validate(self):
-        """Validate cart data before saving."""
+        """Validate cart data before saving.
+
+        Ordering follows Pattern 9:
+        1. Field validation
+        2. Status validation
+        3. Calculations last
+        """
         self.validate_buyer()
         self.validate_tenant_consistency()
         self.validate_items()
         self.validate_status_transition()
+        self.check_expiry()
         self.calculate_totals()
         self.update_seller_summary()
-        self.check_expiry()
 
     def on_update(self):
         """Actions after cart is updated."""
@@ -206,36 +212,82 @@ class Cart(Document):
     # =================================================================
 
     def calculate_totals(self):
-        """Calculate all cart totals from line items."""
+        """
+        Calculate all cart totals from line items.
+
+        Uses bottom-up aggregation: line-level totals first, then cart totals.
+        Applies cascading discount formula per line item where discount tiers are set:
+        final = base * (1-d1/100) * (1-d2/100) * (1-d3/100).
+        Uses flt(value, 2) on ALL numeric operations for financial precision.
+        """
         subtotal = 0
         tax_amount = 0
         total_savings = 0
 
-        for item in self.items:
-            # Calculate line totals if not already set
-            item.calculate_totals()
+        if self.items:
+            for item in self.items:
+                # Calculate line totals (handles discount_type/discount_value)
+                item.calculate_totals()
 
-            subtotal += flt(item.line_total)
-            tax_amount += flt(item.tax_amount)
+                # Apply cascading discount per line item if tiers are set
+                if flt(item.discount_1) or flt(item.discount_2) or flt(item.discount_3):
+                    # Validate discount values (0-100 range)
+                    for d in [item.discount_1, item.discount_2, item.discount_3]:
+                        if flt(d) < 0 or flt(d) > 100:
+                            frappe.throw(_("Discount percentage must be between 0 and 100"))
 
-            # Calculate savings from original price
-            if item.compare_at_price and flt(item.compare_at_price) > 0:
-                savings = (flt(item.compare_at_price) - flt(item.unit_price)) * flt(item.qty)
-                total_savings += max(0, savings)
+                    base_price = flt(item.unit_price, 2)
+                    price_after_d1 = flt(base_price * (1 - flt(item.discount_1, 2) / 100), 2)
+                    price_after_d2 = flt(price_after_d1 * (1 - flt(item.discount_2, 2) / 100), 2)
+                    final_price = flt(price_after_d2 * (1 - flt(item.discount_3, 2) / 100), 2)
 
-        self.subtotal = subtotal
-        self.tax_amount = tax_amount
+                    item.discount_amount = flt(
+                        flt(base_price - final_price, 2) * flt(item.qty, 2), 2
+                    )
+                    if flt(base_price, 2) > 0:
+                        item.effective_discount_pct = flt(
+                            flt(base_price - final_price, 2) / flt(base_price, 2) * 100, 2
+                        )
+                    else:
+                        item.effective_discount_pct = 0
+                    item.discounted_price = flt(final_price, 2)
+
+                    # Recalculate line total with cascading discount
+                    base_total = flt(flt(item.qty, 2) * flt(final_price, 2), 2)
+                    if item.price_includes_tax:
+                        item.line_total = flt(base_total, 2)
+                    else:
+                        item.line_total = flt(flt(base_total, 2) + flt(item.tax_amount, 2), 2)
+
+                subtotal += flt(item.line_total, 2)
+                tax_amount += flt(item.tax_amount, 2)
+
+                # Calculate savings from original price
+                if item.compare_at_price and flt(item.compare_at_price, 2) > 0:
+                    savings = flt(
+                        (flt(item.compare_at_price, 2) - flt(item.unit_price, 2))
+                        * flt(item.qty, 2), 2
+                    )
+                    total_savings += flt(max(0, flt(savings, 2)), 2)
+
+        self.subtotal = flt(subtotal, 2)
+        self.tax_amount = flt(tax_amount, 2)
 
         # Calculate discount totals
-        self.discount_amount = flt(self.coupon_discount) + flt(self.promotion_discount)
-        self.total_savings = total_savings + flt(self.discount_amount)
+        self.discount_amount = flt(
+            flt(self.coupon_discount, 2) + flt(self.promotion_discount, 2), 2
+        )
+        self.total_savings = flt(
+            flt(total_savings, 2) + flt(self.discount_amount, 2), 2
+        )
 
         # Grand total
-        self.grand_total = (
-            flt(self.subtotal)
-            - flt(self.discount_amount)
-            + flt(self.shipping_amount)
-            + (flt(self.tax_amount) if not self.price_includes_tax else 0)
+        self.grand_total = flt(
+            flt(self.subtotal, 2)
+            - flt(self.discount_amount, 2)
+            + flt(self.shipping_amount, 2)
+            + (flt(self.tax_amount, 2) if not self.price_includes_tax else 0),
+            2
         )
 
     def update_seller_summary(self):

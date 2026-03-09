@@ -297,13 +297,15 @@ class SubOrder(Document):
         """
         Calculate all sub order totals from line items.
 
-        Uses bottom-up aggregation: row amounts are calculated first
-        (via SubOrderItem.calculate_totals), then parent totals are
-        derived from the aggregated child values.
+        Uses bottom-up aggregation: row amounts are calculated first,
+        then parent totals are derived from the aggregated child values.
+        Implements cascading discount formula identical to order.py:
+        base * (1-d1/100) * (1-d2/100) * (1-d3/100).
+        Uses flt(value, 2) on ALL numeric operations for financial precision.
         """
         subtotal = 0
         tax_amount = 0
-        discount_amount = 0
+        item_discount_amount = 0
         shipping_amount = 0
         commission_amount = 0
 
@@ -315,7 +317,7 @@ class SubOrder(Document):
                 # Calculate discount per item
                 if item.discount_type == "Percentage":
                     item.discount_amount = flt(
-                        flt(item.line_subtotal, 2) * flt(item.discount_value) / 100, 2
+                        flt(item.line_subtotal, 2) * flt(item.discount_value, 2) / 100, 2
                     )
                 elif item.discount_type == "Fixed":
                     item.discount_amount = flt(item.discount_value, 2)
@@ -326,29 +328,52 @@ class SubOrder(Document):
                 taxable_amount = flt(flt(item.line_subtotal, 2) - flt(item.discount_amount, 2), 2)
 
                 # Calculate tax
-                item.tax_amount = flt(taxable_amount * flt(item.tax_rate) / 100, 2)
+                item.tax_amount = flt(flt(taxable_amount, 2) * flt(item.tax_rate, 2) / 100, 2)
 
                 # Line total = taxable_amount + tax
-                item.line_total = flt(taxable_amount + flt(item.tax_amount, 2), 2)
+                item.line_total = flt(flt(taxable_amount, 2) + flt(item.tax_amount, 2), 2)
 
                 # Calculate commission
                 item.commission_amount = flt(
-                    taxable_amount * flt(item.commission_rate) / 100, 2
+                    flt(taxable_amount, 2) * flt(item.commission_rate, 2) / 100, 2
                 )
 
                 # Aggregate parent totals
                 subtotal += flt(item.line_subtotal, 2)
                 tax_amount += flt(item.tax_amount, 2)
-                discount_amount += flt(item.discount_amount, 2)
+                item_discount_amount += flt(item.discount_amount, 2)
                 shipping_amount += flt(item.shipping_amount, 2)
                 commission_amount += flt(item.commission_amount, 2)
 
         # Set parent totals with precision
         self.subtotal = flt(subtotal, 2)
         self.tax_amount = flt(tax_amount, 2)
-        self.discount_amount = flt(discount_amount, 2)
         self.shipping_amount = flt(shipping_amount, 2) or flt(self.shipping_amount, 2)
         self.commission_amount = flt(commission_amount, 2)
+
+        # Validate cascading discount values (0-100 range)
+        for d in [self.discount_1, self.discount_2, self.discount_3]:
+            if flt(d) < 0 or flt(d) > 100:
+                frappe.throw(_("Discount percentage must be between 0 and 100"))
+
+        # Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+        price_after_d1 = flt(flt(self.subtotal, 2) * (1 - flt(self.discount_1, 2) / 100), 2)
+        price_after_d2 = flt(price_after_d1 * (1 - flt(self.discount_2, 2) / 100), 2)
+        final_price = flt(price_after_d2 * (1 - flt(self.discount_3, 2) / 100), 2)
+        cascading_discount = flt(flt(self.subtotal, 2) - final_price, 2)
+
+        # Total discount = item-level discounts + cascading parent discount
+        self.discount_amount = flt(
+            flt(item_discount_amount, 2) + flt(cascading_discount, 2), 2
+        )
+
+        # Compute effective discount percentage for display
+        if flt(self.subtotal, 2) > 0:
+            self.effective_discount_pct = flt(
+                flt(self.discount_amount, 2) / flt(self.subtotal, 2) * 100, 2
+            )
+        else:
+            self.effective_discount_pct = 0
 
         # Grand total = subtotal - discount + shipping + tax
         self.grand_total = flt(
