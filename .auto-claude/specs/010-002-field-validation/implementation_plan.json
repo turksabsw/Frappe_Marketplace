@@ -7,7 +7,7 @@
       "id": "phase-1-commerce-schema",
       "name": "Commerce App JSON Schema Updates",
       "type": "implementation",
-      "description": "Apply all Gorev 2 (read_only, set_only_once), Gorev 3 (cascading discount fields), and Gorev 5 (fetch_from) JSON schema changes to tradehub_commerce DocTypes. Pure JSON editing — no code logic changes.",
+      "description": "Apply all Gorev 2 (read_only, set_only_once), Gorev 3 (cascading discount fields), and Gorev 5 (fetch_from) JSON schema changes to tradehub_commerce DocTypes. Pure JSON editing \u2014 no code logic changes.",
       "depends_on": [],
       "parallel_safe": true,
       "subtasks": [
@@ -285,7 +285,7 @@
         },
         {
           "id": "subtask-3-2",
-          "description": "Create migrate_listing_json_fields.py for tradehub_seller: Migrate Listing JSON fields (attributes → listing_attribute_value child table, images → listing_image child table, bulk_pricing_tiers → listing_bulk_pricing_tier child table). Child DocTypes ALREADY EXIST — this patch only migrates data. Use parse_json_field helper from Pattern 10.",
+          "description": "Create migrate_listing_json_fields.py for tradehub_seller: Migrate Listing JSON fields (attributes \u2192 listing_attribute_value child table, images \u2192 listing_image child table, bulk_pricing_tiers \u2192 listing_bulk_pricing_tier child table). Child DocTypes ALREADY EXIST \u2014 this patch only migrates data. Use parse_json_field helper from Pattern 10.",
           "service": "tradehub_seller",
           "files_to_modify": [],
           "files_to_create": [
@@ -300,7 +300,7 @@
             "expected": "Patch file valid - OK"
           },
           "status": "completed",
-          "notes": "Created migrate_listing_json_fields.py following exact pattern from migrate_json_to_child_tables.py. Migrates 3 JSON fields: attributes → attribute_values (Listing Attribute Value), images → listing_images (Listing Image), bulk_pricing_tiers → pricing_tiers (Listing Bulk Pricing Tier). Idempotent with NOT EXISTS queries, parse_json_field helper, flags.ignore_validate/ignore_permissions. Verification passed. Commit a1e802f.",
+          "notes": "Created migrate_listing_json_fields.py following exact pattern from migrate_json_to_child_tables.py. Migrates 3 JSON fields: attributes \u2192 attribute_values (Listing Attribute Value), images \u2192 listing_images (Listing Image), bulk_pricing_tiers \u2192 pricing_tiers (Listing Bulk Pricing Tier). Idempotent with NOT EXISTS queries, parse_json_field helper, flags.ignore_validate/ignore_permissions. Verification passed. Commit a1e802f.",
           "updated_at": "2026-03-09T09:35:49.511681+00:00"
         },
         {
@@ -352,7 +352,7 @@
       "subtasks": [
         {
           "id": "subtask-4-1",
-          "description": "Update order.py: (G1) Verify calculate_totals uses flt(flt(qty,2)*flt(price,2),2) outer wrapping on item.amount — fix if using unwrapped multiplication. (G2) Verify _guard_system_fields and _guard_primary_links exist and are called first in validate(). (G3) Replace single discount_percentage calculation with cascading formula: price_after_d1 = flt(subtotal*(1-flt(d1,2)/100),2), repeat for d2/d3. (G5) Update refetch_denormalized_fields for any new fetch_from fields added in Phase 1.",
+          "description": "Update order.py: (G1) Verify calculate_totals uses flt(flt(qty,2)*flt(price,2),2) outer wrapping on item.amount \u2014 fix if using unwrapped multiplication. (G2) Verify _guard_system_fields and _guard_primary_links exist and are called first in validate(). (G3) Replace single discount_percentage calculation with cascading formula: price_after_d1 = flt(subtotal*(1-flt(d1,2)/100),2), repeat for d2/d3. (G5) Update refetch_denormalized_fields for any new fetch_from fields added in Phase 1.",
           "service": "tradehub_commerce",
           "files_to_modify": [
             "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
@@ -394,7 +394,7 @@
         },
         {
           "id": "subtask-4-3",
-          "description": "Update marketplace_order.py and quotation.py: (G1) Implement/verify calculate_totals with flt(value,2). (G2) Verify _guard_system_fields exists. For quotation.py, fix the existing calculate_totals which uses flt() without precision arg — add precision 2 to all currency ops.",
+          "description": "Update marketplace_order.py and quotation.py: (G1) Implement/verify calculate_totals with flt(value,2). (G2) Verify _guard_system_fields exists. For quotation.py, fix the existing calculate_totals which uses flt() without precision arg \u2014 add precision 2 to all currency ops.",
           "service": "tradehub_commerce",
           "files_to_modify": [
             "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/marketplace_order/marketplace_order.py",
@@ -448,7 +448,7 @@
             "expected": "Import OK"
           },
           "status": "completed",
-          "notes": "IMPORTANT: listing.py is a large file. Check if json.loads() calls remain for attributes/images/bulk_pricing_tiers — these should now use self.attribute_values (child table) etc. Do NOT touch json.loads() for fields that are KEEP (not in MIGRATE list)."
+          "notes": "IMPORTANT: listing.py is a large file. Check if json.loads() calls remain for attributes/images/bulk_pricing_tiers \u2014 these should now use self.attribute_values (child table) etc. Do NOT touch json.loads() for fields that are KEEP (not in MIGRATE list)."
         },
         {
           "id": "subtask-4-6",
@@ -467,7 +467,7 @@
             "command": "cd frappe-bench && python -c \"from tradehub_seller.tradehub_seller.doctype.seller_profile.seller_profile import SellerProfile; print('Import OK')\"",
             "expected": "Import OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-4-7",
@@ -489,7 +489,7 @@
         },
         {
           "id": "subtask-4-8",
-          "description": "Update shipping_rule.py (logistics) and coupon.py (marketing): (G1) Add rate tier calculation with flt(value,2) to shipping_rule.py. (G3) Ensure coupon.py applies coupon discounts AFTER cascading discounts — verify discount application ordering.",
+          "description": "Update shipping_rule.py (logistics) and coupon.py (marketing): (G1) Add rate tier calculation with flt(value,2) to shipping_rule.py. (G3) Ensure coupon.py applies coupon discounts AFTER cascading discounts \u2014 verify discount application ordering.",
           "service": "tradehub_logistics",
           "files_to_modify": [
             "frappe-bench/apps/tradehub_logistics/tradehub_logistics/tradehub_logistics/doctype/shipping_rule/shipping_rule.py",
@@ -615,7 +615,7 @@
         },
         {
           "id": "subtask-5-5",
-          "description": "Update listing.js in tradehub_seller: (G1) Add child table calculation handlers for Listing Variant, Listing Bulk Pricing Tier child tables. (G2) Verify role-based checks. (G5) Implement city→district→neighborhood cascade handler if applicable; verify category→subcategory cascade handler; verify tenant-based set_query filters.",
+          "description": "Update listing.js in tradehub_seller: (G1) Add child table calculation handlers for Listing Variant, Listing Bulk Pricing Tier child tables. (G2) Verify role-based checks. (G5) Implement city\u2192district\u2192neighborhood cascade handler if applicable; verify category\u2192subcategory cascade handler; verify tenant-based set_query filters.",
           "service": "tradehub_seller",
           "files_to_modify": [
             "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js"
@@ -634,7 +634,7 @@
         },
         {
           "id": "subtask-5-6",
-          "description": "Update seller_profile.js and buyer_profile.js: (G2) Verify/add role-based field authorization in refresh handler. (G5) For seller_profile.js, implement city→district→neighborhood cascade handler: when city changes, clear district/neighborhood and refresh; when district changes, clear neighborhood. Add set_query filters for tenant isolation on all Link fields.",
+          "description": "Update seller_profile.js and buyer_profile.js: (G2) Verify/add role-based field authorization in refresh handler. (G5) For seller_profile.js, implement city\u2192district\u2192neighborhood cascade handler: when city changes, clear district/neighborhood and refresh; when district changes, clear neighborhood. Add set_query filters for tenant isolation on all Link fields.",
           "service": "tradehub_seller",
           "files_to_modify": [
             "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.js",
@@ -731,10 +731,10 @@
           "verification": {
             "type": "e2e",
             "steps": [
-              "Run: find frappe-bench/apps/tradehub_*/tradehub_*/tradehub_*/doctype -name '__init__.py' | wc -l — verify count matches pre-change baseline",
-              "Run: ls frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/ — verify directory exists with DocTypes",
-              "Run: bench --site marketplace.local migrate — verify no errors",
-              "Run: bench build — verify no JS errors",
+              "Run: find frappe-bench/apps/tradehub_*/tradehub_*/tradehub_*/doctype -name '__init__.py' | wc -l \u2014 verify count matches pre-change baseline",
+              "Run: ls frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/ \u2014 verify directory exists with DocTypes",
+              "Run: bench --site marketplace.local migrate \u2014 verify no errors",
+              "Run: bench build \u2014 verify no JS errors",
               "Verify Order JSON has discount_1, discount_2, discount_3 fields",
               "Verify Seller Profile JSON has fetch_from fields for tenant_name, tier_name",
               "Verify order.py calculate_totals uses flt(value, 2) on all operations",
@@ -760,10 +760,10 @@
       "tradehub_compliance"
     ],
     "gorev_coverage": {
-      "gorev_1_calculations": "Phase 4 (Python) + Phase 5 (JS) — subtasks 4-1 through 4-8, 5-1 through 5-8",
+      "gorev_1_calculations": "Phase 4 (Python) + Phase 5 (JS) \u2014 subtasks 4-1 through 4-8, 5-1 through 5-8",
       "gorev_2_field_auth": "Phase 1-2 (JSON schema) + Phase 4 (Python guards) + Phase 5 (JS role checks)",
       "gorev_3_cascading_discount": "Phase 1-2 (JSON fields) + Phase 3 (migration patch) + Phase 4 (Python formula) + Phase 5 (JS formula)",
-      "gorev_4_json_migration": "Phase 3 (Listing migration patch) + Phase 4 (Python code updates — subtasks 4-5, 4-6, 4-9)",
+      "gorev_4_json_migration": "Phase 3 (Listing migration patch) + Phase 4 (Python code updates \u2014 subtasks 4-5, 4-6, 4-9)",
       "gorev_5_fetch_from": "Phase 1-2 (JSON fetch_from) + Phase 4 (Python refetch) + Phase 5 (JS cascade handlers)"
     },
     "parallelism": {
@@ -774,18 +774,18 @@
             "phase-1-commerce-schema",
             "phase-2-noncommerce-schema"
           ],
-          "reason": "Both are JSON schema changes to different apps — no file conflicts"
+          "reason": "Both are JSON schema changes to different apps \u2014 no file conflicts"
         },
         {
           "phases": [
             "phase-4-python-code",
             "phase-5-js-code"
           ],
-          "reason": "Both depend only on phase-3, modify different file types (.py vs .js) in same apps — no file conflicts"
+          "reason": "Both depend only on phase-3, modify different file types (.py vs .js) in same apps \u2014 no file conflicts"
         }
       ],
       "recommended_workers": 2,
-      "speedup_estimate": "1.5x faster than sequential — schema phases parallel, then code phases parallel"
+      "speedup_estimate": "1.5x faster than sequential \u2014 schema phases parallel, then code phases parallel"
     },
     "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 010-002-field-validation --parallel 2"
   },
@@ -892,10 +892,10 @@
       "required": true,
       "commands": [],
       "flows": [
-        "Order with cascading discount: Create → Add items → Set discount_1/2/3 → Save → Verify totals",
-        "Role-based field lock: Login as non-admin → Open Order → Verify read-only fields",
-        "fetch_from cascade: Open Listing → Select seller → Verify tenant_name auto-fill",
-        "Child table add/remove: Open Order → Add 3 items → Remove 1 → Verify recalculation"
+        "Order with cascading discount: Create \u2192 Add items \u2192 Set discount_1/2/3 \u2192 Save \u2192 Verify totals",
+        "Role-based field lock: Login as non-admin \u2192 Open Order \u2192 Verify read-only fields",
+        "fetch_from cascade: Open Listing \u2192 Select seller \u2192 Verify tenant_name auto-fill",
+        "Child table add/remove: Open Order \u2192 Add 3 items \u2192 Remove 1 \u2192 Verify recalculation"
       ]
     },
     "browser_verification": {
@@ -941,7 +941,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T10:10:24.547Z",
+  "updated_at": "2026-03-09T10:16:13.915Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,

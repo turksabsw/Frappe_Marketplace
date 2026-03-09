@@ -50,12 +50,22 @@ class SKUProduct(Document):
 
     def validate(self):
         """Validate product data before saving."""
+        # 1. GUARDS FIRST - prevent unauthorized modifications
+        self._guard_system_fields()
+        self._guard_primary_links()
+
+        # 2. FIELD VALIDATION
         self.validate_sku_code()
         self.validate_pricing()
         self.validate_inventory()
         self.validate_physical_attributes()
         self.validate_seo_fields()
         self.validate_url_slug()
+
+        # 3. REFETCH - override client values with authoritative DB data
+        self.refetch_denormalized_fields()
+
+        # 4. STATUS VALIDATION
         self.validate_tenant_isolation()
         self.validate_status_transition()
 
@@ -75,6 +85,80 @@ class SKUProduct(Document):
     def on_trash(self):
         """Prevent deletion of active products with orders."""
         self.check_linked_documents()
+
+    # =========================================================================
+    # FIELD GUARDS
+    # =========================================================================
+
+    def _guard_system_fields(self):
+        """Prevent modification of system-generated fields after creation."""
+        if self.is_new():
+            return
+
+        system_fields = [
+            'erpnext_item_code',
+        ]
+        for field in system_fields:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be modified after creation").format(field),
+                    frappe.PermissionError
+                )
+
+    def _guard_primary_links(self):
+        """Enforce set_only_once on primary Link fields via Python guard."""
+        if self.is_new():
+            return
+
+        primary_links = ['seller']
+        for field in primary_links:
+            if self.has_value_changed(field):
+                frappe.throw(
+                    _("Field '{0}' cannot be changed after creation").format(field),
+                    frappe.PermissionError
+                )
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents. Prevents stale or
+        tampered fetch_from values.
+        """
+        # Re-fetch seller name and tenant from Seller Profile
+        if self.seller:
+            seller_data = frappe.db.get_value(
+                "Seller Profile", self.seller,
+                ["seller_name", "tenant"],
+                as_dict=True
+            )
+            if seller_data:
+                self.seller_name = seller_data.seller_name
+                if seller_data.tenant:
+                    self.tenant = seller_data.tenant
+
+        # Re-fetch tenant name from Tenant
+        if self.tenant:
+            tenant_name = frappe.db.get_value("Tenant", self.tenant, "tenant_name")
+            if tenant_name:
+                self.tenant_name = tenant_name
+
+        # Re-fetch category name
+        if self.category:
+            category_name = frappe.db.get_value(
+                "Category", self.category, "category_name"
+            )
+            if category_name:
+                self.category_name = category_name
+
+        # Re-fetch brand name
+        if self.brand:
+            brand_name = frappe.db.get_value(
+                "Brand", self.brand, "brand_name"
+            )
+            if brand_name:
+                self.brand_name = brand_name
 
     # =========================================================================
     # TENANT ISOLATION
