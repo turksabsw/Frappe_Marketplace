@@ -102,29 +102,34 @@ class ShippingRule(Document):
             self.validate_rate_tiers()
 
     def validate_rate_tiers(self):
-        """Validate rate tier configuration."""
+        """Validate rate tier configuration with flt(value, 2) precision."""
         if not self.rate_tiers:
             return
 
         # Sort tiers by threshold
-        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from))
+        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from, 2))
 
         prev_to = 0
         for tier in sorted_tiers:
+            # Normalize tier values with flt(value, 2)
+            tier.threshold_from = flt(tier.threshold_from, 2)
+            tier.threshold_to = flt(tier.threshold_to, 2)
+            tier.rate = flt(tier.rate, 2)
+
             # Check for gaps or overlaps
-            if flt(tier.threshold_from) < prev_to:
+            if flt(tier.threshold_from, 2) < prev_to:
                 frappe.throw(
                     _("Rate tier overlap detected at threshold {0}").format(
                         tier.threshold_from
                     )
                 )
 
-            if flt(tier.threshold_to) > 0 and flt(tier.threshold_to) <= flt(tier.threshold_from):
+            if flt(tier.threshold_to, 2) > 0 and flt(tier.threshold_to, 2) <= flt(tier.threshold_from, 2):
                 frappe.throw(
                     _("Tier threshold_to must be greater than threshold_from")
                 )
 
-            prev_to = flt(tier.threshold_to) if flt(tier.threshold_to) > 0 else float('inf')
+            prev_to = flt(tier.threshold_to, 2) if flt(tier.threshold_to, 2) > 0 else float('inf')
 
     def validate_free_shipping(self):
         """Validate free shipping configuration."""
@@ -176,6 +181,8 @@ class ShippingRule(Document):
         """
         Calculate shipping cost for an order.
 
+        All currency calculations use flt(value, 2) for financial precision.
+
         Args:
             order_data: dict with keys:
                 - order_amount: Total order amount
@@ -217,31 +224,34 @@ class ShippingRule(Document):
             }
 
         # Calculate base shipping
-        shipping_amount = self.calculate_base_shipping(order_data)
+        shipping_amount = flt(self.calculate_base_shipping(order_data), 2)
 
         # Add handling fee
-        handling = self.calculate_handling_fee(order_data)
+        handling = flt(self.calculate_handling_fee(order_data), 2)
 
         # Add packaging fee
-        packaging = flt(self.packaging_fee)
+        packaging = flt(self.packaging_fee, 2)
 
         # Add insurance
-        insurance = self.calculate_insurance(order_data)
+        insurance = flt(self.calculate_insurance(order_data), 2)
 
         # Add express surcharge
         express_surcharge = 0
         if order_data.get("express") and self.express_available:
-            express_surcharge = flt(self.express_surcharge)
+            express_surcharge = flt(self.express_surcharge, 2)
 
         # Calculate subtotal
-        subtotal = shipping_amount + handling + packaging + insurance + express_surcharge
+        subtotal = flt(
+            flt(shipping_amount, 2) + flt(handling, 2) + flt(packaging, 2)
+            + flt(insurance, 2) + flt(express_surcharge, 2), 2
+        )
 
         # Calculate tax
         tax = 0
-        if not self.price_includes_tax and flt(self.tax_rate) > 0:
-            tax = subtotal * (flt(self.tax_rate) / 100)
+        if not self.price_includes_tax and flt(self.tax_rate, 2) > 0:
+            tax = flt(flt(subtotal, 2) * flt(self.tax_rate, 2) / 100, 2)
 
-        total = subtotal + tax
+        total = flt(flt(subtotal, 2) + flt(tax, 2), 2)
 
         # Delivery estimate
         est_min = self.estimated_days_min
@@ -251,107 +261,107 @@ class ShippingRule(Document):
             est_max = self.express_days
 
         return {
-            "shipping_amount": total,
+            "shipping_amount": flt(total, 2),
             "is_free_shipping": False,
             "rule_name": self.rule_name,
             "carrier": self.default_carrier,
             "estimated_days_min": est_min,
             "estimated_days_max": est_max,
             "breakdown": {
-                "base_rate": shipping_amount,
-                "weight_charge": 0 if self.calculation_method != "Weight Based" else shipping_amount - flt(self.base_rate),
-                "handling_fee": handling,
-                "packaging_fee": packaging,
-                "insurance": insurance,
-                "express_surcharge": express_surcharge,
-                "tax": tax
+                "base_rate": flt(shipping_amount, 2),
+                "weight_charge": flt(flt(shipping_amount, 2) - flt(self.base_rate, 2), 2) if self.calculation_method == "Weight Based" else 0,
+                "handling_fee": flt(handling, 2),
+                "packaging_fee": flt(packaging, 2),
+                "insurance": flt(insurance, 2),
+                "express_surcharge": flt(express_surcharge, 2),
+                "tax": flt(tax, 2)
             }
         }
 
     def calculate_base_shipping(self, order_data):
-        """Calculate base shipping amount."""
+        """Calculate base shipping amount with flt(value, 2) precision."""
         if self.calculation_method == "Fixed":
-            return flt(self.base_rate)
+            return flt(self.base_rate, 2)
 
         elif self.calculation_method == "Weight Based":
-            weight = flt(order_data.get("total_weight", 0))
-            return flt(self.base_rate) + (weight * flt(self.per_kg_rate))
+            weight = flt(order_data.get("total_weight", 0), 2)
+            return flt(flt(self.base_rate, 2) + flt(weight * flt(self.per_kg_rate, 2), 2), 2)
 
         elif self.calculation_method == "Price Percentage":
-            amount = flt(order_data.get("order_amount", 0))
-            rate = self.get_percentage_rate(amount)
-            return amount * (rate / 100)
+            amount = flt(order_data.get("order_amount", 0), 2)
+            rate = flt(self.get_percentage_rate(amount), 2)
+            return flt(flt(amount, 2) * flt(rate, 2) / 100, 2)
 
         elif self.calculation_method == "Item Count":
             count = cint(order_data.get("item_count", 1))
-            return flt(self.base_rate) + (count * flt(self.per_item_rate))
+            return flt(flt(self.base_rate, 2) + flt(count * flt(self.per_item_rate, 2), 2), 2)
 
         elif self.calculation_method == "Weight Tiered":
-            weight = flt(order_data.get("total_weight", 0))
-            return self.get_tiered_rate(weight)
+            weight = flt(order_data.get("total_weight", 0), 2)
+            return flt(self.get_tiered_rate(weight), 2)
 
         elif self.calculation_method == "Price Tiered":
-            amount = flt(order_data.get("order_amount", 0))
-            return self.get_tiered_rate(amount)
+            amount = flt(order_data.get("order_amount", 0), 2)
+            return flt(self.get_tiered_rate(amount), 2)
 
         elif self.calculation_method == "Combined":
-            weight = flt(order_data.get("total_weight", 0))
+            weight = flt(order_data.get("total_weight", 0), 2)
             count = cint(order_data.get("item_count", 1))
-            return (
-                flt(self.base_rate)
-                + (weight * flt(self.per_kg_rate))
-                + (count * flt(self.per_item_rate))
+            return flt(
+                flt(self.base_rate, 2)
+                + flt(weight * flt(self.per_kg_rate, 2), 2)
+                + flt(count * flt(self.per_item_rate, 2), 2), 2
             )
 
-        return flt(self.base_rate)
+        return flt(self.base_rate, 2)
 
     def get_tiered_rate(self, value):
-        """Get rate from tiered pricing."""
+        """Get rate from tiered pricing with flt(value, 2) precision."""
         if not self.rate_tiers:
-            return flt(self.base_rate)
+            return flt(self.base_rate, 2)
 
         # Sort tiers by threshold
-        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from))
+        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from, 2))
 
         for tier in sorted_tiers:
-            threshold_to = flt(tier.threshold_to) if flt(tier.threshold_to) > 0 else float('inf')
-            if flt(tier.threshold_from) <= value < threshold_to:
-                return flt(tier.rate)
+            threshold_to = flt(tier.threshold_to, 2) if flt(tier.threshold_to, 2) > 0 else float('inf')
+            if flt(tier.threshold_from, 2) <= flt(value, 2) < threshold_to:
+                return flt(tier.rate, 2)
 
         # Return last tier rate if value exceeds all tiers
         if sorted_tiers:
-            return flt(sorted_tiers[-1].rate)
+            return flt(sorted_tiers[-1].rate, 2)
 
-        return flt(self.base_rate)
+        return flt(self.base_rate, 2)
 
     def get_percentage_rate(self, amount):
-        """Get percentage rate for price-based calculation."""
+        """Get percentage rate for price-based calculation with flt(value, 2) precision."""
         # Use rate tiers for percentage calculation
         if not self.rate_tiers:
             return 0
 
-        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from))
+        sorted_tiers = sorted(self.rate_tiers, key=lambda x: flt(x.threshold_from, 2))
 
         for tier in sorted_tiers:
-            threshold_to = flt(tier.threshold_to) if flt(tier.threshold_to) > 0 else float('inf')
-            if flt(tier.threshold_from) <= amount < threshold_to:
-                return flt(tier.rate)
+            threshold_to = flt(tier.threshold_to, 2) if flt(tier.threshold_to, 2) > 0 else float('inf')
+            if flt(tier.threshold_from, 2) <= flt(amount, 2) < threshold_to:
+                return flt(tier.rate, 2)
 
         if sorted_tiers:
-            return flt(sorted_tiers[-1].rate)
+            return flt(sorted_tiers[-1].rate, 2)
 
         return 0
 
     def calculate_handling_fee(self, order_data):
-        """Calculate handling fee."""
+        """Calculate handling fee with flt(value, 2) precision."""
         if self.handling_fee_type == "Percentage":
-            return flt(order_data.get("order_amount", 0)) * (flt(self.handling_fee) / 100)
-        return flt(self.handling_fee)
+            return flt(flt(order_data.get("order_amount", 0), 2) * flt(self.handling_fee, 2) / 100, 2)
+        return flt(self.handling_fee, 2)
 
     def calculate_insurance(self, order_data):
-        """Calculate insurance amount."""
-        if flt(self.insurance_rate) > 0:
-            return flt(order_data.get("order_amount", 0)) * (flt(self.insurance_rate) / 100)
+        """Calculate insurance amount with flt(value, 2) precision."""
+        if flt(self.insurance_rate, 2) > 0:
+            return flt(flt(order_data.get("order_amount", 0), 2) * flt(self.insurance_rate, 2) / 100, 2)
         return 0
 
     # =================================================================

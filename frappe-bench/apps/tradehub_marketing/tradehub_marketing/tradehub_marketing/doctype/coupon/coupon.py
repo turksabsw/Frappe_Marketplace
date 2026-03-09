@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime, getdate, get_datetime
+from frappe.utils import now_datetime, getdate, get_datetime, flt
 
 
 class Coupon(Document):
@@ -314,40 +314,115 @@ class Coupon(Document):
         """
         Calculate discount amount for a given order.
 
+        IMPORTANT: Coupon discounts are applied AFTER cascading discounts (discount_1/2/3).
+        The order_amount and applicable_amount should be the post-cascading-discount amounts,
+        i.e., the amounts after discount_1/2/3 have already been applied.
+
+        Discount application order:
+        1. Cascading discounts (discount_1 -> discount_2 -> discount_3) — applied at Order/Cart level
+        2. Coupon discount — applied on the post-cascading amount (this method)
+
         Args:
-            order_amount: Total order amount
+            order_amount: Total order amount (should be post-cascading-discount amount)
             applicable_amount: Amount of items this coupon applies to (for partial discounts)
             cart_items: List of cart items for BOGO calculation
 
         Returns:
-            float: Discount amount
+            float: Discount amount with flt(value, 2) precision
         """
         if not applicable_amount:
-            applicable_amount = order_amount
+            applicable_amount = flt(order_amount, 2)
+        else:
+            applicable_amount = flt(applicable_amount, 2)
 
         if self.discount_type == "Percentage":
-            discount = applicable_amount * (self.discount_value / 100)
+            discount = flt(flt(applicable_amount, 2) * flt(self.discount_value, 2) / 100, 2)
             # Apply max discount cap if set
-            if self.max_discount_amount and discount > self.max_discount_amount:
-                discount = self.max_discount_amount
-            return discount
+            if self.max_discount_amount and flt(discount, 2) > flt(self.max_discount_amount, 2):
+                discount = flt(self.max_discount_amount, 2)
+            return flt(discount, 2)
 
         elif self.discount_type == "Fixed Amount":
             # Don't discount more than the applicable amount
-            return min(self.discount_value, applicable_amount)
+            return flt(min(flt(self.discount_value, 2), flt(applicable_amount, 2)), 2)
 
         elif self.discount_type == "Free Shipping":
             # Return 0 as discount - shipping is handled separately
             return 0
 
         elif self.discount_type == "Buy X Get Y":
-            return self.calculate_bogo_discount(cart_items)
+            return flt(self.calculate_bogo_discount(cart_items), 2)
 
         return 0
+
+    def calculate_discount_after_cascading(self, subtotal, discount_1=0, discount_2=0, discount_3=0,
+                                           applicable_amount=None, cart_items=None):
+        """
+        Calculate coupon discount on the amount remaining AFTER cascading discounts.
+
+        This is the recommended method for applying coupon discounts in the correct order.
+        It first computes the post-cascading amount, then applies the coupon discount on that.
+
+        Discount application order:
+        1. discount_1 applied on subtotal
+        2. discount_2 applied on price_after_d1
+        3. discount_3 applied on price_after_d2
+        4. Coupon discount applied on final post-cascading amount (this step)
+
+        Args:
+            subtotal: Original subtotal before any discounts
+            discount_1: First tier cascading discount percentage (0-100)
+            discount_2: Second tier cascading discount percentage (0-100)
+            discount_3: Third tier cascading discount percentage (0-100)
+            applicable_amount: Optional override for applicable amount (for partial discounts)
+            cart_items: List of cart items for BOGO calculation
+
+        Returns:
+            dict: {
+                'cascading_discount_amount': amount discounted by cascading tiers,
+                'post_cascading_amount': amount after cascading discounts,
+                'coupon_discount_amount': amount discounted by this coupon,
+                'final_amount': final amount after all discounts,
+                'total_discount_amount': total of all discounts
+            }
+        """
+        subtotal = flt(subtotal, 2)
+
+        # Step 1-3: Apply cascading discounts
+        price_after_d1 = flt(subtotal * (1 - flt(discount_1, 2) / 100), 2)
+        price_after_d2 = flt(price_after_d1 * (1 - flt(discount_2, 2) / 100), 2)
+        post_cascading_amount = flt(price_after_d2 * (1 - flt(discount_3, 2) / 100), 2)
+
+        cascading_discount_amount = flt(subtotal - post_cascading_amount, 2)
+
+        # Step 4: Apply coupon discount on post-cascading amount
+        coupon_discount_amount = flt(self.calculate_discount(
+            post_cascading_amount,
+            applicable_amount=applicable_amount,
+            cart_items=cart_items
+        ), 2)
+
+        final_amount = flt(flt(post_cascading_amount, 2) - flt(coupon_discount_amount, 2), 2)
+        # Guard against negative final amount
+        if final_amount < 0:
+            final_amount = 0
+            coupon_discount_amount = flt(post_cascading_amount, 2)
+
+        total_discount_amount = flt(flt(cascading_discount_amount, 2) + flt(coupon_discount_amount, 2), 2)
+
+        return {
+            "cascading_discount_amount": flt(cascading_discount_amount, 2),
+            "post_cascading_amount": flt(post_cascading_amount, 2),
+            "coupon_discount_amount": flt(coupon_discount_amount, 2),
+            "final_amount": flt(final_amount, 2),
+            "total_discount_amount": flt(total_discount_amount, 2)
+        }
 
     def calculate_bogo_discount(self, cart_items):
         """
         Calculate BOGO (Buy X Get Y) discount for cart items.
+
+        All currency calculations use flt(value, 2) for financial precision.
 
         Args:
             cart_items: List of cart items with structure:
@@ -361,7 +436,7 @@ class Coupon(Document):
 
         buy_qty = self.buy_quantity or 1
         get_qty = self.get_quantity or 1
-        get_discount = (self.get_discount_percent or 100) / 100
+        get_discount = flt((self.get_discount_percent or 100) / 100, 2)
         total_needed = buy_qty + get_qty
 
         total_discount = 0
@@ -370,7 +445,7 @@ class Coupon(Document):
             # BOGO applies per product - customer must buy X of same product to get Y of same product
             for item in cart_items:
                 item_qty = item.get("qty", 0)
-                item_rate = item.get("rate", 0)
+                item_rate = flt(item.get("rate", 0), 2)
                 item_name = item.get("item") or item.get("listing")
                 item_category = item.get("category")
 
@@ -384,8 +459,8 @@ class Coupon(Document):
                 if bogo_sets > 0:
                     # Discount applies to 'get_qty' items per set
                     discounted_items = bogo_sets * get_qty
-                    item_discount = discounted_items * item_rate * get_discount
-                    total_discount += item_discount
+                    item_discount = flt(discounted_items * flt(item_rate, 2) * flt(get_discount, 2), 2)
+                    total_discount = flt(flt(total_discount, 2) + flt(item_discount, 2), 2)
         else:
             # BOGO with different products - buy products can differ from get products
             # Sort items by rate (descending) to maximize customer benefit
@@ -396,15 +471,15 @@ class Coupon(Document):
                 item_name = item.get("item") or item.get("listing")
                 item_category = item.get("category")
                 item_qty = item.get("qty", 0)
-                item_rate = item.get("rate", 0)
+                item_rate = flt(item.get("rate", 0), 2)
 
                 # Check if item qualifies as "buy" item
                 if self._item_qualifies_as_buy(item_name, item_category):
-                    qualifying_buy_items.extend([item_rate] * int(item_qty))
+                    qualifying_buy_items.extend([flt(item_rate, 2)] * int(item_qty))
 
                 # Check if item qualifies as "get" item
                 if self._item_qualifies_as_get(item_name, item_category):
-                    qualifying_get_items.extend([item_rate] * int(item_qty))
+                    qualifying_get_items.extend([flt(item_rate, 2)] * int(item_qty))
 
             # Sort get items by rate ascending (cheapest first for customer benefit)
             qualifying_get_items.sort()
@@ -419,13 +494,13 @@ class Coupon(Document):
             items_to_discount = bogo_sets * get_qty
             for i in range(items_to_discount):
                 if i < len(qualifying_get_items):
-                    total_discount += qualifying_get_items[i] * get_discount
+                    total_discount = flt(flt(total_discount, 2) + flt(flt(qualifying_get_items[i], 2) * flt(get_discount, 2), 2), 2)
 
         # Apply max discount cap if set
-        if self.max_discount_amount and total_discount > self.max_discount_amount:
-            total_discount = self.max_discount_amount
+        if self.max_discount_amount and flt(total_discount, 2) > flt(self.max_discount_amount, 2):
+            total_discount = flt(self.max_discount_amount, 2)
 
-        return total_discount
+        return flt(total_discount, 2)
 
     def _item_qualifies_for_bogo(self, item_name, item_category):
         """Check if an item qualifies for same-product BOGO"""
@@ -622,6 +697,13 @@ def apply_coupon_to_order(coupon_code, order_name):
     """
     Apply a coupon to an order and increment usage.
 
+    IMPORTANT: Coupon discounts are applied AFTER cascading discounts (discount_1/2/3).
+    The discount is calculated on the post-cascading amount, not the original subtotal.
+
+    Discount application order:
+    1. Cascading discounts (discount_1 -> discount_2 -> discount_3)
+    2. Coupon discount (this function)
+
     Args:
         coupon_code: The coupon code to apply
         order_name: The order to apply the coupon to
@@ -645,25 +727,29 @@ def apply_coupon_to_order(coupon_code, order_name):
 
     order = frappe.get_doc("Marketplace Order", order_name)
 
+    # Use total_amount (post-cascading) for validation and discount calculation
+    # total_amount already has cascading discounts applied, so coupon applies AFTER them
+    order_amount = flt(order.total_amount, 2) if hasattr(order, 'total_amount') else 0
+
     # Validate coupon for this order
     is_valid, error_message = coupon.is_valid_for_use(
         buyer=order.buyer,
-        order_amount=order.total_amount if hasattr(order, 'total_amount') else 0
+        order_amount=order_amount
     )
 
     if not is_valid:
         return {"success": False, "message": error_message}
 
-    # Calculate discount
-    order_amount = order.total_amount if hasattr(order, 'total_amount') else 0
-    discount_amount = coupon.calculate_discount(order_amount)
+    # Calculate coupon discount on the post-cascading amount
+    # total_amount already reflects cascading discounts, so coupon discount is applied after them
+    discount_amount = flt(coupon.calculate_discount(order_amount), 2)
 
     # Increment usage
     coupon.increment_usage()
 
     return {
         "success": True,
-        "discount_amount": discount_amount,
+        "discount_amount": flt(discount_amount, 2),
         "coupon_code": coupon.coupon_code,
         "discount_type": coupon.discount_type
     }
