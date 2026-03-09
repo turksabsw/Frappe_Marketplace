@@ -717,7 +717,7 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/category_proposal/category_proposal.js').read(); assert 'parent_category' in content; assert 'set_query' in content; assert 'Seller' in content; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-6-5",
@@ -1014,7 +1014,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T15:08:26.703Z",
+  "updated_at": "2026-03-09T15:11:55.294Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
