@@ -156,14 +156,15 @@ frappe.ui.form.on('SKU Product', {
     },
 
     /**
-     * Called when base_price changes
+     * Called when base_price changes - validates and triggers calculation
      */
     base_price: function(frm) {
         // Validate price is not negative
-        if (frm.doc.base_price < 0) {
+        if (flt(frm.doc.base_price) < 0) {
             frappe.msgprint(__('Price cannot be negative'));
             frm.set_value('base_price', 0);
         }
+        calculate_product_totals(frm);
     },
 
     /**
@@ -171,14 +172,25 @@ frappe.ui.form.on('SKU Product', {
      */
     min_order_quantity: function(frm) {
         // Validate MOQ
-        if (frm.doc.min_order_quantity < 1) {
+        if (flt(frm.doc.min_order_quantity) < 1) {
             frm.set_value('min_order_quantity', 1);
         }
 
         // Ensure max >= min if max is set
-        if (frm.doc.max_order_quantity > 0 &&
-            frm.doc.max_order_quantity < frm.doc.min_order_quantity) {
-            frm.set_value('max_order_quantity', frm.doc.min_order_quantity);
+        if (flt(frm.doc.max_order_quantity) > 0 &&
+            flt(frm.doc.max_order_quantity) < flt(frm.doc.min_order_quantity)) {
+            frm.set_value('max_order_quantity', flt(frm.doc.min_order_quantity));
+        }
+    },
+
+    /**
+     * Called when max_order_quantity changes
+     */
+    max_order_quantity: function(frm) {
+        // Ensure max >= min if max is set
+        if (flt(frm.doc.max_order_quantity) > 0 &&
+            flt(frm.doc.max_order_quantity) < flt(frm.doc.min_order_quantity)) {
+            frm.set_value('max_order_quantity', flt(frm.doc.min_order_quantity));
         }
     },
 
@@ -190,9 +202,37 @@ frappe.ui.form.on('SKU Product', {
         frm.events.show_stock_indicator(frm);
 
         // Warn if negative and not allowed
-        if (frm.doc.stock_quantity < 0 && !frm.doc.allow_negative_stock) {
+        if (flt(frm.doc.stock_quantity) < 0 && !frm.doc.allow_negative_stock) {
             frappe.msgprint(__('Stock quantity is negative. Enable "Allow Negative Stock" or correct the quantity.'));
         }
+    },
+
+    /**
+     * Called when weight changes - recalculates volumetric weight
+     */
+    weight: function(frm) {
+        calculate_product_totals(frm);
+    },
+
+    /**
+     * Called when length changes - recalculates volumetric weight
+     */
+    length: function(frm) {
+        calculate_product_totals(frm);
+    },
+
+    /**
+     * Called when width changes - recalculates volumetric weight
+     */
+    width: function(frm) {
+        calculate_product_totals(frm);
+    },
+
+    /**
+     * Called when height changes - recalculates volumetric weight
+     */
+    height: function(frm) {
+        calculate_product_totals(frm);
     },
 
     // =========================================================================
@@ -361,3 +401,96 @@ frappe.ui.form.on('SKU Product', {
         return slug.substring(0, 100);
     }
 });
+
+/**
+ * Child table event handlers for SKU Product Image
+ */
+frappe.ui.form.on('SKU Product Image', {
+    /**
+     * Sort order change handler - re-sequences images
+     */
+    sort_order: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        row.sort_order = flt(row.sort_order);
+        frm.refresh_field('product_images');
+        calculate_product_totals(frm);
+    },
+
+    /**
+     * Is primary change handler - ensures only one primary image
+     */
+    is_primary: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        if (row.is_primary) {
+            // Unset other primary images
+            if (frm.doc.product_images) {
+                frm.doc.product_images.forEach(function(img) {
+                    if (img.name !== row.name && img.is_primary) {
+                        frappe.model.set_value(img.doctype, img.name, 'is_primary', 0);
+                    }
+                });
+            }
+        }
+        frm.refresh_field('product_images');
+    },
+
+    /**
+     * Image row added handler
+     */
+    product_images_add: function(frm, cdt, cdn) {
+        var row = locals[cdt][cdn];
+        // Auto-set sort order to next available
+        var max_sort = 0;
+        if (frm.doc.product_images) {
+            frm.doc.product_images.forEach(function(img) {
+                if (flt(img.sort_order) > max_sort) {
+                    max_sort = flt(img.sort_order);
+                }
+            });
+        }
+        row.sort_order = flt(max_sort) + 1;
+        frm.refresh_field('product_images');
+        calculate_product_totals(frm);
+    },
+
+    /**
+     * Image row removed handler
+     */
+    product_images_remove: function(frm, cdt, cdn) {
+        calculate_product_totals(frm);
+    }
+});
+
+/**
+ * Calculate product totals and derived metrics
+ * Uses flt() on all numeric operations for precision
+ * @param {object} frm - Form object
+ */
+function calculate_product_totals(frm) {
+    // Count product images
+    var image_count = 0;
+    if (frm.doc.product_images) {
+        image_count = frm.doc.product_images.length;
+    }
+
+    // Calculate volumetric weight (L x W x H / 5000 - standard shipping formula)
+    var volumetric_weight = 0;
+    if (flt(frm.doc.length) > 0 && flt(frm.doc.width) > 0 && flt(frm.doc.height) > 0) {
+        volumetric_weight = flt(flt(frm.doc.length) * flt(frm.doc.width) * flt(frm.doc.height) / 5000);
+    }
+
+    // Determine effective shipping weight (greater of actual vs volumetric)
+    var actual_weight = flt(frm.doc.weight);
+    var shipping_weight = Math.max(actual_weight, volumetric_weight);
+
+    // Calculate daily production value (base_price * production_capacity)
+    var production_value = 0;
+    if (flt(frm.doc.base_price) > 0 && flt(frm.doc.production_capacity) > 0) {
+        production_value = flt(flt(frm.doc.base_price) * flt(frm.doc.production_capacity));
+    }
+
+    // Calculate stock value (base_price * stock_quantity)
+    var stock_value = flt(flt(frm.doc.base_price) * flt(frm.doc.stock_quantity));
+
+    frm.refresh_fields();
+}

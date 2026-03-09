@@ -65,6 +65,74 @@ frappe.ui.form.on('Seller KPI', {
         }
     },
 
+    /**
+     * Actual value change handler - recalculates KPI metrics
+     */
+    actual_value: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Target value change handler - recalculates KPI metrics
+     */
+    target_value: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Previous value change handler - recalculates value change
+     */
+    previous_value: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Minimum threshold change handler - validates threshold ordering
+     */
+    minimum_threshold: function(frm) {
+        // Ensure minimum < maximum
+        if (flt(frm.doc.minimum_threshold) > flt(frm.doc.maximum_threshold) &&
+            flt(frm.doc.maximum_threshold) > 0) {
+            frappe.msgprint(__('Minimum threshold cannot exceed maximum threshold'));
+            frm.set_value('minimum_threshold', flt(frm.doc.maximum_threshold));
+        }
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Maximum threshold change handler - validates threshold ordering
+     */
+    maximum_threshold: function(frm) {
+        // Ensure maximum > minimum
+        if (flt(frm.doc.maximum_threshold) > 0 &&
+            flt(frm.doc.maximum_threshold) < flt(frm.doc.minimum_threshold)) {
+            frappe.msgprint(__('Maximum threshold cannot be less than minimum threshold'));
+            frm.set_value('maximum_threshold', flt(frm.doc.minimum_threshold));
+        }
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Warning threshold change handler
+     */
+    warning_threshold: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Critical threshold change handler
+     */
+    critical_threshold: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
+    /**
+     * Improvement target change handler
+     */
+    improvement_target: function(frm) {
+        calculate_kpi_metrics(frm);
+    },
+
     kpi_period: function(frm) {
         // Auto-set date range based on selected period
         if (frm.doc.kpi_period) {
@@ -101,3 +169,30 @@ frappe.ui.form.on('Seller KPI', {
         }
     }
 });
+
+/**
+ * Calculate KPI metrics from actual, target, and previous values
+ * Uses flt() on all numeric operations for precision
+ * @param {object} frm - Form object
+ */
+function calculate_kpi_metrics(frm) {
+    var actual = flt(frm.doc.actual_value);
+    var target = flt(frm.doc.target_value);
+    var previous = flt(frm.doc.previous_value);
+
+    // Calculate value change (actual - previous)
+    var value_change = flt(actual - previous);
+    frm.set_value('value_change', value_change);
+
+    // Calculate percentage of target (actual / target * 100)
+    // Zero-division guard
+    var percentage_of_target = 0;
+    if (flt(target) > 0) {
+        percentage_of_target = flt(actual / flt(target) * 100);
+    }
+    frm.set_value('percentage_of_target', percentage_of_target);
+
+    // Calculate deviation from target (actual - target)
+    var deviation = flt(actual - target);
+    frm.set_value('deviation_from_target', deviation);
+}
