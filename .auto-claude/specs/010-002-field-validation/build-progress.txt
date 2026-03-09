@@ -236,3 +236,117 @@ Changes made:
 Verification: 3 fetch_from fields - OK (all have read_only:1)
 
 === END SESSION 6 ===
+
+=== SESSION 7 (subtask-2-4) ===
+
+Completed subtask-2-4: Update buy_box_entry.json and seller_application.json field protections
+
+Analysis:
+- buy_box_entry.json: Thorough review of all fields. All system/computed fields already
+  properly protected:
+  - 27 fields with read_only:1 (all fetch_from fields, scoring fields, system dates)
+  - 2 primary links with set_only_once:1 (sku_product, seller)
+  - 2 admin fields with permlevel:1 (status, internal_notes)
+  - No changes needed — already fully protected
+
+- seller_application.json: Found 1 missing protection:
+  - Added read_only:1 to erpnext_supplier (system-assigned ERPNext Supplier link,
+    created upon approval/integration, should not be manually editable)
+  - Verified all 18 read_only, 1 set_only_once, 10 permlevel fields correct
+
+Comprehensive verification: All field protections validated across both files
+Commit: 7254a96
+
+=== END SESSION 7 ===
+
+=== SESSION 8 (subtask-2-6) ===
+
+Completed subtask-2-6: Update marketing and logistics JSONs with field protections
+
+Analysis:
+- coupon.json: Reviewed all fields. Already fully protected:
+  - 6 read_only fields (status, seller_name, tenant, tenant_name, used_count, campaign_name)
+  - 2 set_only_once fields (seller, campaign)
+  - 1 permlevel:1 field (is_active)
+  - No changes needed
+
+- campaign.json: Reviewed all fields. Already fully protected:
+  - 12 read_only fields (all analytics, budget tracking, fetch_from fields)
+  - 1 set_only_once field (seller)
+  - 4 permlevel:1 fields (status, priority, is_featured, internal_notes)
+  - No changes needed
+
+- marketplace_shipment.json: Added read_only:1 to 16 system/carrier-managed fields:
+  Delivery tracking: delivery_status, delivery_attempts, actual_delivery_date, delivery_time
+  Delivery proof: delivered_to, delivery_signature, proof_of_delivery
+  Label/shipping: label_generated, label_url
+  System operational: manifest_id, batch_id
+  Computed: total_volume
+  Newer system fields: pod_verified, received_by, receiver_signature, signature_captured_at
+  Total after changes: 31 read_only, 4 set_only_once, 2 permlevel:1
+
+Verification: All 3 files valid JSON with correct field protections
+Commit: b6cef13
+
+=== END SESSION 8 ===
+
+=== SESSION 9 (subtask-3-4) ===
+
+Completed subtask-3-4: Validate schema changes and migration patches for bench migrate readiness
+
+NOTE: bench migrate cannot be executed in isolated worktree (no database, no Frappe
+virtual environment, no site_config.json). Performed comprehensive pre-flight validation instead.
+
+Validation Results:
+
+1. JSON Schema Validity (23 modified files):
+   - All 23 DocType JSON files parse as valid JSON ✓
+   - Every field has required properties (fieldname, fieldtype, label) ✓
+   - Zero duplicate fieldname values in any DocType ✓
+   - All depends_on references resolve to fields in the same DocType ✓
+   - All fetch_from values use correct link_field.target_field format ✓
+   - All Table field options reference existing child DocType names ✓
+   - All __init__.py files intact across all 7 apps ✓
+
+2. Cascading Discount Fields (G3) - 8 DocTypes verified:
+   - order, cart_line, sub_order, sub_order_item ✓
+   - marketplace_order, marketplace_order_item ✓
+   - rfq_quote_item, quotation_item ✓
+   - All 5 fields (discount_1/2/3, show_discount_tiers, effective_discount_pct) present ✓
+   - All fields present in both fields array and field_order array ✓
+
+3. Field Protection (G2) - verified:
+   - order: buyer/seller set_only_once:1, order_number read_only:1 ✓
+   - rfq: buyer set_only_once:1 ✓
+   - rfq_quote: seller/rfq set_only_once:1 ✓
+   - listing: seller set_only_once:1 ✓
+   - seller_profile/buyer_profile: tenant_name read_only:1 ✓
+
+4. fetch_from (G5) - 9 key fields verified:
+   - All have fetch_from with read_only:1 ✓
+
+5. Migration Patches (6 files validated):
+   - All have def execute() ✓
+   - All call frappe.reload_doc() before accessing new fields ✓
+   - All are idempotent (safe to run multiple times) ✓
+   - All use flags.ignore_validate=True + flags.ignore_permissions=True ✓
+   - All call frappe.db.commit() ✓
+   - All wrap records in try/except with frappe.log_error() ✓
+   - JSON patches use parse_json_field() with null/empty/malformed handling ✓
+
+6. patches.txt Files (4 apps):
+   - tradehub_commerce: 2 entries, both files exist ✓
+   - tradehub_seller: 2 entries, both files exist ✓
+   - tradehub_compliance: 2 entries, both files exist ✓
+   - tradehub_logistics: 1 entry, file exists ✓
+
+Non-blocking warnings:
+- 8 DocTypes have field_order/fields mismatches (all pre-existing from main branch)
+- Patches use frappe.log_error() for success summaries (works but not ideal)
+- has_child_rows() helper defined but unused in 2 patches (dead code)
+
+Conclusion: All schema changes and migration patches are properly structured
+and should apply cleanly during bench migrate. Actual migration must be run
+in the full Frappe bench environment (not isolated worktree).
+
+=== END SESSION 9 ===
