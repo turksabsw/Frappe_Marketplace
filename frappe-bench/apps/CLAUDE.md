@@ -9,8 +9,10 @@ Projenin gerçek yapısını, kurallarını ve cross-app referanslarını içeri
 
 - **Platform:** B2B Marketplace (İstoç Ticaret Merkezi bazlı)
 - **Framework:** Frappe v15 (Python 3.12 + Client-side JS/jQuery)
+- **Monorepo root:** `/home/ali/Masaüstü/Frappe_Marketplace` (tüm app'ler tek git repo)
 - **Bench dizini:** frappe-bench/
-- **App sayısı:** 7 custom app
+- **Site:** marketplace.local
+- **App sayısı:** 7 custom app + 3 yardımcı app (tr_tradehub, tr_consent_center, tr_contract_center)
 - **Mimari:** Katmanlı bağımlılık zinciri (aşağıda)
 
 ---
@@ -200,9 +202,82 @@ Bir app'te çalışırken başka app'lerin DocType'larına Link vermeniz gerekti
 
 ---
 
-## 5. FRAPPE GELİŞTİRME KURALLARI
+## 5. FRAPPE MODÜL SİSTEMİ — KRİTİK YAPI (DOKUNMA!)
 
-### 5.1 DocType Oluşturma Pattern
+### ⚠️ Bu bölüm en kritik kuraldır. İhlal edilirse TÜM uygulama çöker.
+
+Frappe v15, her app için **triple-nested dizin yapısı** kullanır. Bu yapı "duplicate" veya "gereksiz tekrar" DEĞİLDİR — Frappe'nin modül çözümleme mekanizmasının zorunlu parçasıdır.
+
+### 5.1 Yapı Şeması
+
+```
+apps/tradehub_core/                    ← Git repo / app kök dizini
+├── setup.py                           ← __version__ import eder
+├── tradehub_core/                     ← Python PACKAGE (pip install ile yüklenen)
+│   ├── __init__.py                    ← ZORUNLU: __version__ = "0.0.1" içermeli
+│   ├── hooks.py                       ← App hook tanımları
+│   ├── modules.txt                    ← "TradeHub Core" (modül adı)
+│   ├── eca/                           ← Utility modüller (package seviyesinde)
+│   ├── utils/                         ← Utility modüller (package seviyesinde)
+│   └── tradehub_core/                 ← MODULE dizini (modules.txt'ten türetilir)
+│       ├── __init__.py                ← Boş olabilir ama OLMALI
+│       ├── doctype/                   ← DocType'lar BURADA
+│       │   ├── tenant/
+│       │   │   ├── __init__.py
+│       │   │   ├── tenant.json
+│       │   │   ├── tenant.py
+│       │   │   └── tenant.js
+│       │   └── buyer_profile/
+│       │       └── ...
+│       ├── config/
+│       └── workspace/
+```
+
+### 5.2 Neden Triple-Nested?
+
+Frappe şu adımlarla modül çözümler:
+
+1. `modules.txt` okunur → `"TradeHub Core"`
+2. Scrub edilir → `tradehub_core` (boşluk → `_`, küçük harf)
+3. Python import yapılır → `import tradehub_core.tradehub_core`
+   - Birinci `tradehub_core` = Python package
+   - İkinci `tradehub_core` = Module dizini
+4. DocType controller → `from tradehub_core.tradehub_core.doctype.tenant.tenant import Tenant`
+
+**Eğer orta katman (module dizini) silinirse:**
+```
+ModuleNotFoundError: No module named 'tradehub_core.tradehub_core'
+→ bench migrate PATLAR
+→ Tüm DocType'lar yüklenemez
+→ Site tamamen çalışmaz hale gelir
+```
+
+### 5.3 Tüm App'ler İçin Module Dizin Haritası
+
+| App | Package | Module Dizini | modules.txt |
+|-----|---------|---------------|-------------|
+| tradehub_core | `tradehub_core/` | `tradehub_core/tradehub_core/` | TradeHub Core |
+| tradehub_catalog | `tradehub_catalog/` | `tradehub_catalog/tradehub_catalog/` | TradeHub Catalog |
+| tradehub_commerce | `tradehub_commerce/` | `tradehub_commerce/tradehub_commerce/` | TradeHub Commerce |
+| tradehub_seller | `tradehub_seller/` | `tradehub_seller/tradehub_seller/` | TradeHub Seller |
+| tradehub_logistics | `tradehub_logistics/` | `tradehub_logistics/tradehub_logistics/` | TradeHub Logistics |
+| tradehub_marketing | `tradehub_marketing/` | `tradehub_marketing/tradehub_marketing/` | TradeHub Marketing |
+| tradehub_compliance | `tradehub_compliance/` | `tradehub_compliance/tradehub_compliance/` | TradeHub Compliance |
+
+### 5.4 MUTLAK YASAK
+
+- ❌ Module dizinini silme, taşıma veya yeniden adlandırma
+- ❌ DocType'ları module dizininden yukarı taşıma
+- ❌ Triple-nested yapıyı "düzleştirme" veya "optimize etme"
+- ❌ `__init__.py` dosyalarını silme veya boşaltma
+- ❌ `modules.txt` içeriğini değiştirme
+- ❌ Bu yapıyı "duplicate/gereksiz tekrar" olarak değerlendirme
+
+---
+
+## 6. FRAPPE GELİŞTİRME KURALLARI
+
+### 6.1 DocType Oluşturma Pattern
 ```
 Dizin: apps/{APP}/{APP}/{MODULE}/doctype/{snake_case_name}/
 Dosyalar:
@@ -213,19 +288,19 @@ Dosyalar:
   test_{name}.py      → Test (opsiyonel)
 ```
 
-### 5.2 Child Table
+### 6.2 Child Table
 - JSON'da "istable": 1
 - Parent DocType'ta: "fieldtype": "Table", "options": "Child DocType Name"
 - parent field otomatik oluşur — elle ekleme
 
-### 5.3 hooks.py Altın Kuralları
+### 6.3 hooks.py Altın Kuralları
 1. ASLA hooks.py'yi silme/üzerine yazma — mevcut dict'lere SADECE ekle
 2. doc_events["*"] wildcard tradehub_core'da — TÜM DocType'ları etkiler
 3. Yeni doc_events eklerken wildcard'ı geçersiz kılma
 4. scheduler_events → hourly, daily, weekly, monthly, cron
 5. app_include_js → Global JS, her sayfa yüklemesinde çalışır
 
-### 5.4 Python API
+### 6.4 Python API
 ```python
 doc = frappe.get_doc("DocType", name)
 doc = frappe.new_doc("DocType")
@@ -238,7 +313,7 @@ frappe.throw(_("Hata"))    # i18n zorunlu
 frappe.enqueue("path.fn")  # async
 ```
 
-### 5.5 Client-Side JS
+### 6.5 Client-Side JS
 ```javascript
 frappe.ui.form.on('DocType', {
     setup(frm) {},
@@ -248,7 +323,7 @@ frappe.ui.form.on('DocType', {
 frm.set_query('field', () => ({ filters: { key: val } }));
 ```
 
-### 5.6 Migration Patch
+### 6.6 Migration Patch
 ```python
 # {app}/patches/patch_name.py
 import frappe
@@ -260,8 +335,28 @@ patches.txt'e kayıt: {app_name}.patches.patch_name
 
 ---
 
-## 6. KESİNLİKLE YAPILMAMASI GEREKENLER
+## 7. DOKUNULMAZ DOSYA VE DİZİNLER
 
+Aşağıdaki dosya ve dizinler **hiçbir koşulda** değiştirilmez, silinmez veya taşınmaz:
+
+| Dosya/Dizin | Neden |
+|-------------|-------|
+| `apps/frappe/` | Frappe core — ASLA değiştirme |
+| `apps/erpnext/` | ERPNext core — ASLA değiştirme |
+| `{app}/{app}/__init__.py` | `__version__` tanımı, silme/boşaltma yasak |
+| `{app}/{app}/modules.txt` | Modül adı tanımı, değiştirme yasak |
+| `{app}/{app}/{module}/` | Module dizini, taşıma/silme/yeniden adlandırma yasak |
+| `{app}/{app}/{module}/doctype/` | DocType kök dizini, taşıma yasak |
+| `{app}/{app}/{module}/doctype/*/__init__.py` | Python package marker, silme yasak |
+| `{app}/{app}/hooks.py` | Sadece EKLE, silme/üzerine yazma yasak |
+
+**Geçmiş hata:** Auto-claude `833c532` commit'inde module dizinini "duplicate" sanarak sildi → 750+ dosya kayboldu, tüm app'ler çöktü. Bu yapı Frappe'nin zorunlu modül çözümleme mekanizmasıdır (Bölüm 5'e bakın).
+
+---
+
+## 8. KESİNLİKLE YAPILMAMASI GEREKENLER
+
+### Kod Kuralları
 1. Raw SQL yazma → Frappe ORM kullan
 2. DocType adlarını hardcode etme → grep/find ile tespit et
 3. Deprecated v13/v14 API → v15 API kullan
@@ -275,31 +370,51 @@ patches.txt'e kayıt: {app_name}.patches.patch_name
 11. Yukarı yönde cross-app referans → bağımlılık zincirini takip et
 12. Wildcard doc_events geçersiz kılma → core'daki "*" tüm DocType'ları etkiler
 
+### Yapısal Kurallar (KRİTİK — ihlal sistemi çökertir)
+13. Frappe/ERPNext core dosyalarını değiştirme → `apps/frappe/` ve `apps/erpnext/` dokunulmaz
+14. Triple-nested modül dizin yapısını düzleştirme/taşıma/silme → Bölüm 5'e bak
+15. `__init__.py` dosyalarını silme veya boşaltma → özellikle `__version__` içerenler
+16. Tek task'ta 10'dan fazla dosya silme veya taşıma → böl, onay al
+17. Dizin yapısını "optimize", "düzleştir" veya "duplicate kaldır" diye değerlendirme → yapı Frappe zorunluluğu
+18. Commit öncesi `bench --site marketplace.local migrate` çalıştırmadan commit atma
+
 ---
 
-## 7. BENCH KOMUTLARI
+## 9. BENCH KOMUTLARI
 
 ```bash
-bench --site dev.localhost migrate
+bench --site marketplace.local migrate
 bench build --app {app_name}
-bench --site dev.localhost run-tests --app {app_name}
-bench --site dev.localhost clear-cache
-bench --site dev.localhost console
-bench --site dev.localhost run-tests --doctype "DocType Name"
+bench --site marketplace.local run-tests --app {app_name}
+bench --site marketplace.local clear-cache
+bench --site marketplace.local console
+bench --site marketplace.local run-tests --doctype "DocType Name"
 ```
 
 ---
 
-## 8. AUTO-CLAUDE TASK YAZIM KURALLARI
+## 10. AUTO-CLAUDE TASK YAZIM KURALLARI
 
 ### Atomik task kuralı
 - 1-3 dosya → --complexity simple
 - 4-8 dosya → --complexity standard
 - 9+ dosya → BÖLÜN
 
-### QA kriterleri
-✅ dosya mevcut, grep pattern, py_compile hatasız, bench migrate
+### QA kriterleri (zorunlu, commit öncesi)
+✅ dosya mevcut, grep pattern, py_compile hatasız
+✅ `bench --site marketplace.local migrate` başarılı (HER COMMIT ÖNCESİ ZORUNLU)
+✅ `__init__.py` dosyaları sağlam (silinmemiş, boşaltılmamış)
+✅ Triple-nested yapı bozulmamış (`{app}/{app}/{module}/doctype/` mevcut)
 ❌ "formda dropdown çalışıyor" (site gerektirir)
+❌ Toplu dosya silme/taşıma (10+ dosya tek task'ta yasak)
+❌ Frappe/ERPNext core dosyalarında değişiklik
+
+### Yapısal değişiklik tespiti
+Eğer task sonucunda aşağıdakilerden biri etkileniyorsa, TASK'I DURDUR ve kullanıcıya sor:
+- Herhangi bir `__init__.py` silme veya boşaltma
+- Herhangi bir dizin silme veya yeniden adlandırma
+- `hooks.py`, `modules.txt`, `patches.txt` üzerinde büyük değişiklik
+- `apps/frappe/` veya `apps/erpnext/` altında herhangi bir değişiklik
 
 ### Hedef app belirtin
 ```
