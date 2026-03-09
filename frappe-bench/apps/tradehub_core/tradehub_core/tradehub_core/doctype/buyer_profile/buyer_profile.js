@@ -45,6 +45,10 @@ frappe.ui.form.on('Buyer Profile', {
             // Lock admin-editable fields for non-admin users
             frm.set_df_property('status', 'read_only', 1);
             frm.set_df_property('verification_status', 'read_only', 1);
+            frm.set_df_property('segment', 'read_only', 1);
+            frm.set_df_property('email_verified', 'read_only', 1);
+            frm.set_df_property('phone_verified', 'read_only', 1);
+            frm.set_df_property('identity_verified', 'read_only', 1);
         }
     },
 
