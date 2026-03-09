@@ -659,7 +659,9 @@
             "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/tradehub_catalog_settings/tradehub_catalog_settings.json')); assert d.get('issingle')==1; fnames=[f['fieldname'] for f in d['fields']]; assert 'max_daily_category_proposals' in fnames; assert 'enable_proposal_rate_limit' in fnames; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Created TradeHub Catalog Settings Single DocType (issingle:1) with 4 rate-limiting fields: max_daily_category_proposals (Int, default 5), max_weekly_category_proposals (Int, default 15), max_pending_proposals (Int, default 3), enable_proposal_rate_limit (Check, default 1). Follows analytics_settings.json pattern from tradehub_core. System Manager only permissions. Includes minimal .py controller and empty __init__.py. All verifications passed. Committed as 8601c3d.",
+          "updated_at": "2026-03-09T15:05:50.556807+00:00"
         },
         {
           "id": "subtask-6-2",
@@ -678,7 +680,7 @@
             "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/category_proposal/category_proposal.json')); assert d['name']=='Category Proposal'; assert 'CAT-PROP' in d.get('autoname',''); fnames=[f['fieldname'] for f in d['fields']]; assert 'proposed_name' in fnames; assert 'created_category' in fnames; assert 'status' in fnames; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-6-3",
@@ -697,7 +699,7 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/category_proposal/category_proposal.py').read(); assert 'get_permission_query_conditions' in content; assert 'has_permission' in content; assert 'rate_limit' in content or 'check_rate_limit' in content or 'max_daily' in content; assert 'create_category_from_proposal' in content or 'Approved' in content; assert 'seller' in content.lower(); print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-6-4",
@@ -1012,12 +1014,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T14:59:02.688Z",
+  "updated_at": "2026-03-09T15:08:26.703Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T13:54:26.482149+00:00"
   },
-  "last_updated": "2026-03-09T14:56:43.235512+00:00"
+  "last_updated": "2026-03-09T15:05:50.556814+00:00"
 }
