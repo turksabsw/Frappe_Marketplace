@@ -627,7 +627,9 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/patches/backfill_condition_field.py').read(); assert 'def execute' in content; assert 'REVERSE_AMAZON_MAP' in content or 'amazon_condition' in content; assert 'New' in content; assert 'commit' in content; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Created backfill_condition_field.py patch. Implements REVERSE_AMAZON_MAP to convert Amazon-specific condition values (including Collectible/Very Good variants) to the new generic condition options. Backfills PIM Product records first from amazon_condition mapping, then defaults remaining NULL/empty condition records to 'New' for both PIM Product and Listing. Adds DB indexes on Listing table: idx_listing_condition, idx_listing_country_of_origin, and composite idx_listing_condition_country. All operations are idempotent (checks for NULL/empty before updating, checks index existence before creating). Uses bulk UPDATE for efficiency. Follows existing patch patterns with reload_doctypes, error logging, and frappe.db.commit().",
+          "updated_at": "2026-03-09T16:00:00.000000+00:00"
         }
       ]
     },
@@ -1010,7 +1012,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T14:57:07.776Z",
+  "updated_at": "2026-03-09T14:59:02.688Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
