@@ -262,7 +262,8 @@
    "fieldname": "content_snapshot",
    "fieldtype": "JSON",
    "label": "Content Snapshot",
-   "description": "Snapshot of content at time of case creation (for audit purposes)"
+   "description": "Snapshot of content at time of case creation (for audit purposes)",
+   "read_only": 1
   },
   {
    "fieldname": "report_info_section",
@@ -366,14 +367,16 @@
    "fieldname": "is_repeat_offense",
    "fieldtype": "Check",
    "label": "Repeat Offense",
-   "description": "Whether this is a repeat violation by the same owner"
+   "description": "Whether this is a repeat violation by the same owner",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "previous_violations_count",
    "fieldtype": "Int",
    "label": "Previous Violations Count",
-   "description": "Number of previous violations by this content owner"
+   "description": "Number of previous violations by this content owner",
+   "read_only": 1
   },
   {
    "fieldname": "related_cases",
@@ -401,7 +404,8 @@
    "fieldname": "is_auto_detected",
    "fieldtype": "Check",
    "label": "Auto Detected",
-   "description": "Whether this case was created by automated detection"
+   "description": "Whether this case was created by automated detection",
+   "read_only": 1
   },
   {
    "depends_on": "is_auto_detected",
@@ -409,14 +413,16 @@
    "fieldtype": "Select",
    "label": "Detection Method",
    "options": "\nImage Recognition\nText Analysis\nML Classification\nKeyword Filter\nPattern Matching\nBehavior Analysis\nExternal API\nHash Matching\nPrice Anomaly\nDuplicate Detection",
-   "description": "Method used for auto-detection"
+   "description": "Method used for auto-detection",
+   "read_only": 1
   },
   {
    "depends_on": "is_auto_detected",
    "fieldname": "detection_confidence",
    "fieldtype": "Percent",
    "label": "Detection Confidence",
-   "description": "Confidence level of the auto-detection (0-100%)"
+   "description": "Confidence level of the auto-detection (0-100%)",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_detection",
@@ -427,14 +433,16 @@
    "fieldname": "detection_flags",
    "fieldtype": "JSON",
    "label": "Detection Flags",
-   "description": "Specific flags raised by auto-detection"
+   "description": "Specific flags raised by auto-detection",
+   "read_only": 1
   },
   {
    "depends_on": "is_auto_detected",
    "fieldname": "ai_analysis_result",
    "fieldtype": "JSON",
    "label": "AI Analysis Result",
-   "description": "Full result from AI/ML analysis"
+   "description": "Full result from AI/ML analysis",
+   "read_only": 1
   },
   {
    "fieldname": "review_section",
@@ -810,7 +818,8 @@
    "fieldtype": "Table",
    "label": "Moderation History",
    "options": "Moderation Action Log",
-   "description": "Full history of actions taken on this case"
+   "description": "Full history of actions taken on this case",
+   "read_only": 1
   },
   {
    "fieldname": "details_tab",
@@ -871,7 +880,7 @@
    "link_fieldname": "account_action_link"
   }
  ],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-03-09 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Compliance",
  "name": "Moderation Case",

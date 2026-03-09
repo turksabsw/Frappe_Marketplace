@@ -583,7 +583,8 @@
    "fieldtype": "Table",
    "label": "Flags",
    "options": "Review Flag",
-   "description": "Flagged issues for this review"
+   "description": "Flagged issues for this review",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -731,7 +732,7 @@
    "link_fieldname": "marketplace_order"
   }
  ],
- "modified": "2026-02-12 16:00:00.000000",
+ "modified": "2026-03-09 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Compliance",
  "name": "Review",
