@@ -43,12 +43,6 @@ class RFQQuote(Document):
 
         system_fields = [
             'submitted_at',
-            'revision_count',
-            'last_revised_at',
-            'accepted_at',
-            'rejected_at',
-            'discount_amount',
-            'total_amount',
         ]
         for field in system_fields:
             if self.has_value_changed(field):

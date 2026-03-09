@@ -514,30 +514,30 @@ function calculate_item_amounts(frm, cdt, cdn) {
     let shipping_amount = flt(row.shipping_amount);
 
     // Calculate line subtotal (before discount)
-    let line_subtotal = qty * unit_price;
+    let line_subtotal = flt(qty * unit_price);
 
     // Calculate discount amount
-    let discount_amount = line_subtotal * (discount_value / 100);
+    let discount_amount = flt(line_subtotal * (discount_value / 100));
 
     // Taxable amount (after discount)
-    let taxable_amount = line_subtotal - discount_amount;
+    let taxable_amount = flt(line_subtotal - discount_amount);
 
     // Calculate tax amount
-    let tax_amount = taxable_amount * (tax_rate / 100);
+    let tax_amount = flt(taxable_amount * (tax_rate / 100));
 
     // Calculate commission amount
-    let commission_amount = taxable_amount * (commission_rate / 100);
+    let commission_amount = flt(taxable_amount * (commission_rate / 100));
 
     // Calculate line total (taxable + tax + shipping)
-    let line_total = taxable_amount + tax_amount + shipping_amount;
+    let line_total = flt(taxable_amount + tax_amount + shipping_amount);
 
     // Update all calculated fields using frappe.model.set_value
     // CRITICAL: Always use frappe.model.set_value() for child table updates, never direct assignment
-    frappe.model.set_value(cdt, cdn, 'line_subtotal', line_subtotal);
-    frappe.model.set_value(cdt, cdn, 'discount_amount', discount_amount);
-    frappe.model.set_value(cdt, cdn, 'tax_amount', tax_amount);
-    frappe.model.set_value(cdt, cdn, 'commission_amount', commission_amount);
-    frappe.model.set_value(cdt, cdn, 'line_total', line_total);
+    frappe.model.set_value(cdt, cdn, 'line_subtotal', flt(line_subtotal));
+    frappe.model.set_value(cdt, cdn, 'discount_amount', flt(discount_amount));
+    frappe.model.set_value(cdt, cdn, 'tax_amount', flt(tax_amount));
+    frappe.model.set_value(cdt, cdn, 'commission_amount', flt(commission_amount));
+    frappe.model.set_value(cdt, cdn, 'line_total', flt(line_total));
 
     // Recalculate order totals
     calculate_order_totals(frm);
@@ -564,7 +564,7 @@ function calculate_order_totals(frm) {
         total_commission += flt(item.commission_amount);
         total_shipping += flt(item.shipping_amount);
         total_qty += flt(item.qty);
-        total_weight += flt(item.weight) * flt(item.qty);
+        total_weight += flt(flt(item.weight) * flt(item.qty));
     });
 
     // Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
@@ -584,10 +584,10 @@ function calculate_order_totals(frm) {
     // Apply order-level discounts (coupon, promotion) AFTER cascading discounts
     let coupon_discount = flt(frm.doc.coupon_discount);
     let promotion_discount = flt(frm.doc.promotion_discount);
-    let order_discount = coupon_discount + promotion_discount;
+    let order_discount = flt(coupon_discount + promotion_discount);
 
     // Total discount = item-level + cascading + coupon/promotion
-    let total_discount = flt(item_discount) + flt(cascading_discount) + flt(order_discount);
+    let total_discount = flt(flt(item_discount) + flt(cascading_discount) + flt(order_discount));
 
     // Effective discount percentage for display
     if (flt(subtotal) > 0) {
@@ -596,20 +596,20 @@ function calculate_order_totals(frm) {
     frm.set_value('effective_discount_pct', effective_discount_pct);
 
     // Calculate grand total
-    let grand_total = flt(subtotal) - flt(total_discount) + flt(total_tax) + flt(total_shipping);
+    let grand_total = flt(flt(subtotal) - flt(total_discount) + flt(total_tax) + flt(total_shipping));
 
     // Update parent totals using frm.set_value
-    frm.set_value('subtotal', subtotal);
-    frm.set_value('total_discount', total_discount);
-    frm.set_value('tax_total', total_tax);
-    frm.set_value('shipping_total', total_shipping);
-    frm.set_value('grand_total', grand_total);
-    frm.set_value('total_commission', total_commission);
+    frm.set_value('subtotal', flt(subtotal));
+    frm.set_value('total_discount', flt(total_discount));
+    frm.set_value('tax_total', flt(total_tax));
+    frm.set_value('shipping_total', flt(total_shipping));
+    frm.set_value('grand_total', flt(grand_total));
+    frm.set_value('total_commission', flt(total_commission));
     frm.set_value('item_count', items.length);
-    frm.set_value('total_qty', total_qty);
-    frm.set_value('total_weight', total_weight);
+    frm.set_value('total_qty', flt(total_qty));
+    frm.set_value('total_weight', flt(total_weight));
 
     // Calculate seller payout (grand_total - commission)
-    let seller_payout = flt(grand_total) - flt(total_commission);
-    frm.set_value('seller_payout', seller_payout);
+    let seller_payout = flt(flt(grand_total) - flt(total_commission));
+    frm.set_value('seller_payout', flt(seller_payout));
 }

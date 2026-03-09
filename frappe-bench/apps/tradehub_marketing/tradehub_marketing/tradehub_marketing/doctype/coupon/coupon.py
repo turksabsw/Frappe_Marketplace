@@ -87,17 +87,17 @@ class Coupon(Document):
             # Free shipping doesn't need a discount value
             return
 
-        if self.discount_value <= 0:
+        if flt(self.discount_value) <= 0:
             frappe.throw(_("Discount Value must be greater than 0"))
 
         if self.discount_type == "Percentage":
-            if self.discount_value > 100:
+            if flt(self.discount_value) > 100:
                 frappe.throw(_("Percentage discount cannot exceed 100%"))
-            if self.discount_value < 0.01:
+            if flt(self.discount_value) < 0.01:
                 frappe.throw(_("Percentage discount must be at least 0.01%"))
 
         if self.discount_type == "Fixed Amount":
-            if self.discount_value < 0.01:
+            if flt(self.discount_value) < 0.01:
                 frappe.throw(_("Fixed discount amount must be at least 0.01"))
 
     def validate_bogo_configuration(self):

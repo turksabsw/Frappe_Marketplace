@@ -57,12 +57,53 @@ class MarketplaceOrder(Document):
         """Validate order data before saving."""
         self._guard_system_fields()
         self.validate_buyer()
+        self.refetch_denormalized_fields()
         self.validate_items()
         self.validate_addresses()
         self.validate_status_transitions()
         self.calculate_totals()
         self.update_seller_summary()
         self.validate_payment_status()
+
+    def refetch_denormalized_fields(self):
+        """
+        Re-fetch denormalized fields from source documents in validate().
+
+        Ensures data consistency by overriding client-side values with
+        authoritative data from source documents. Prevents stale or
+        tampered fetch_from values from being saved.
+        """
+        # Re-fetch buyer fields
+        if self.buyer:
+            buyer_data = frappe.db.get_value(
+                "Buyer Profile", self.buyer,
+                ["buyer_name", "email", "tenant"],
+                as_dict=True
+            )
+            if buyer_data:
+                self.buyer_name = buyer_data.buyer_name
+                self.buyer_email = buyer_data.email
+                self.tenant = buyer_data.tenant
+
+        # Re-fetch organization name
+        if self.organization:
+            org_data = frappe.db.get_value(
+                "Organization", self.organization,
+                ["organization_name"],
+                as_dict=True
+            )
+            if org_data:
+                self.organization_name = org_data.organization_name
+
+        # Re-fetch tenant name
+        if self.tenant:
+            tenant_data = frappe.db.get_value(
+                "Tenant", self.tenant,
+                ["tenant_name"],
+                as_dict=True
+            )
+            if tenant_data:
+                self.tenant_name = tenant_data.tenant_name
 
     def _guard_system_fields(self):
         """Prevent modification of system-generated fields after creation."""
@@ -292,9 +333,27 @@ class MarketplaceOrder(Document):
         self.tax_amount = flt(tax_amount, 2)
         self.total_commission = flt(total_commission, 2)
 
-        # Calculate discount totals
+        # Calculate cascading discount: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+        for d in [flt(self.discount_1, 2), flt(self.discount_2, 2), flt(self.discount_3, 2)]:
+            if flt(d) < 0 or flt(d) > 100:
+                frappe.throw(_("Discount percentage must be between 0 and 100"))
+
+        d1 = flt(self.discount_1, 2)
+        d2 = flt(self.discount_2, 2)
+        d3 = flt(self.discount_3, 2)
+
+        price_after_d1 = flt(flt(self.subtotal, 2) * (1 - d1 / 100), 2)
+        price_after_d2 = flt(price_after_d1 * (1 - d2 / 100), 2)
+        final_price = flt(price_after_d2 * (1 - d3 / 100), 2)
+        cascading_discount = flt(flt(self.subtotal, 2) - final_price, 2)
+
+        if flt(self.subtotal, 2) > 0:
+            self.effective_discount_pct = flt(cascading_discount / flt(self.subtotal, 2) * 100, 2)
+
+        # Calculate total discount: cascading + coupon + promotion + store credit
         self.discount_amount = flt(
-            flt(self.coupon_discount, 2)
+            flt(cascading_discount, 2)
+            + flt(self.coupon_discount, 2)
             + flt(self.promotion_discount, 2)
             + flt(self.store_credit_used, 2),
             2

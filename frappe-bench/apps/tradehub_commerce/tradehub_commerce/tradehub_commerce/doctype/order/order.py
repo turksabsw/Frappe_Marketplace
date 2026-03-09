@@ -385,20 +385,20 @@ class Order(Document):
         # Calculate advance amount
         if self.advance_percentage:
             self.advance_amount = flt(
-                flt(self.total_amount) * flt(self.advance_percentage) / 100, 2
+                flt(self.total_amount, 2) * flt(self.advance_percentage, 2) / 100, 2
             )
 
         # Calculate balance amount
         self.balance_amount = flt(
-            flt(self.total_amount) - flt(self.paid_amount), 2
+            flt(self.total_amount, 2) - flt(self.paid_amount, 2), 2
         )
 
         # Update payment status based on amounts
-        if flt(self.paid_amount) >= flt(self.total_amount):
+        if flt(self.paid_amount, 2) >= flt(self.total_amount, 2):
             if self.payment_status not in ["Refunded"]:
                 self.payment_status = "Fully Paid"
-        elif flt(self.paid_amount) > 0:
-            if flt(self.paid_amount) >= flt(self.advance_amount) and self.advance_amount:
+        elif flt(self.paid_amount, 2) > 0:
+            if flt(self.paid_amount, 2) >= flt(self.advance_amount, 2) and self.advance_amount:
                 self.payment_status = "Advance Received"
             else:
                 self.payment_status = "Partially Paid"

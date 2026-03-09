@@ -288,10 +288,10 @@ frappe.ui.form.on('RFQ Item', {
     /**
      * Quantity change handler - validates and recalculates totals
      */
-    qty: function(frm, cdt, cdn) {
+    quantity: function(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
-        if (row.qty <= 0) {
-            frappe.model.set_value(cdt, cdn, 'qty', 1);
+        if (flt(row.quantity) <= 0) {
+            frappe.model.set_value(cdt, cdn, 'quantity', 1);
             frappe.msgprint(__('Quantity must be greater than zero'));
         }
         calculate_totals(frm);

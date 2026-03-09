@@ -914,13 +914,13 @@ function calculate_totals(frm) {
 function calculate_payment_amounts(frm) {
     // Calculate advance amount
     if (frm.doc.advance_percentage) {
-        var advance_amount = flt(frm.doc.total_amount) * flt(frm.doc.advance_percentage) / 100;
-        frm.set_value('advance_amount', advance_amount);
+        var advance_amount = flt(flt(frm.doc.total_amount) * flt(frm.doc.advance_percentage) / 100);
+        frm.set_value('advance_amount', flt(advance_amount));
     }
 
     // Calculate balance
-    var balance = flt(frm.doc.total_amount) - flt(frm.doc.paid_amount);
-    frm.set_value('balance_amount', balance);
+    var balance = flt(flt(frm.doc.total_amount) - flt(frm.doc.paid_amount));
+    frm.set_value('balance_amount', flt(balance));
 }
 
 /**
