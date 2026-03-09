@@ -25,9 +25,9 @@ frappe.ui.form.on('Listing', {
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
 
         // =====================================================
-        // Category Field - Filter Active Categories
+        // Category Field - Filter Active Product Categories
         // =====================================================
-        // Only show active categories
+        // Only show active product categories
         frm.set_query('category', function() {
             return {
                 filters: {
@@ -46,7 +46,29 @@ frappe.ui.form.on('Listing', {
             };
 
             if (frm.doc.category) {
-                filters['parent_category'] = frm.doc.category;
+                filters['parent_product_category'] = frm.doc.category;
+            }
+
+            return {
+                filters: filters
+            };
+        });
+
+        // =====================================================
+        // Seller Custom Category Field - Filter by Seller and Category
+        // =====================================================
+        // Only show seller's own custom categories under the selected category
+        frm.set_query('seller_custom_category', function() {
+            let filters = {
+                'is_active': 1
+            };
+
+            if (frm.doc.seller) {
+                filters['seller'] = frm.doc.seller;
+            }
+
+            if (frm.doc.category) {
+                filters['marketplace_category'] = frm.doc.category;
             }
 
             return {
@@ -163,9 +185,12 @@ frappe.ui.form.on('Listing', {
 
     category: function(frm) {
         // When category changes, handle cascading updates
+        // Always clear seller_custom_category when category changes
+        frm.set_value('seller_custom_category', null);
+
         if (frm.doc.category) {
             // Auto-fetch attribute_set from category if not already set
-            frappe.db.get_value('Category', frm.doc.category, 'attribute_set', function(r) {
+            frappe.db.get_value('Product Category', frm.doc.category, 'attribute_set', function(r) {
                 if (r && r.attribute_set) {
                     // Only auto-fill if attribute_set is empty or different category
                     if (!frm.doc.attribute_set) {
@@ -180,8 +205,8 @@ frappe.ui.form.on('Listing', {
 
             // Check if current subcategory belongs to new category
             if (frm.doc.subcategory) {
-                frappe.db.get_value('Category', frm.doc.subcategory, 'parent_category', function(r) {
-                    if (r && r.parent_category !== frm.doc.category) {
+                frappe.db.get_value('Product Category', frm.doc.subcategory, 'parent_product_category', function(r) {
+                    if (r && r.parent_product_category !== frm.doc.category) {
                         frm.set_value('subcategory', null);
                         frappe.show_alert({
                             message: __('Subcategory cleared because it does not belong to the selected Category'),
@@ -201,7 +226,7 @@ frappe.ui.form.on('Listing', {
                             indicator: 'blue'
                         });
                         // Try to auto-fill from new category
-                        frappe.db.get_value('Category', frm.doc.category, 'attribute_set', function(r2) {
+                        frappe.db.get_value('Product Category', frm.doc.category, 'attribute_set', function(r2) {
                             if (r2 && r2.attribute_set) {
                                 frm.set_value('attribute_set', r2.attribute_set);
                             }
@@ -219,6 +244,12 @@ frappe.ui.form.on('Listing', {
             // Clear fetch_from fields dependent on category
             frm.set_value('category_name', '');
         }
+    },
+
+    subcategory: function(frm) {
+        // When subcategory changes, clear seller_custom_category
+        // since it may be tied to the previous subcategory context
+        frm.set_value('seller_custom_category', null);
     },
 
     attribute_set: function(frm) {
@@ -379,7 +410,7 @@ function calculate_totals(frm) {
 function load_category_attributes(frm) {
     if (!frm.doc.category) return;
 
-    frappe.db.get_value('Category', frm.doc.category, 'attribute_set', function(r) {
+    frappe.db.get_value('Product Category', frm.doc.category, 'attribute_set', function(r) {
         if (r && r.attribute_set) {
             // Get attributes from the attribute set
             frappe.call({
