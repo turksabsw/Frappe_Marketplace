@@ -528,7 +528,7 @@
             "command": "cd frappe-bench && python -c \"from tradehub_compliance.tradehub_compliance.doctype.review.review import Review; from tradehub_compliance.tradehub_compliance.doctype.moderation_case.moderation_case import ModerationCase; from tradehub_compliance.tradehub_compliance.doctype.contract_instance.contract_instance import ContractInstance; print('Import OK')\"",
             "expected": "Import OK"
           },
-          "status": "pending"
+          "status": "completed"
         }
       ]
     },
@@ -947,7 +947,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T10:24:39.679Z",
+  "updated_at": "2026-03-09T10:31:50.794Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,

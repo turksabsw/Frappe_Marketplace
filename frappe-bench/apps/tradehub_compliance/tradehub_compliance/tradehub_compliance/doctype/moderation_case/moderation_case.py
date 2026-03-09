@@ -99,11 +99,11 @@ class ModerationCase(Document):
     def on_update(self):
         """Actions to perform after case is updated."""
         self.check_sla_status()
-        self.log_history_event("updated")
+        self.log_history_event("updated", _save_to_db=True)
 
     def after_insert(self):
         """Actions to perform after case is created."""
-        self.log_history_event("created")
+        self.log_history_event("created", _save_to_db=True)
 
     def on_trash(self):
         """Prevent deletion of moderation cases - they must be preserved for audit."""
@@ -343,27 +343,56 @@ class ModerationCase(Document):
         else:
             self.sla_status = "On Track"
 
-    def log_history_event(self, event_type, details=None):
-        """Log an event to the moderation history."""
-        history = []
-        if self.moderation_history:
-            try:
-                history = json.loads(self.moderation_history)
-            except (json.JSONDecodeError, TypeError):
-                history = []
+    # Mapping from event types to Moderation Action Log action_type options
+    EVENT_TO_ACTION_TYPE = {
+        "created": "Created",
+        "assigned": "Assigned",
+        "review_started": "Reviewed",
+        "resolved": "Decision Made",
+        "escalated": "Escalated",
+        "info_requested": "Status Changed",
+        "closed": "Closed",
+        "reopened": "Reopened",
+        "appeal_submitted": "Appealed",
+        "updated": "Status Changed",
+    }
 
-        event = {
-            "timestamp": str(now_datetime()),
-            "event": event_type,
-            "user": frappe.session.user,
-            "status": self.status,
-        }
+    def log_history_event(self, event_type, details=None, _save_to_db=False):
+        """Log an event to the moderation history child table.
 
+        Args:
+            event_type: Type of event (e.g. 'created', 'assigned', 'resolved')
+            details: Optional dict of additional details
+            _save_to_db: If True, flush the row to DB immediately (for post-save contexts)
+        """
+        # Map event type to action_type; appeal_* variants map to "Appeal Decided"
+        if event_type.startswith("appeal_") and event_type != "appeal_submitted":
+            action_type = "Appeal Decided"
+        else:
+            action_type = self.EVENT_TO_ACTION_TYPE.get(event_type, "Status Changed")
+
+        # Get previous status from DB for tracking transitions
+        previous_status = ""
+        if not self.is_new() and self.name:
+            previous_status = frappe.db.get_value("Moderation Case", self.name, "status") or ""
+
+        # Build details string from dict
+        detail_str = ""
         if details:
-            event["details"] = details
+            detail_parts = [f"{k}: {v}" for k, v in details.items()]
+            detail_str = "; ".join(detail_parts)
 
-        history.append(event)
-        self.moderation_history = json.dumps(history)
+        row = self.append("moderation_history_table", {
+            "action_date": now_datetime(),
+            "action_type": action_type,
+            "action_by": frappe.session.user,
+            "previous_status": previous_status,
+            "new_status": self.status or "",
+            "details": detail_str,
+        })
+
+        if _save_to_db:
+            row.db_insert()
 
     # -------------------- Public Methods --------------------
 
