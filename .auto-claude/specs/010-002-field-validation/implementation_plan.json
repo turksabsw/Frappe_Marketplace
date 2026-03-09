@@ -1,0 +1,936 @@
+{
+  "feature": "TradeHub B2B Field Validation & Data Integrity Enhancement (Gorev 1-5)",
+  "workflow_type": "feature",
+  "workflow_rationale": "Five interconnected data integrity enhancements spanning 7 apps: child table calculations, role-based field auth, cascading discounts, JSON-to-child-table migration, and fetch_from completion. This adds new functionality (cascading discounts, authorization layers) while enhancing existing patterns across 233+ DocTypes.",
+  "phases": [
+    {
+      "id": "phase-1-commerce-schema",
+      "name": "Commerce App JSON Schema Updates",
+      "type": "implementation",
+      "description": "Apply all Gorev 2 (read_only, set_only_once), Gorev 3 (cascading discount fields), and Gorev 5 (fetch_from) JSON schema changes to tradehub_commerce DocTypes. Pure JSON editing — no code logic changes.",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-1-1",
+          "description": "Update order.json and order_item.json: (G2) Add read_only:1 to system fields (order_number, confirmed_date, dates), set_only_once:1 to buyer/seller. (G3) Add discount_1, discount_2, discount_3, effective_discount_pct, show_discount_tiers fields; hide old discount_percentage. (G5) Verify existing fetch_from completeness.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order_item/order_item.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json')); fields={f['fieldname']:f for f in d['fields']}; assert 'discount_1' in fields, 'discount_1 missing'; assert fields.get('buyer',{}).get('set_only_once')==1, 'set_only_once missing on buyer'; print('OK')\"",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "notes": "Updated order.json and order_item.json: (G3) Added discount_1, discount_2, discount_3, effective_discount_pct, show_discount_tiers fields; hid old discount_percentage. (G2) Verified read_only:1 on system fields and set_only_once:1 on buyer/seller - already present. (G5) Verified fetch_from completeness - all relationships intact. All verification checks passed.",
+          "updated_at": "2026-03-09T08:12:20.097503+00:00"
+        },
+        {
+          "id": "subtask-1-2",
+          "description": "Update cart.json and cart_line.json: (G2) Add read_only:1 to system fields. (G3) Add discount_1/2/3 fields to cart_line.json. (G5) Add fetch_from for listing_title, listing_image, seller_name in cart_line.json with read_only:1.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart/cart.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart_line/cart_line.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart_line/cart_line.json')); fields={f['fieldname']:f for f in d['fields']}; assert 'discount_1' in fields, 'discount_1 missing'; print('OK')\"",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "notes": "Updated cart.json: G2 added read_only:1 to last_activity and naming_series. Updated cart_line.json: G2 added read_only:1 to reserved_at and stock_reserved. G3 added discount_1/2/3, show_discount_tiers, effective_discount_pct fields following order.json pattern. G5 verified fetch_from already configured for title, primary_image, seller_name all with read_only:1. All 20 verification checks passed. Commit c323580.",
+          "updated_at": "2026-03-09T08:16:54.925363+00:00"
+        },
+        {
+          "id": "subtask-1-3",
+          "description": "Update sub_order.json, sub_order_item.json, marketplace_order.json, marketplace_order_item.json: (G2) Add read_only:1, set_only_once:1 as specified. (G3) Add cascading discount fields. (G5) Add fetch_from fields for buyer/seller/tenant names with read_only:1.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order_item/sub_order_item.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/marketplace_order/marketplace_order.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/marketplace_order_item/marketplace_order_item.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.json')); fields={f['fieldname']:f for f in d['fields']}; assert 'discount_1' in fields; print('OK')\"",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "notes": "Added cascading discount fields (discount_1/2/3, show_discount_tiers, effective_discount_pct) to all 4 files following order.json pattern. G2 verified: read_only:1 on system fields and set_only_once:1 on primary links already in place. G5 verified: all buyer/seller/tenant name fetch_from with read_only:1 already configured; added missing fetch_from on sub_order_item.sku. All validations passed. Commit 6bb2a92.",
+          "updated_at": "2026-03-09T14:00:00.000000+00:00"
+        },
+        {
+          "id": "subtask-1-4",
+          "description": "Update rfq.json, rfq_quote.json, rfq_quote_item.json: (G2) Add set_only_once:1 to buyer (rfq) and seller/rfq (rfq_quote). (G3) Add cascading discount fields to rfq_quote_item.json. (G5) Add fetch_from for buyer_name, seller_name, tenant_name with read_only:1.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq/rfq.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq_quote/rfq_quote.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq_quote_item/rfq_quote_item.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq/rfq.json')); fields={f['fieldname']:f for f in d['fields']}; b=fields.get('buyer',{}); assert b.get('set_only_once')==1, 'buyer set_only_once missing'; print('OK')\"",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "updated_at": "2026-03-09T14:00:00.000000+00:00"
+        },
+        {
+          "id": "subtask-1-5",
+          "description": "Update quotation.json, quotation_item.json, commission_plan.json, escrow_account.json: (G2) Add read_only:1 to system/computed fields. (G3) Add cascading discount fields to quotation_item.json.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/quotation/quotation.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/quotation_item/quotation_item.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/commission_plan/commission_plan.json",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/escrow_account/escrow_account.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/quotation_item/quotation_item.json')); fields={f['fieldname']:f for f in d['fields']}; assert 'discount_1' in fields; print('OK')\"",
+            "expected": "OK"
+          },
+          "status": "completed",
+          "notes": "G2: Added permlevel:1 to buyer_evaluation_score, buyer_evaluation_notes, rejection_reason in quotation.json. Added read_only:1 to 8 system/computed fields in escrow_account.json (platform_fee, processing_fee, delivery_confirmed_at, payout_error, payout_reference, original/extended_release_date, erpnext_sync_error). Commission_plan.json already fully protected - no changes needed. G3: Added cascading discount fields (discount_1/2/3, show_discount_tiers, effective_discount_pct, discount_amount) to quotation_item.json following order_item.json pattern. All verification checks passed. Commit 8315a8b.",
+          "updated_at": "2026-03-09T09:00:23.257859+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-noncommerce-schema",
+      "name": "Non-Commerce Apps JSON Schema Updates",
+      "type": "implementation",
+      "description": "Apply Gorev 2 (field authorization), Gorev 3 (discount fields for Listing), and Gorev 5 (fetch_from) JSON changes to core, catalog, seller, logistics, marketing, and compliance apps.",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-2-1",
+          "description": "Update tradehub_core JSONs: (G2) Add read_only:1 to system fields in buyer_profile.json, tenant.json, organization.json, kyc_profile.json. (G5) Add fetch_from for buyer_category_name, tenant_name, organization_name in buyer_profile.json with read_only:1.",
+          "service": "tradehub_core",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/buyer_profile/buyer_profile.json",
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/tenant/tenant.json",
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/organization/organization.json",
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/kyc_profile/kyc_profile.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_core/tradehub_core/tradehub_core/doctype/buyer_profile/buyer_profile.json')); fields={f['fieldname']:f for f in d['fields']}; ff=[f for f in fields.values() if f.get('fetch_from')]; print(f'{len(ff)} fetch_from fields found - OK')\"",
+            "expected": "fetch_from fields found - OK"
+          },
+          "status": "completed",
+          "notes": "Added read_only:1 to system fields: buyer_profile (email_verified, phone_verified, identity_verified), tenant (subscription_start_date, subscription_end_date), organization (documents_verified, tax_documents_verified, trade_registry_verified), kyc_profile (pep_status). G5 fetch_from fields already complete in buyer_profile (buyer_category_name, tenant_name, organization_name all have fetch_from + read_only:1). Commit: de39245",
+          "updated_at": "2026-03-09T09:03:44.977967+00:00"
+        },
+        {
+          "id": "subtask-2-2",
+          "description": "Update product.json in tradehub_catalog: (G5) Add fetch_from for Category and Brand display fields with read_only:1.",
+          "service": "tradehub_catalog",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/product/product.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/product/product.json')); fields={f['fieldname']:f for f in d['fields']}; ff=[f for f in fields.values() if f.get('fetch_from')]; print(f'{len(ff)} fetch_from fields - OK')\"",
+            "expected": "fetch_from fields - OK"
+          },
+          "status": "completed",
+          "notes": "Verified product.json already has all G5 fetch_from fields correctly configured: brand_name (fetch_from: brand.brand_name, read_only:1), category_name (fetch_from: category.category_name, read_only:1), family_name (fetch_from: product_family.family_name, read_only:1). Updated modified timestamp.",
+          "updated_at": "2026-03-09T12:00:00.000000+00:00"
+        },
+        {
+          "id": "subtask-2-3",
+          "description": "Update seller_profile.json and listing.json in tradehub_seller: (G2) Add read_only:1 to metrics/system fields, set_only_once:1 to seller in listing. (G3) Add cascading discount fields to listing.json. (G5) Add fetch_from for tenant_name, tier_name, district_name, neighborhood_name, organization_name in seller_profile; seller_name, category_name, tenant_name in listing.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.json",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.json"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; sp=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.json')); fields={f['fieldname']:f for f in sp['fields']}; ff=[f for f in fields.values() if f.get('fetch_from')]; print(f'Seller Profile: {len(ff)} fetch_from fields - OK')\"",
+            "expected": "fetch_from fields - OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-4",
+          "description": "Update buy_box_entry.json and seller_application.json in tradehub_seller: (G2) Add read_only:1 to system/computed fields, set_only_once:1 where appropriate.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/buy_box_entry/buy_box_entry.json",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_application/seller_application.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/buy_box_entry/buy_box_entry.json')); ro=[f for f in d['fields'] if f.get('read_only')==1]; print(f'{len(ro)} read_only fields - OK')\"",
+            "expected": "read_only fields - OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-5",
+          "description": "Update compliance app JSONs: (G2) Add read_only:1 to moderation/system fields in review.json, moderation_case.json, contract_instance.json. (G5) Add fetch_from for template_title, contract_type, tenant_name in contract_instance.json with read_only:1.",
+          "service": "tradehub_compliance",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/review/review.json",
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/contract_instance/contract_instance.json",
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/moderation_case/moderation_case.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/contract_instance/contract_instance.json')); fields={f['fieldname']:f for f in d['fields']}; ff=[f for f in fields.values() if f.get('fetch_from')]; print(f'{len(ff)} fetch_from fields - OK')\"",
+            "expected": "fetch_from fields - OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-2-6",
+          "description": "Update marketing and logistics JSONs: (G2) Add read_only:1 to system fields in coupon.json, campaign.json (marketing), marketplace_shipment.json (logistics).",
+          "service": "tradehub_marketing",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/coupon/coupon.json",
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/campaign/campaign.json",
+            "frappe-bench/apps/tradehub_logistics/tradehub_logistics/tradehub_logistics/doctype/marketplace_shipment/marketplace_shipment.json"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/coupon/coupon.json')); ro=[f for f in d['fields'] if f.get('read_only')==1]; print(f'{len(ro)} read_only fields - OK')\"",
+            "expected": "read_only fields - OK"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-migration-patches",
+      "name": "Migration Patches & Schema Validation",
+      "type": "implementation",
+      "description": "Create Gorev 3 discount migration patch, Gorev 4 Listing JSON field migration patch, update patches.txt, and run bench migrate to apply all schema changes and data migrations.",
+      "depends_on": [
+        "phase-1-commerce-schema",
+        "phase-2-noncommerce-schema"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-3-1",
+          "description": "Create migrate_discount_to_cascading.py for tradehub_commerce: Copy existing discount_percentage values to discount_1 for Order, Sub Order, Marketplace Order. Use Pattern 10 (migration patch template). Must be idempotent with NOT EXISTS check. Set flags.ignore_validate and flags.ignore_permissions.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [],
+          "files_to_create": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/patches/migrate_discount_to_cascading.py"
+          ],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/patches/migrate_json_to_child_tables.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import importlib.util; spec=importlib.util.spec_from_file_location('patch', 'apps/tradehub_commerce/tradehub_commerce/patches/migrate_discount_to_cascading.py'); mod=importlib.util.module_from_spec(spec); print('Patch file valid - OK')\"",
+            "expected": "Patch file valid - OK"
+          },
+          "status": "pending",
+          "notes": "Call frappe.reload_doc() for Order, Sub Order, Marketplace Order FIRST. Query records WHERE discount_percentage IS NOT NULL AND discount_percentage != 0 AND discount_1 IS NULL (or = 0). Copy discount_percentage → discount_1."
+        },
+        {
+          "id": "subtask-3-2",
+          "description": "Create migrate_listing_json_fields.py for tradehub_seller: Migrate Listing JSON fields (attributes → listing_attribute_value child table, images → listing_image child table, bulk_pricing_tiers → listing_bulk_pricing_tier child table). Child DocTypes ALREADY EXIST — this patch only migrates data. Use parse_json_field helper from Pattern 10.",
+          "service": "tradehub_seller",
+          "files_to_modify": [],
+          "files_to_create": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/patches/migrate_listing_json_fields.py"
+          ],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/patches/migrate_json_to_child_tables.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"import importlib.util; spec=importlib.util.spec_from_file_location('patch', 'apps/tradehub_seller/tradehub_seller/patches/migrate_listing_json_fields.py'); mod=importlib.util.module_from_spec(spec); print('Patch file valid - OK')\"",
+            "expected": "Patch file valid - OK"
+          },
+          "status": "pending",
+          "notes": "CRITICAL: Child DocTypes listing_attribute_value, listing_image, listing_bulk_pricing_tier ALREADY EXIST. This patch creates data rows from existing JSON field values. First verify which Listing records still have JSON data in the legacy fields. Use try/except per record to avoid batch failure."
+        },
+        {
+          "id": "subtask-3-3",
+          "description": "Update patches.txt for all apps with new migration patches. Add: tradehub_commerce.patches.migrate_discount_to_cascading and tradehub_seller.patches.migrate_listing_json_fields. Verify existing patch entries are correct.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/patches.txt",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/patches.txt"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'migrate_discount_to_cascading' apps/tradehub_commerce/tradehub_commerce/patches.txt && grep -c 'migrate_listing_json_fields' apps/tradehub_seller/tradehub_seller/patches.txt && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-3-4",
+          "description": "Run bench migrate to apply ALL pending schema changes (from Phases 1-2) and run migration patches (from subtasks 3-1, 3-2). Verify no errors during migration.",
+          "service": "tradehub_core",
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && bench --site marketplace.local migrate 2>&1 | tail -5",
+            "expected": "Success"
+          },
+          "status": "pending",
+          "notes": "If migration fails, check error output and fix the failing schema/patch before proceeding. Common issues: missing fields referenced by fetch_from, invalid field types, duplicate fieldnames."
+        }
+      ]
+    },
+    {
+      "id": "phase-4-python-code",
+      "name": "Python Server-Side Code",
+      "type": "implementation",
+      "description": "Implement all Python code changes across all Gorevs: (G1) calculate_totals with flt() precision, (G2) verify/complete _guard_system_fields and _guard_primary_links, (G3) cascading discount formula, (G4) verify child table operations replace json.loads, (G5) verify/complete refetch_denormalized_fields.",
+      "depends_on": [
+        "phase-3-migration-patches"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-4-1",
+          "description": "Update order.py: (G1) Verify calculate_totals uses flt(flt(qty,2)*flt(price,2),2) outer wrapping on item.amount — fix if using unwrapped multiplication. (G2) Verify _guard_system_fields and _guard_primary_links exist and are called first in validate(). (G3) Replace single discount_percentage calculation with cascading formula: price_after_d1 = flt(subtotal*(1-flt(d1,2)/100),2), repeat for d2/d3. (G5) Update refetch_denormalized_fields for any new fetch_from fields added in Phase 1.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.py",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_commerce.tradehub_commerce.doctype.order.order import Order; print('Import OK')\" 2>&1 | head -3",
+            "expected": "Import OK"
+          },
+          "status": "pending",
+          "notes": "CRITICAL: The existing calculate_totals in order.py (lines 334-363) does NOT wrap item_amount in outer flt(...,2). Fix this: item.amount = flt(flt(item.quantity, 2) * flt(item.unit_price, 2), 2). Also add cascading discount calculation: use discount_1/2/3 if show_discount_tiers, else just discount_1. Keep discount_percentage backward compat by computing effective_discount_pct."
+        },
+        {
+          "id": "subtask-4-2",
+          "description": "Update cart.py and sub_order.py: (G1) Implement/verify calculate_totals with flt(value,2) on ALL numeric ops. (G3) Add cascading discount formula identical to order.py. Ensure validate() ordering follows Pattern 9.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart/cart.py",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_commerce.tradehub_commerce.doctype.cart.cart import Cart; from tradehub_commerce.tradehub_commerce.doctype.sub_order.sub_order import SubOrder; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-3",
+          "description": "Update marketplace_order.py and quotation.py: (G1) Implement/verify calculate_totals with flt(value,2). (G2) Verify _guard_system_fields exists. For quotation.py, fix the existing calculate_totals which uses flt() without precision arg — add precision 2 to all currency ops.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/marketplace_order/marketplace_order.py",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/quotation/quotation.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_commerce.tradehub_commerce.doctype.marketplace_order.marketplace_order import MarketplaceOrder; from tradehub_commerce.tradehub_commerce.doctype.quotation.quotation import Quotation; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-4",
+          "description": "Update rfq.py and rfq_quote.py: (G1) Implement/verify calculate_totals with flt(value,2). (G2) Verify _guard_system_fields. (G5) Verify refetch_denormalized_fields covers buyer_name, seller_name, tenant_name.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq/rfq.py",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq_quote/rfq_quote.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_commerce.tradehub_commerce.doctype.rfq.rfq import RFQ; from tradehub_commerce.tradehub_commerce.doctype.rfq_quote.rfq_quote import RFQQuote; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-5",
+          "description": "Update listing.py in tradehub_seller: (G1) Implement/verify calculate_totals with flt(value,2) for child table calculations. (G2) Verify _guard_system_fields and _guard_primary_links. (G3) Add cascading discount formula. (G4) Verify json.loads/json.dumps for attributes/images/bulk_pricing_tiers are replaced with child table operations. (G5) Verify refetch_denormalized_fields covers seller_name, category_name, tenant_name.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_seller.tradehub_seller.doctype.listing.listing import Listing; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending",
+          "notes": "IMPORTANT: listing.py is a large file. Check if json.loads() calls remain for attributes/images/bulk_pricing_tiers — these should now use self.attribute_values (child table) etc. Do NOT touch json.loads() for fields that are KEEP (not in MIGRATE list)."
+        },
+        {
+          "id": "subtask-4-6",
+          "description": "Update seller_profile.py and sku_product.py: (G2) Verify _guard_system_fields. (G4) For seller_profile, verify badges JSON field is replaced with seller_badges child table operations. (G5) For seller_profile, verify refetch_denormalized_fields covers new fetch_from fields (tenant_name, tier_name, etc.).",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.py",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/sku_product/sku_product.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_seller.tradehub_seller.doctype.seller_profile.seller_profile import SellerProfile; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-7",
+          "description": "Update buyer_profile.py in tradehub_core: (G2) Verify _guard_system_fields exists and is called in validate(). (G5) Verify refetch_denormalized_fields covers buyer_category_name, tenant_name, organization_name.",
+          "service": "tradehub_core",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/buyer_profile/buyer_profile.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_core.tradehub_core.doctype.buyer_profile.buyer_profile import BuyerProfile; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-8",
+          "description": "Update shipping_rule.py (logistics) and coupon.py (marketing): (G1) Add rate tier calculation with flt(value,2) to shipping_rule.py. (G3) Ensure coupon.py applies coupon discounts AFTER cascading discounts — verify discount application ordering.",
+          "service": "tradehub_logistics",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_logistics/tradehub_logistics/tradehub_logistics/doctype/shipping_rule/shipping_rule.py",
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/coupon/coupon.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_logistics.tradehub_logistics.doctype.shipping_rule.shipping_rule import ShippingRule; from tradehub_marketing.tradehub_marketing.doctype.coupon.coupon import Coupon; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-9",
+          "description": "Update compliance Python files: (G2) Verify _guard_system_fields in review.py, moderation_case.py, contract_instance.py. (G4) In moderation_case.py, verify/update moderation_history json.loads/json.dumps to use child table operations if applicable (check if moderation_action_log child table is the target). (G5) Verify refetch_denormalized_fields in contract_instance.py covers template_title, contract_type, tenant_name.",
+          "service": "tradehub_compliance",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/review/review.py",
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/moderation_case/moderation_case.py",
+            "frappe-bench/apps/tradehub_compliance/tradehub_compliance/tradehub_compliance/doctype/contract_instance/contract_instance.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && python -c \"from tradehub_compliance.tradehub_compliance.doctype.review.review import Review; from tradehub_compliance.tradehub_compliance.doctype.moderation_case.moderation_case import ModerationCase; from tradehub_compliance.tradehub_compliance.doctype.contract_instance.contract_instance import ContractInstance; print('Import OK')\"",
+            "expected": "Import OK"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-5-js-code",
+      "name": "JavaScript Client-Side Code",
+      "type": "implementation",
+      "description": "Implement all JS code changes across all Gorevs: (G1) calculate_totals() and child table event handlers, (G2) role-based field locking, (G3) cascading discount client-side handlers, (G5) fetch_from cascade change handlers.",
+      "depends_on": [
+        "phase-3-migration-patches"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-5-1",
+          "description": "Update order.js: (G1) Verify calculate_totals(frm) uses flt() on all numeric values, verify items_add/items_remove/field change handlers call calculate_totals. (G2) Verify role-based field authorization in refresh handler. (G3) Replace discount_percentage handler with cascading discount handlers for discount_1/2/3, update calculate_totals to use cascading formula. Add show_discount_tiers toggle handler.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'discount_1' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending",
+          "notes": "JS cascading discount formula: var price_after_d1 = flt(base * (1 - flt(frm.doc.discount_1) / 100)); var price_after_d2 = flt(price_after_d1 * (1 - flt(frm.doc.discount_2) / 100)); var final_price = flt(price_after_d2 * (1 - flt(frm.doc.discount_3) / 100));"
+        },
+        {
+          "id": "subtask-5-2",
+          "description": "Update cart.js: (G1) Verify calculate_line_totals() and calculate_cart_totals() use flt(), verify child table handlers. (G3) Update to use cascading discount formula for cart line calculations.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart/cart.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'calculate' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/cart/cart.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-3",
+          "description": "Update sub_order.js and marketplace_order.js: (G1) Add child table field change handlers (items_add, items_remove, quantity/unit_price change) and calculate_totals(frm). (G2) Add role-based field locking in refresh handler. (G3) Add cascading discount handlers for sub_order.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.js",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/marketplace_order/marketplace_order.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'calculate_totals' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/sub_order/sub_order.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-4",
+          "description": "Update rfq.js, rfq_quote.js, commission_plan.js, escrow_account.js: (G1) Add child table field change handlers and calculate_totals(frm) for each. For rfq/rfq_quote, handle RFQ Item and RFQ Quote Item child table events. For commission_plan, handle Commission Plan Rate child table. For escrow_account, handle Escrow Event child table.",
+          "service": "tradehub_commerce",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq/rfq.js",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq_quote/rfq_quote.js",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/commission_plan/commission_plan.js",
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/escrow_account/escrow_account.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'calculate_totals\\|items_add\\|items_remove' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/rfq/rfq.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-5",
+          "description": "Update listing.js in tradehub_seller: (G1) Add child table calculation handlers for Listing Variant, Listing Bulk Pricing Tier child tables. (G2) Verify role-based checks. (G5) Implement city→district→neighborhood cascade handler if applicable; verify category→subcategory cascade handler; verify tenant-based set_query filters.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'calculate_totals\\|set_query' apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-6",
+          "description": "Update seller_profile.js and buyer_profile.js: (G2) Verify/add role-based field authorization in refresh handler. (G5) For seller_profile.js, implement city→district→neighborhood cascade handler: when city changes, clear district/neighborhood and refresh; when district changes, clear neighborhood. Add set_query filters for tenant isolation on all Link fields.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.js",
+            "frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/buyer_profile/buyer_profile.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'district\\|neighborhood\\|set_query' apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-7",
+          "description": "Update sku_product.js and seller_kpi.js: (G1) Add calculation handlers for SKU Product child tables and Seller KPI child table events. Use flt() on all numeric operations.",
+          "service": "tradehub_seller",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/sku_product/sku_product.js",
+            "frappe-bench/apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_kpi/seller_kpi.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'flt\\|calculate' apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/sku_product/sku_product.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-8",
+          "description": "Update marketing and logistics JS files: (G1) Add child table handlers for coupon.js (Coupon Category/Product Items), group_buy.js (Group Buy Tier/Commitment), wholesale_offer.js (Wholesale Offer Product), marketplace_shipment.js (shipping calculations). Use flt() for all numeric values.",
+          "service": "tradehub_marketing",
+          "files_to_modify": [
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/coupon/coupon.js",
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/group_buy/group_buy.js",
+            "frappe-bench/apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/wholesale_offer/wholesale_offer.js",
+            "frappe-bench/apps/tradehub_logistics/tradehub_logistics/tradehub_logistics/doctype/marketplace_shipment/marketplace_shipment.js"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "frappe-bench/apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.js"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && grep -c 'calculate\\|flt' apps/tradehub_marketing/tradehub_marketing/tradehub_marketing/doctype/coupon/coupon.js && echo 'OK'",
+            "expected": "OK"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-6-integration",
+      "name": "Build & Integration Verification",
+      "type": "integration",
+      "description": "Run bench build, clear cache, and perform end-to-end verification of all 5 Gorevs across all apps.",
+      "depends_on": [
+        "phase-4-python-code",
+        "phase-5-js-code"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-6-1",
+          "description": "Run bench build for all apps and clear cache. Verify no JS compilation errors. Run bench migrate one final time to ensure clean state.",
+          "service": "tradehub_core",
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "all_services": true,
+          "verification": {
+            "type": "command",
+            "command": "cd frappe-bench && bench build 2>&1 | tail -5 && bench --site marketplace.local clear-cache && echo 'Build OK'",
+            "expected": "Build OK"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-2",
+          "description": "End-to-end verification: (1) Verify __init__.py files intact, (2) Verify triple-nested directory structure, (3) Verify no json.loads remains for migrated fields, (4) Verify all fetch_from fields have read_only:1, (5) Verify cascading discount fields exist in all target DocTypes, (6) Spot-check flt() usage in modified Python files.",
+          "service": "tradehub_core",
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "all_services": true,
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Run: find frappe-bench/apps/tradehub_*/tradehub_*/tradehub_*/doctype -name '__init__.py' | wc -l — verify count matches pre-change baseline",
+              "Run: ls frappe-bench/apps/tradehub_core/tradehub_core/tradehub_core/doctype/ — verify directory exists with DocTypes",
+              "Run: bench --site marketplace.local migrate — verify no errors",
+              "Run: bench build — verify no JS errors",
+              "Verify Order JSON has discount_1, discount_2, discount_3 fields",
+              "Verify Seller Profile JSON has fetch_from fields for tenant_name, tier_name",
+              "Verify order.py calculate_totals uses flt(value, 2) on all operations",
+              "Verify order.js calculate_totals uses cascading discount formula",
+              "Verify existing tests pass: bench --site marketplace.local run-tests --app tradehub_commerce"
+            ]
+          },
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_phases": 6,
+    "total_subtasks": 32,
+    "services_involved": [
+      "tradehub_core",
+      "tradehub_catalog",
+      "tradehub_commerce",
+      "tradehub_seller",
+      "tradehub_logistics",
+      "tradehub_marketing",
+      "tradehub_compliance"
+    ],
+    "gorev_coverage": {
+      "gorev_1_calculations": "Phase 4 (Python) + Phase 5 (JS) — subtasks 4-1 through 4-8, 5-1 through 5-8",
+      "gorev_2_field_auth": "Phase 1-2 (JSON schema) + Phase 4 (Python guards) + Phase 5 (JS role checks)",
+      "gorev_3_cascading_discount": "Phase 1-2 (JSON fields) + Phase 3 (migration patch) + Phase 4 (Python formula) + Phase 5 (JS formula)",
+      "gorev_4_json_migration": "Phase 3 (Listing migration patch) + Phase 4 (Python code updates — subtasks 4-5, 4-6, 4-9)",
+      "gorev_5_fetch_from": "Phase 1-2 (JSON fetch_from) + Phase 4 (Python refetch) + Phase 5 (JS cascade handlers)"
+    },
+    "parallelism": {
+      "max_parallel_phases": 2,
+      "parallel_groups": [
+        {
+          "phases": [
+            "phase-1-commerce-schema",
+            "phase-2-noncommerce-schema"
+          ],
+          "reason": "Both are JSON schema changes to different apps — no file conflicts"
+        },
+        {
+          "phases": [
+            "phase-4-python-code",
+            "phase-5-js-code"
+          ],
+          "reason": "Both depend only on phase-3, modify different file types (.py vs .js) in same apps — no file conflicts"
+        }
+      ],
+      "recommended_workers": 2,
+      "speedup_estimate": "1.5x faster than sequential — schema phases parallel, then code phases parallel"
+    },
+    "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 010-002-field-validation --parallel 2"
+  },
+  "verification_strategy": {
+    "risk_level": "critical",
+    "skip_validation": false,
+    "test_creation_phase": "post_implementation",
+    "test_types_required": [
+      "unit",
+      "integration",
+      "e2e"
+    ],
+    "security_scanning_required": true,
+    "staging_deployment_required": true,
+    "acceptance_criteria": [
+      "bench --site marketplace.local migrate succeeds without errors",
+      "bench build succeeds without JS compilation errors",
+      "All existing tests pass (bench run-tests)",
+      "No __init__.py files deleted or emptied",
+      "Triple-nested directory structure preserved for all 7 apps",
+      "hooks.py files only appended to, never overwritten",
+      "flt(value, 2) used on ALL Python numeric operations",
+      "flt() used on ALL JS numeric values",
+      "All fetch_from fields have read_only:1",
+      "Cascading discount formula identical in JS and Python",
+      "Migration patches are idempotent (safe to run multiple times)",
+      "Tenant isolation not broken by any change",
+      "Turkish role names used consistently in authorization checks"
+    ],
+    "verification_steps": [
+      {
+        "name": "Schema Migration",
+        "command": "cd frappe-bench && bench --site marketplace.local migrate",
+        "expected_outcome": "No errors, all DocTypes load",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Asset Build",
+        "command": "cd frappe-bench && bench build",
+        "expected_outcome": "No JS compilation errors",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Init File Integrity",
+        "command": "find frappe-bench/apps/tradehub_*/tradehub_*/tradehub_*/doctype -name '__init__.py' | wc -l",
+        "expected_outcome": "Count matches pre-change baseline",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Commerce Tests",
+        "command": "cd frappe-bench && bench --site marketplace.local run-tests --app tradehub_commerce",
+        "expected_outcome": "All tests pass",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Discount Field Verification",
+        "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.json')); fields=[f['fieldname'] for f in d['fields']]; assert 'discount_1' in fields and 'discount_2' in fields and 'discount_3' in fields; print('Discount fields present')\"",
+        "expected_outcome": "Discount fields present",
+        "type": "test",
+        "required": true,
+        "blocking": false
+      },
+      {
+        "name": "flt() Coverage Check",
+        "command": "cd frappe-bench && grep -rn 'item\\.amount\\s*=' apps/tradehub_commerce/tradehub_commerce/tradehub_commerce/doctype/order/order.py | grep -v flt | wc -l",
+        "expected_outcome": "0 (all item.amount assignments use flt)",
+        "type": "test",
+        "required": true,
+        "blocking": false
+      }
+    ],
+    "reasoning": "Critical risk: financial calculations (cascading discounts), permission/authorization changes (124 DocTypes), data migrations (JSON to child tables with data loss risk), schema changes across 7 apps. Maximum validation depth required."
+  },
+  "qa_acceptance": {
+    "unit_tests": {
+      "required": true,
+      "commands": [
+        "cd frappe-bench && bench --site marketplace.local run-tests --app tradehub_commerce",
+        "cd frappe-bench && bench --site marketplace.local run-tests --app tradehub_seller",
+        "cd frappe-bench && bench --site marketplace.local run-tests --app tradehub_core"
+      ],
+      "minimum_coverage": null
+    },
+    "integration_tests": {
+      "required": true,
+      "commands": [
+        "cd frappe-bench && bench --site marketplace.local run-tests --doctype 'Order'",
+        "cd frappe-bench && bench --site marketplace.local run-tests --doctype 'Listing'"
+      ],
+      "services_to_test": [
+        "tradehub_commerce",
+        "tradehub_seller"
+      ]
+    },
+    "e2e_tests": {
+      "required": true,
+      "commands": [],
+      "flows": [
+        "Order with cascading discount: Create → Add items → Set discount_1/2/3 → Save → Verify totals",
+        "Role-based field lock: Login as non-admin → Open Order → Verify read-only fields",
+        "fetch_from cascade: Open Listing → Select seller → Verify tenant_name auto-fill",
+        "Child table add/remove: Open Order → Add 3 items → Remove 1 → Verify recalculation"
+      ]
+    },
+    "browser_verification": {
+      "required": true,
+      "pages": [
+        {
+          "url": "http://localhost:8000/app/order",
+          "checks": [
+            "renders",
+            "discount fields visible",
+            "no-console-errors"
+          ]
+        },
+        {
+          "url": "http://localhost:8000/app/listing",
+          "checks": [
+            "renders",
+            "category cascade works",
+            "no-console-errors"
+          ]
+        },
+        {
+          "url": "http://localhost:8000/app/seller-profile",
+          "checks": [
+            "renders",
+            "city-district-neighborhood cascade works"
+          ]
+        }
+      ]
+    },
+    "database_verification": {
+      "required": true,
+      "checks": [
+        "bench migrate succeeds",
+        "Order table has discount_1, discount_2, discount_3 columns",
+        "All child table migrations completed (no orphaned JSON data)",
+        "patches.txt entries are registered"
+      ]
+    }
+  },
+  "qa_signoff": null,
+  "status": "in_progress",
+  "planStatus": "in_progress",
+  "xstateState": "coding",
+  "executionPhase": "coding",
+  "updated_at": "2026-03-09T09:04:06.922Z",
+  "lastEvent": {
+    "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
+    "sequence": 0,
+    "type": "PLANNING_COMPLETE",
+    "timestamp": "2026-03-09T08:10:19.348519+00:00"
+  },
+  "last_updated": "2026-03-09T09:03:44.977976+00:00"
+}

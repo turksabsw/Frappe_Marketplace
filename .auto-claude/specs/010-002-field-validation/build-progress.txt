@@ -1,0 +1,238 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: TradeHub B2B Field Validation & Data Integrity Enhancement (Gorev 1-5)
+Workspace: /home/ali/Masaüstü/Frappe_Marketplace
+Spec: 010-002-field-validation
+Started: 2026-03-09
+
+Workflow Type: feature
+Rationale: Five interconnected data integrity enhancements spanning 7 apps: child table calculations,
+           role-based field authorization, cascading discounts, JSON-to-child-table migration, and
+           fetch_from completion. Adds new functionality while enhancing existing patterns.
+
+Session 1 (Planner):
+- Completed deep codebase investigation (Phase 0)
+  - Explored all 7 tradehub apps, 233+ DocTypes
+  - Identified 103 existing child DocTypes (all spec-mentioned ones already exist)
+  - Verified 19 DocTypes with _guard_system_fields
+  - Verified 9 DocTypes with refetch_denormalized_fields
+  - Verified 37 JS files with role-based checks
+  - Found 5 existing migration patches across apps
+  - Read canonical pattern files (order.py, order.js, sub_order.py, seller_profile.py, listing.js)
+- Created implementation_plan.json
+- Created/updated project_index.json
+- Created/updated context.json
+- Created init.sh
+- Phases: 6
+- Total subtasks: 34
+
+Phase Summary:
+- Phase 1 (Commerce JSON Schema): 5 subtasks, depends on nothing
+  - order/order_item, cart/cart_line, sub_order/marketplace_order, rfq/rfq_quote, quotation/commission_plan
+- Phase 2 (Non-Commerce JSON Schema): 6 subtasks, depends on nothing
+  - core (4 files), catalog (1 file), seller (2+2 files), compliance (3 files), marketing+logistics (3 files)
+- Phase 3 (Migration Patches & Schema Validation): 4 subtasks, depends on Phase 1+2
+  - Create discount migration patch, create Listing JSON migration patch, update patches.txt, run bench migrate
+- Phase 4 (Python Code): 9 subtasks, depends on Phase 3
+  - order.py, cart.py+sub_order.py, marketplace_order.py+quotation.py, rfq.py+rfq_quote.py,
+  - listing.py, seller_profile.py+sku_product.py, buyer_profile.py,
+  - shipping_rule.py+coupon.py, review.py+moderation_case.py+contract_instance.py
+- Phase 5 (JS Code): 8 subtasks, depends on Phase 3
+  - order.js, cart.js, sub_order.js+marketplace_order.js, rfq.js+rfq_quote.js+commission_plan.js+escrow_account.js,
+  - listing.js, seller_profile.js+buyer_profile.js, sku_product.js+seller_kpi.js,
+  - coupon.js+group_buy.js+wholesale_offer.js+marketplace_shipment.js
+- Phase 6 (Build & Integration): 2 subtasks, depends on Phase 4+5
+  - bench build + clear-cache, end-to-end verification
+
+Gorev Coverage:
+- Gorev 1 (Calculations):    Phases 4+5 (all calculate_totals in Python + JS)
+- Gorev 2 (Field Auth):      Phases 1+2 (JSON) + Phase 4 (Python guards) + Phase 5 (JS role checks)
+- Gorev 3 (Cascading Disc):  Phases 1+2 (JSON fields) + Phase 3 (migration) + Phases 4+5 (formula)
+- Gorev 4 (JSON Migration):  Phase 3 (Listing patch) + Phase 4 (Python code updates)
+- Gorev 5 (fetch_from):      Phases 1+2 (JSON) + Phase 4 (Python refetch) + Phase 5 (JS cascade)
+
+Services Involved:
+- tradehub_core: Foundation — Buyer Profile guards, refetch, tenant isolation
+- tradehub_catalog: Product fetch_from for Category/Brand
+- tradehub_commerce: Primary — Order/Cart/Sub Order calculations, cascading discounts, field auth
+- tradehub_seller: Primary — Listing/Seller Profile calculations, cascading discounts, JSON migration
+- tradehub_logistics: Integration — Shipping calculations, field auth
+- tradehub_marketing: Integration — Coupon after cascading discount, child table handlers
+- tradehub_compliance: Integration — Review/Moderation guards, Contract Instance refetch
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 2
+- Parallel groups:
+  1. Phase 1 + Phase 2 (JSON schema for commerce vs non-commerce — different files)
+  2. Phase 4 + Phase 5 (Python vs JS — different file types, no conflicts)
+
+Key Findings from Investigation:
+- ALL 19 child DocTypes from @128 ALREADY EXIST — no new DocTypes needed
+- Existing migration patches handle most JSON-to-child-table work
+- Remaining migrations: Listing (attributes/images/bulk_pricing) + discount field copy
+- order.py calculate_totals needs flt() outer wrapping fix (currently missing)
+- quotation.py calculate_totals lacks flt() precision args
+- 37 JS files already have role-based checks — mostly verify, not create from scratch
+
+Risk Factors:
+- Schema changes across 7 apps — any JSON error breaks bench migrate
+- Cascading discount formula must match exactly in Python and JS
+- Data migration must not lose existing discount_percentage values
+- Multi-tenant isolation must remain intact
+- set_only_once must not be applied to amended_from fields
+- existing __init__.py files must never be deleted
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 010-002-field-validation --parallel 2
+
+Example:
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 010-002-field-validation --parallel 2
+
+=== END SESSION 1 ===
+
+=== SESSION 2 (subtask-1-2) ===
+
+Completed subtask-1-2: Update cart.json and cart_line.json
+
+Changes made:
+- cart.json (G2): Added read_only:1 to last_activity and naming_series system fields
+- cart_line.json (G2): Added read_only:1 to reserved_at and stock_reserved system fields
+- cart_line.json (G3): Added discount_1, show_discount_tiers, discount_2, discount_3, effective_discount_pct
+  - Follows order.json pattern exactly (Percent type, depends_on for D2/D3, read_only on effective_discount_pct)
+- cart_line.json (G5): Verified fetch_from already configured:
+  - title -> listing.title (read_only:1)
+  - primary_image -> listing.primary_image (read_only:1)
+  - seller_name -> seller.seller_name (read_only:1)
+
+Verification: All 20 checks passed
+Commit: c323580
+
+=== END SESSION 2 ===
+
+=== SESSION 3 (subtask-1-3) ===
+
+Completed subtask-1-3: Update sub_order, sub_order_item, marketplace_order, marketplace_order_item JSON schemas
+
+Changes made:
+- sub_order.json (G3): Added discount_1, show_discount_tiers, discount_2, discount_3, effective_discount_pct
+  in totals section before discount_amount, following order.json pattern exactly
+- sub_order.json (G2): Verified already in place - sub_order_id read_only:1,
+  marketplace_order/seller/buyer set_only_once:1
+- sub_order.json (G5): Verified fetch_from already configured for seller_name, seller_company,
+  tenant_name, buyer_name, marketplace_order_number - all with read_only:1
+
+- sub_order_item.json (G3): Added cascading discount fields in pricing section
+- sub_order_item.json (G5): Added fetch_from: "listing.sku" to sku field (was missing)
+  Verified title, seller_name fetch_from already configured
+
+- marketplace_order.json (G3): Added cascading discount fields in totals section
+- marketplace_order.json (G2): Verified order_id read_only:1, buyer/organization set_only_once:1
+- marketplace_order.json (G5): Verified buyer_name, buyer_email, organization_name,
+  tenant_name fetch_from all with read_only:1
+
+- marketplace_order_item.json (G3): Added cascading discount fields in pricing section
+- marketplace_order_item.json (G5): Verified seller_name, title, sku fetch_from all with read_only:1
+
+Verification: All field existence, type, property, and depends_on checks passed for all 4 files
+Commit: 6bb2a92
+
+=== END SESSION 3 ===
+
+=== SESSION 4 (subtask-1-4) ===
+
+Completed subtask-1-4: Update rfq.json, rfq_quote.json, rfq_quote_item.json
+
+Changes made:
+- rfq.json: All changes already in place from prior work
+  - (G2) buyer already has set_only_once:1
+  - (G5) buyer_name has fetch_from:"buyer.buyer_name" read_only:1
+  - (G5) tenant_name has fetch_from:"tenant.tenant_name" read_only:1
+
+- rfq_quote.json: All changes already in place from prior work
+  - (G2) seller has set_only_once:1, rfq has set_only_once:1
+  - (G5) seller_name has fetch_from:"seller.seller_name" read_only:1
+  - (G5) rfq_title has fetch_from:"rfq.title" read_only:1
+  - (G5) tenant_name has fetch_from:"tenant.tenant_name" read_only:1
+
+- rfq_quote_item.json (G3): Added cascading discount fields in pricing section
+  after total_price, following order.json pattern exactly:
+  - discount_1 (Percent, default "0")
+  - show_discount_tiers (Check, default "0")
+  - discount_2 (Percent, depends_on show_discount_tiers)
+  - discount_3 (Percent, depends_on show_discount_tiers)
+  - effective_discount_pct (Percent, read_only:1)
+  - discount_amount (Currency, options:"currency", read_only:1)
+
+Verification: All 13 checks passed (buyer set_only_once, fetch_from fields, all 6 discount fields)
+Commit: fd84561
+
+=== END SESSION 4 ===
+
+=== SESSION 5 (subtask-1-5) ===
+
+Completed subtask-1-5: Update quotation.json, quotation_item.json, commission_plan.json, escrow_account.json
+
+Changes made:
+- quotation.json (G2): Added permlevel:1 to buyer_evaluation_score, buyer_evaluation_notes,
+  and rejection_reason (admin/buyer evaluation fields - not seller-editable).
+  Verified: quotation_number read_only:1, status permlevel:1, rfq/seller set_only_once:1,
+  all fetch_from fields (rfq_title, rfq_type, rfq_deadline, rfq_buyer, rfq_buyer_company,
+  seller_name, seller_company, seller_email, seller_phone, tenant, tenant_name) already have read_only:1.
+  Computed fields (subtotal, discount_amount, tax_amount, total_amount, advance_amount) already read_only:1.
+  Date fields (created_date, submitted_date, reviewed_date, decided_date) already read_only:1.
+
+- quotation_item.json (G3): Added cascading discount fields following order_item.json pattern:
+  - discount_section (Section Break, collapsible)
+  - discount_1 (Percent, default "0")
+  - show_discount_tiers (Check, default "0")
+  - discount_2 (Percent, depends_on show_discount_tiers)
+  - discount_3 (Percent, depends_on show_discount_tiers)
+  - column_break_discount (Column Break)
+  - effective_discount_pct (Percent, read_only:1)
+  - discount_amount (Currency, read_only:1)
+
+- commission_plan.json (G2): No changes needed - already fully protected:
+  - All stats fields (total_sellers, total_gmv_processed, total_commission_earned,
+    average_commission_rate, last_calculation_date, current_seller_count) have read_only:1
+  - Timestamp fields (created_by, created_at, modified_by, modified_at) have read_only:1
+  - status has permlevel:1, tenant has read_only:1
+  - tenant_name has fetch_from + read_only:1
+
+- escrow_account.json (G2): Added read_only:1 to 8 system/computed fields:
+  - platform_fee (computed fee)
+  - processing_fee (computed fee)
+  - delivery_confirmed_at (system timestamp)
+  - payout_error (system-set)
+  - payout_reference (system-set from payment gateway)
+  - original_release_date (system-set)
+  - extended_release_date (system-set)
+  - erpnext_sync_error (system-set)
+  Verified: escrow_id, closed_at, created_at, held_amount, released_amount, refunded_amount,
+  pending_release_amount, total_fees, net_amount_to_seller, payout_date, payout_amount already read_only:1.
+  seller/buyer/marketplace_order/sub_order/payment_intent already set_only_once:1.
+
+Verification: All checks passed - 4 valid JSON files, all G2/G3 fields confirmed
+Commit: 8315a8b
+
+=== END SESSION 5 ===
+
+=== SESSION 6 (subtask-2-2) ===
+
+Completed subtask-2-2: Verify/update product.json in tradehub_catalog
+
+Changes made:
+- product.json (G5): Verified all fetch_from fields already correctly configured:
+  - brand_name: fetch_from="brand.brand_name", read_only:1 ✓
+  - category_name: fetch_from="category.category_name", read_only:1 ✓
+  - family_name: fetch_from="product_family.family_name", read_only:1 ✓
+- Confirmed Category DocType has category_name as title/display field
+- Confirmed Brand DocType has brand_name as title/display field
+- Updated modified timestamp to 2026-03-09
+
+Verification: 3 fetch_from fields - OK (all have read_only:1)
+
+=== END SESSION 6 ===
