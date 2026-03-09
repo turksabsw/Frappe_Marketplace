@@ -524,8 +524,8 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "Created migrate_attribute_set_to_child_table.py patch. Idempotent migration copies single attribute_set Link values from Product Category to category_attribute_sets child table with is_default=1. Checks for existing child rows, validates Attribute Set existence, uses ignore_validate/ignore_permissions flags. Follows established patch patterns.",
-          "updated_at": "2026-03-09T18:00:00.000000+00:00"
+          "notes": "Created migrate_attribute_set_to_child_table.py patch. Idempotent migration copies single attribute_set Link values from Product Category to category_attribute_sets child table with is_default=1. Checks for existing child rows via NOT EXISTS SQL and double-checks via doc load. Validates Attribute Set existence. Uses ignore_validate/ignore_permissions flags. Follows established patch patterns from migrate_category_to_product_category.py and migrate_buyer_flat_address.py. Verification passed.",
+          "updated_at": "2026-03-09T14:48:55.198890+00:00"
         }
       ]
     },
@@ -553,7 +553,9 @@
             "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/pim_product/pim_product.json')); fnames=[f['fieldname'] for f in d['fields']]; assert 'condition' in fnames; assert 'condition_note' in fnames; assert 'city_of_origin' in fnames; assert 'manufactured_by' in fnames; fields={f['fieldname']:f for f in d['fields']}; assert fields['condition']['default']=='New'; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added condition_section before compliance_tab with: condition (Select, 8 options, reqd, default New, in_list_view, in_standard_filter, search_index), column_break_condition_1, condition_note (Small Text with depends_on/mandatory_depends_on for Used/Renewed conditions). Added city_of_origin (Data) and manufactured_by (Data, length 200) to compliance_section after column_break_compliance_1. country_of_origin preserved as-is (not re-added). All verification checks passed. field_order count matches fields count (259).",
+          "updated_at": "2026-03-09T14:51:45.004284+00:00"
         },
         {
           "id": "subtask-5-2",
@@ -569,7 +571,9 @@
             "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.json')); fnames=[f['fieldname'] for f in d['fields']]; assert 'condition' in fnames; assert 'condition_note' in fnames; assert 'country_of_origin' in fnames; assert 'city_of_origin' in fnames; assert 'manufactured_by' in fnames; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added condition_section (Section Break), condition (Select with 8 options, reqd, default New, in_list_view, in_standard_filter, search_index), condition_note (Small Text with depends_on and mandatory_depends_on for Used/Renewed conditions) to field_order and fields array. Added country_of_origin (Link to Country, in_standard_filter, search_index), city_of_origin (Data), manufactured_by (Data, length 200) in shipping_section. Updated modified timestamp. All verifications passed.",
+          "updated_at": "2026-03-09T10:00:00.000000+00:00"
         },
         {
           "id": "subtask-5-3",
@@ -586,7 +590,9 @@
             "command": "cd frappe-bench && python -c \"pim=open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/pim_product/pim_product.py').read(); lst=open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.py').read(); assert 'condition_note' in pim; assert 'condition_note' in lst; assert '20' in pim or 'min_length' in pim; assert '20' in lst or 'min_length' in lst; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added validate_condition_note() method to both PIMProduct (pim_product.py) and Listing (listing.py) controllers. For conditions Used - Like New, Used - Good, Used - Acceptable, and Renewed, condition_note must be at least 20 characters (stripped). Uses getattr for safe field access, follows existing validation pattern with frappe.throw and _() for i18n. Called from validate() in both classes. Verification passed.",
+          "updated_at": "2026-03-09T14:56:43.235505+00:00"
         },
         {
           "id": "subtask-5-4",
@@ -603,7 +609,9 @@
             "command": "cd frappe-bench && python -c \"pim=open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/pim_product/pim_product.js').read(); lst=open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js').read(); assert 'condition' in pim; assert 'condition_note' in pim or 'condition' in pim; assert 'condition' in lst; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added condition change handler to both pim_product.js and listing.js. When condition is 'New', clears condition_note. When condition is Used - Like New, Used - Good, Used - Acceptable, or Renewed, shows frappe.show_alert with orange indicator reminding about condition_note requirement (min 20 chars). Follows existing code patterns with section comments and i18n __() usage.",
+          "updated_at": "2026-03-09T15:05:00.000000+00:00"
         },
         {
           "id": "subtask-5-5",
@@ -1002,12 +1010,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T14:46:11.706Z",
+  "updated_at": "2026-03-09T14:57:07.776Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T13:54:26.482149+00:00"
   },
-  "last_updated": "2026-03-09T14:34:01.312181+00:00"
+  "last_updated": "2026-03-09T14:56:43.235512+00:00"
 }
