@@ -1,5 +1,5 @@
 {
-  "feature": "TradeHub Kategori & \u00dcr\u00fcn Sistemi - 6 Document Master Implementation",
+  "feature": "TradeHub Kategori & Ürün Sistemi - 6 Document Master Implementation",
   "workflow_type": "feature",
   "workflow_rationale": "Large-scale feature spanning 6 planning documents across 2 Frappe apps. Creates 5 new DocTypes, modifies 6+ existing ones, adds SVG sanitization, restructures permissions, implements workflow-driven approval pipeline, and requires 3 data migration patches. Strict dependency order enforced between documents.",
   "phases": [
@@ -220,7 +220,7 @@
         },
         {
           "id": "subtask-2-7",
-          "description": "Create migration patch: migrate_category_to_product_category.py \u2014 map existing Category references to Product Category records by category_name, update Listing.category, Listing.subcategory, and PIM Product.primary_category. Must be idempotent.",
+          "description": "Create migration patch: migrate_category_to_product_category.py — map existing Category references to Product Category records by category_name, update Listing.category, Listing.subcategory, and PIM Product.primary_category. Must be idempotent.",
           "service": "tradehub_catalog",
           "files_to_modify": [],
           "files_to_create": [
@@ -236,7 +236,7 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "Created patches/__init__.py and patches/migrate_category_to_product_category.py. The migration patch is idempotent and handles: (1) Building Category\u2192Product Category mapping by category_name, (2) Creating missing Product Category records from Category data preserving hierarchy, (3) Updating Listing.category and Listing.subcategory references, (4) Updating PIM Product.primary_category references, (5) Updating PIM Product Category Link.category references. Verification passed successfully.",
+          "notes": "Created patches/__init__.py and patches/migrate_category_to_product_category.py. The migration patch is idempotent and handles: (1) Building Category→Product Category mapping by category_name, (2) Creating missing Product Category records from Category data preserving hierarchy, (3) Updating Listing.category and Listing.subcategory references, (4) Updating PIM Product.primary_category references, (5) Updating PIM Product Category Link.category references. Verification passed successfully.",
           "updated_at": "2026-03-09T14:16:44.719238+00:00"
         },
         {
@@ -318,7 +318,7 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "Added validate_icon method to Category class with: SVG extension check, 50KB max file size, defusedxml sanitization (removes script/foreignObject/on* handlers/javascript: URIs), icon_class regex validation (^[a-zA-Z0-9_\\- ]+$), icon_color hex/rgb validation, auto-populate icon_name from filename. Added sanitize_svg module-level helper using parent\u2192child iteration pattern (stdlib ElementTree compatible). Verification passed. Committed as 4a6365b.",
+          "notes": "Added validate_icon method to Category class with: SVG extension check, 50KB max file size, defusedxml sanitization (removes script/foreignObject/on* handlers/javascript: URIs), icon_class regex validation (^[a-zA-Z0-9_\\- ]+$), icon_color hex/rgb validation, auto-populate icon_name from filename. Added sanitize_svg module-level helper using parent→child iteration pattern (stdlib ElementTree compatible). Verification passed. Committed as 4a6365b.",
           "updated_at": "2026-03-09T14:24:57.964240+00:00"
         },
         {
@@ -357,7 +357,7 @@
             "expected": "OK"
           },
           "status": "completed",
-          "notes": "Created category_icon.js with renderCategoryIcon() function (fallback chain: SVG icon \u2192 icon class \u2192 default SVG) and renderCategoryIconAsync() for name-based lookups. Created category_icon.css with 5 size variants (xs/sm/md/lg/xl), dark mode support ([data-theme=\"dark\"] + prefers-color-scheme), hover effects, and utility classes. Exported to tradehub_catalog namespace. Committed as 512bf5f.",
+          "notes": "Created category_icon.js with renderCategoryIcon() function (fallback chain: SVG icon → icon class → default SVG) and renderCategoryIconAsync() for name-based lookups. Created category_icon.css with 5 size variants (xs/sm/md/lg/xl), dark mode support ([data-theme=\"dark\"] + prefers-color-scheme), hover effects, and utility classes. Exported to tradehub_catalog namespace. Committed as 512bf5f.",
           "updated_at": "2026-03-09T14:30:21.206585+00:00"
         },
         {
@@ -393,7 +393,7 @@
       "subtasks": [
         {
           "id": "subtask-4-1",
-          "description": "Create Category Attribute Set child table DocType (istable:1): fields \u2014 attribute_set (Link), attribute_set_name (fetch_from, read_only), is_default (Check), is_required (Check), display_order (Int), display_label (Data)",
+          "description": "Create Category Attribute Set child table DocType (istable:1): fields — attribute_set (Link), attribute_set_name (fetch_from, read_only), is_default (Check), is_required (Check), display_order (Int), display_label (Data)",
           "service": "tradehub_catalog",
           "files_to_modify": [],
           "files_to_create": [
@@ -414,7 +414,7 @@
         },
         {
           "id": "subtask-4-2",
-          "description": "Create Product Attribute Set child table DocType (istable:1): fields \u2014 attribute_set (Link), attribute_set_name (fetch_from, read_only), source (Select: Auto/Manual), source_category (Link to Product Category), is_active (Check, default 1), display_order (Int)",
+          "description": "Create Product Attribute Set child table DocType (istable:1): fields — attribute_set (Link), attribute_set_name (fetch_from, read_only), source (Select: Auto/Manual), source_category (Link to Product Category), is_active (Check, default 1), display_order (Int)",
           "service": "tradehub_catalog",
           "files_to_modify": [],
           "files_to_create": [
@@ -467,7 +467,9 @@
             "command": "cd frappe-bench && python -c \"import json; l=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.json')); p=json.load(open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/pim_product/pim_product.json')); lav=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing_attribute_value/listing_attribute_value.json')); lf=[f['fieldname'] for f in l['fields']]; pf=[f['fieldname'] for f in p['fields']]; lavf=[f['fieldname'] for f in lav['fields']]; assert 'product_attribute_sets' in lf; assert 'product_attribute_sets' in pf; assert 'attribute_set' in lavf; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added product_attribute_sets (Table to Product Attribute Set) to listing.json and pim_product.json field_order and fields arrays. Added attribute_set (Link to Attribute Set) reference field to listing_attribute_value.json. All JSON validation and field consistency checks pass.",
+          "updated_at": "2026-03-09T18:00:00.000000+00:00"
         },
         {
           "id": "subtask-4-5",
@@ -483,7 +485,9 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/tradehub_catalog/doctype/product_category/product_category.py').read(); assert 'is_default' in content; assert 'category_attribute_sets' in content; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added validate_category_attribute_sets method to ProductCategory class. Validates only one row in category_attribute_sets child table has is_default=1 using cint() for safe boolean comparison. Called from validate(). Verification passed.",
+          "updated_at": "2026-03-09T18:10:00.000000+00:00"
         },
         {
           "id": "subtask-4-6",
@@ -501,11 +505,13 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/listing/listing.js').read(); assert 'product_attribute_sets' in content; assert 'Auto' in content or 'auto' in content; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added three new functions to listing.js: load_category_attribute_sets (fetches category's attribute sets via frappe.client.get API, shows frappe.confirm dialog when existing Auto entries exist), remove_auto_attribute_sets (removes Auto entries preserving Manual), update_auto_attribute_sets (clears and rebuilds with Manual preserved + new Auto from category). Called from category change handler. On category clear, removes Auto entries. Verification passed: product_attribute_sets (13 occurrences) and 'Auto' (3 occurrences) found in file.",
+          "updated_at": "2026-03-09T19:00:00.000000+00:00"
         },
         {
           "id": "subtask-4-7",
-          "description": "Create attribute set migration patch: migrate_attribute_set_to_child_table.py \u2014 copy existing single attribute_set Link values from Product Category to category_attribute_sets child table with is_default=1. Must be idempotent.",
+          "description": "Create attribute set migration patch: migrate_attribute_set_to_child_table.py — copy existing single attribute_set Link values from Product Category to category_attribute_sets child table with is_default=1. Must be idempotent.",
           "service": "tradehub_catalog",
           "files_to_modify": [],
           "files_to_create": [
@@ -517,7 +523,9 @@
             "command": "cd frappe-bench && python -c \"content=open('apps/tradehub_catalog/tradehub_catalog/patches/migrate_attribute_set_to_child_table.py').read(); assert 'def execute' in content; assert 'category_attribute_sets' in content or 'Category Attribute Set' in content; print('OK')\"",
             "expected": "OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Created migrate_attribute_set_to_child_table.py patch. Idempotent migration copies single attribute_set Link values from Product Category to category_attribute_sets child table with is_default=1. Checks for existing child rows, validates Attribute Set existence, uses ignore_validate/ignore_permissions flags. Follows established patch patterns.",
+          "updated_at": "2026-03-09T18:00:00.000000+00:00"
         }
       ]
     },
@@ -599,7 +607,7 @@
         },
         {
           "id": "subtask-5-5",
-          "description": "Create condition backfill patch: backfill_condition_field.py \u2014 set condition='New' for all PIM Product and Listing records with NULL/empty condition, apply REVERSE_AMAZON_MAP for records with amazon_condition values. Add DB indexes on condition, country_of_origin, and composite (condition, country_of_origin) on Listing table. Must be idempotent.",
+          "description": "Create condition backfill patch: backfill_condition_field.py — set condition='New' for all PIM Product and Listing records with NULL/empty condition, apply REVERSE_AMAZON_MAP for records with amazon_condition values. Add DB indexes on condition, country_of_origin, and composite (condition, country_of_origin) on Listing table. Must be idempotent.",
           "service": "tradehub_catalog",
           "files_to_modify": [],
           "files_to_create": [
@@ -813,7 +821,7 @@
       "max_parallel_phases": 1,
       "parallel_groups": [],
       "recommended_workers": 1,
-      "speedup_estimate": "Sequential execution required \u2014 all phases modify overlapping files (category.json, product_category.json, listing.json, pim_product.json, hooks.py)",
+      "speedup_estimate": "Sequential execution required — all phases modify overlapping files (category.json, product_category.json, listing.json, pim_product.json, hooks.py)",
       "rationale": "Phases 3-6 all modify the same JSON files (listing.json modified by phases 2,4,5; pim_product.json by phases 2,4,5; hooks.py by phases 2,3,6; category.py by phases 1,3). Sequential execution prevents merge conflicts and ensures each phase builds on verified prior changes."
     },
     "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 011 --parallel 1"
@@ -994,7 +1002,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T14:36:45.226Z",
+  "updated_at": "2026-03-09T14:46:11.706Z",
   "lastEvent": {
     "eventId": "7016afa0-6b12-448d-99e4-72edc0239800",
     "sequence": 0,
