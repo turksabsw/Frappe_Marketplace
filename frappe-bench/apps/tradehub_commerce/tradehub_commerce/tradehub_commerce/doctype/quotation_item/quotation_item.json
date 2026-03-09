@@ -24,6 +24,14 @@
   "unit_price",
   "currency",
   "amount",
+  "discount_section",
+  "discount_1",
+  "show_discount_tiers",
+  "discount_2",
+  "discount_3",
+  "column_break_discount",
+  "effective_discount_pct",
+  "discount_amount",
   "specifications_section",
   "specifications",
   "notes",
@@ -161,6 +169,62 @@
    "label": "Amount",
    "read_only": 1,
    "description": "Total amount (quantity x unit_price)"
+  },
+  {
+   "fieldname": "discount_section",
+   "fieldtype": "Section Break",
+   "label": "Discounts",
+   "collapsible": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_1",
+   "fieldtype": "Percent",
+   "label": "Discount 1 (%)",
+   "description": "First tier discount percentage for this item"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_discount_tiers",
+   "fieldtype": "Check",
+   "label": "Show Discount Tiers",
+   "description": "Enable to show additional discount tiers (Discount 2 and 3)"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_2",
+   "fieldtype": "Percent",
+   "label": "Discount 2 (%)",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Second tier discount percentage (applied after Discount 1)"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_3",
+   "fieldtype": "Percent",
+   "label": "Discount 3 (%)",
+   "depends_on": "eval:doc.show_discount_tiers",
+   "description": "Third tier discount percentage (applied after Discount 2)"
+  },
+  {
+   "fieldname": "column_break_discount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "effective_discount_pct",
+   "fieldtype": "Percent",
+   "label": "Effective Discount %",
+   "read_only": 1,
+   "description": "Calculated effective discount percentage from all tiers"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount",
+   "read_only": 1,
+   "description": "Calculated discount amount from cascading discounts"
   },
   {
    "fieldname": "specifications_section",

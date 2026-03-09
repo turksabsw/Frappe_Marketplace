@@ -564,13 +564,15 @@
    "fieldname": "buyer_evaluation_score",
    "fieldtype": "Rating",
    "label": "Evaluation Score",
-   "description": "Buyer's evaluation score for this quotation"
+   "description": "Buyer's evaluation score for this quotation",
+   "permlevel": 1
   },
   {
    "fieldname": "buyer_evaluation_notes",
    "fieldtype": "Small Text",
    "label": "Evaluation Notes",
-   "description": "Buyer's evaluation notes"
+   "description": "Buyer's evaluation notes",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_evaluation",
@@ -581,7 +583,8 @@
    "fieldtype": "Small Text",
    "label": "Rejection Reason",
    "depends_on": "eval:doc.status === 'Rejected'",
-   "description": "Reason for rejection (visible when rejected)"
+   "description": "Reason for rejection (visible when rejected)",
+   "permlevel": 1
   },
   {
    "fieldname": "dates_section",

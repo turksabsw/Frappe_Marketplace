@@ -310,7 +310,8 @@
    "fieldname": "platform_fee",
    "fieldtype": "Currency",
    "label": "Platform Fee",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -318,7 +319,8 @@
    "fieldname": "processing_fee",
    "fieldtype": "Currency",
    "label": "Processing Fee",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_fee",
@@ -394,7 +396,8 @@
   {
    "fieldname": "delivery_confirmed_at",
    "fieldtype": "Datetime",
-   "label": "Delivery Confirmed At"
+   "label": "Delivery Confirmed At",
+   "read_only": 1
   },
   {
    "fieldname": "release_approved_by",
@@ -460,7 +463,8 @@
    "description": "Payout transaction reference",
    "fieldname": "payout_reference",
    "fieldtype": "Data",
-   "label": "Payout Reference"
+   "label": "Payout Reference",
+   "read_only": 1
   },
   {
    "fieldname": "payout_date",
@@ -495,7 +499,8 @@
   {
    "fieldname": "payout_error",
    "fieldtype": "Small Text",
-   "label": "Payout Error"
+   "label": "Payout Error",
+   "read_only": 1
   },
   {
    "fieldname": "dispute_section",
@@ -603,13 +608,15 @@
    "depends_on": "eval:doc.hold_extended",
    "fieldname": "original_release_date",
    "fieldtype": "Datetime",
-   "label": "Original Release Date"
+   "label": "Original Release Date",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.hold_extended",
    "fieldname": "extended_release_date",
    "fieldtype": "Datetime",
-   "label": "Extended Release Date"
+   "label": "Extended Release Date",
+   "read_only": 1
   },
   {
    "default": "3",
@@ -657,7 +664,8 @@
   {
    "fieldname": "erpnext_sync_error",
    "fieldtype": "Small Text",
-   "label": "ERPNext Sync Error"
+   "label": "ERPNext Sync Error",
+   "read_only": 1
   },
   {
    "collapsible": 1,
