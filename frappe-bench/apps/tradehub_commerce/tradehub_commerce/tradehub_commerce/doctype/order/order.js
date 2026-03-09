@@ -251,9 +251,35 @@ frappe.ui.form.on('Order', {
     },
 
     /**
-     * Discount percentage change handler - recalculates totals
+     * Discount 1 change handler - recalculates totals with cascading discounts
      */
-    discount_percentage: function(frm) {
+    discount_1: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 2 change handler - recalculates totals with cascading discounts
+     */
+    discount_2: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Discount 3 change handler - recalculates totals with cascading discounts
+     */
+    discount_3: function(frm) {
+        calculate_totals(frm);
+    },
+
+    /**
+     * Show discount tiers toggle handler - shows/hides discount 2 and 3 fields
+     */
+    show_discount_tiers: function(frm) {
+        if (!frm.doc.show_discount_tiers) {
+            // Clear discount 2 and 3 when hiding tiers
+            frm.set_value('discount_2', 0);
+            frm.set_value('discount_3', 0);
+        }
         calculate_totals(frm);
     },
 
@@ -832,6 +858,7 @@ function record_payment_action(frm) {
 
 /**
  * Calculate order totals
+ * Uses cascading discount formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
  * @param {object} frm - Form object
  */
 function calculate_totals(frm) {
@@ -844,26 +871,37 @@ function calculate_totals(frm) {
         });
     }
 
-    frm.set_value('subtotal', subtotal);
+    frm.set_value('subtotal', flt(subtotal));
 
-    // Calculate discount
+    // Calculate cascading discount
     var discount_amount = 0;
-    if (frm.doc.discount_percentage) {
-        discount_amount = subtotal * flt(frm.doc.discount_percentage) / 100;
-    }
-    frm.set_value('discount_amount', discount_amount);
+    var effective_discount_pct = 0;
+    var d1 = flt(frm.doc.discount_1);
+    var d2 = flt(frm.doc.discount_2);
+    var d3 = flt(frm.doc.discount_3);
 
-    // Calculate tax
-    var taxable_amount = subtotal - discount_amount;
-    var tax_amount = 0;
-    if (frm.doc.tax_rate) {
-        tax_amount = taxable_amount * flt(frm.doc.tax_rate) / 100;
+    if (flt(subtotal) > 0) {
+        var price_after_d1 = flt(flt(subtotal) * (1 - d1 / 100));
+        var price_after_d2 = flt(price_after_d1 * (1 - d2 / 100));
+        var final_price = flt(price_after_d2 * (1 - d3 / 100));
+        discount_amount = flt(flt(subtotal) - final_price);
+        effective_discount_pct = flt(discount_amount / flt(subtotal) * 100);
     }
-    frm.set_value('tax_amount', tax_amount);
+
+    frm.set_value('discount_amount', flt(discount_amount));
+    frm.set_value('effective_discount_pct', flt(effective_discount_pct));
+
+    // Calculate tax on amount after discount
+    var taxable_amount = flt(flt(subtotal) - flt(discount_amount));
+    var tax_amount = 0;
+    if (flt(frm.doc.tax_rate) > 0) {
+        tax_amount = flt(taxable_amount * flt(frm.doc.tax_rate) / 100);
+    }
+    frm.set_value('tax_amount', flt(tax_amount));
 
     // Calculate total
-    var total = subtotal - discount_amount + tax_amount + flt(frm.doc.shipping_cost);
-    frm.set_value('total_amount', total);
+    var total = flt(flt(subtotal) - flt(discount_amount) + flt(tax_amount) + flt(frm.doc.shipping_cost));
+    frm.set_value('total_amount', flt(total));
 
     // Update payment amounts
     calculate_payment_amounts(frm);
