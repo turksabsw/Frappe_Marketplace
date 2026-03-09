@@ -603,12 +603,14 @@
   {
    "fieldname": "actual_delivery_date",
    "fieldtype": "Date",
-   "label": "Actual Delivery Date"
+   "label": "Actual Delivery Date",
+   "read_only": 1
   },
   {
    "fieldname": "delivery_time",
    "fieldtype": "Time",
-   "label": "Delivery Time"
+   "label": "Delivery Time",
+   "read_only": 1
   },
   {
    "fieldname": "delivery_section",
@@ -621,19 +623,22 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Delivery Status",
-   "options": "Pending\nAttempted\nDelivered\nFailed\nRefused\nReturning\nReturned"
+   "options": "Pending\nAttempted\nDelivered\nFailed\nRefused\nReturning\nReturned",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "delivery_attempts",
    "fieldtype": "Int",
-   "label": "Delivery Attempts"
+   "label": "Delivery Attempts",
+   "read_only": 1
   },
   {
    "description": "Name of person who received delivery",
    "fieldname": "delivered_to",
    "fieldtype": "Data",
-   "label": "Delivered To"
+   "label": "Delivered To",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_delivery",
@@ -643,13 +648,15 @@
    "description": "Digital signature image",
    "fieldname": "delivery_signature",
    "fieldtype": "Attach Image",
-   "label": "Delivery Signature"
+   "label": "Delivery Signature",
+   "read_only": 1
   },
   {
    "description": "Photo proof of delivery",
    "fieldname": "proof_of_delivery",
    "fieldtype": "Attach Image",
-   "label": "Proof of Delivery"
+   "label": "Proof of Delivery",
+   "read_only": 1
   },
   {
    "description": "Notes about delivery",
@@ -767,13 +774,15 @@
    "default": "0",
    "fieldname": "label_generated",
    "fieldtype": "Check",
-   "label": "Label Generated"
+   "label": "Label Generated",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.label_generated",
    "fieldname": "label_url",
    "fieldtype": "Data",
-   "label": "Label URL"
+   "label": "Label URL",
+   "read_only": 1
   },
   {
    "default": "PDF",
@@ -791,13 +800,15 @@
    "description": "Carrier manifest ID",
    "fieldname": "manifest_id",
    "fieldtype": "Data",
-   "label": "Manifest ID"
+   "label": "Manifest ID",
+   "read_only": 1
   },
   {
    "description": "Batch ID for bulk shipments",
    "fieldname": "batch_id",
    "fieldtype": "Data",
-   "label": "Batch ID"
+   "label": "Batch ID",
+   "read_only": 1
   },
   {
    "fieldname": "system_tab",
@@ -888,31 +899,36 @@
    "fieldname": "total_volume",
    "fieldtype": "Float",
    "label": "Total Volume",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "pod_verified",
    "fieldtype": "Check",
    "label": "POD Verified",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "received_by",
    "fieldtype": "Data",
    "label": "Received By",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "receiver_signature",
    "fieldtype": "Attach Image",
    "label": "Receiver Signature",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   },
   {
    "fieldname": "signature_captured_at",
    "fieldtype": "Datetime",
    "label": "Signature Captured At",
-   "in_list_view": 0
+   "in_list_view": 0,
+   "read_only": 1
   }
  ],
  "has_web_view": 0,
