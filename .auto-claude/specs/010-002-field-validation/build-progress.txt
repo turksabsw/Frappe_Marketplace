@@ -523,3 +523,75 @@ zero json.loads/json.dumps references in file
 Commit: fba7aa7
 
 === END SESSION 13 ===
+
+=== SESSION 14 (subtask-4-6) ===
+
+Completed subtask-4-6: Update seller_profile.py and sku_product.py (Phase 4 - Python Server-Side Code)
+
+seller_profile.py - Verified (no changes needed):
+- G2: _guard_system_fields correctly guards 16 system fields (verified_at, verified_by,
+  seller_score, total_sales_count, total_sales_amount, average_rating, total_reviews,
+  order_fulfillment_rate, on_time_delivery_rate, return_rate, response_time_hours,
+  cancellation_rate, complaint_rate, positive_feedback_rate, last_metrics_update,
+  joined_at, created_by). Called first in validate() per Pattern 9. ✓
+- G4: Badge methods use seller_badges child table throughout:
+  - add_badge() uses self.append("seller_badges", {...})
+  - remove_badge() filters self.seller_badges list
+  - has_badge() uses any() on self.seller_badges
+  - API endpoints (get_seller_profile, get_seller_statistics, award_badge) iterate
+    seller.seller_badges - no json.loads/json.dumps anywhere ✓
+- G5: refetch_denormalized_fields covers all 6 fetch_from fields:
+  - organization_name from Organization ✓
+  - tenant from Organization ✓
+  - tier_name from Seller Tier ✓
+  - district_name from District ✓
+  - neighborhood_name from Neighborhood ✓
+  - tenant_name from Tenant ✓
+
+sku_product.py - Updated:
+- G2: Added _guard_system_fields() guarding erpnext_item_code (system-set from ERPNext sync)
+  Uses is_new() check, has_value_changed(), frappe.PermissionError. Follows Pattern 3. ✓
+- G2: Added _guard_primary_links() guarding seller (set_only_once primary link)
+  Server-side enforcement matching set_only_once:1 in JSON schema. ✓
+- G5: Added refetch_denormalized_fields() covering all 5 fetch_from fields:
+  - seller_name from Seller Profile ✓
+  - tenant from Seller Profile ✓
+  - tenant_name from Tenant ✓
+  - category_name from Category ✓
+  - brand_name from Brand ✓
+- Reordered validate() per Pattern 9:
+  1. Guards (_guard_system_fields, _guard_primary_links)
+  2. Field validation (sku_code, pricing, inventory, etc.)
+  3. Refetch (refetch_denormalized_fields)
+  4. Status validation (tenant_isolation, status_transition)
+
+Verification: Syntax OK, AST parse OK, Pattern 9 ordering confirmed, all methods present
+Commit: 6061fef
+
+=== END SESSION 14 ===
+
+=== SESSION 15 (subtask-4-7) ===
+
+Completed subtask-4-7: Verify buyer_profile.py in tradehub_core (Phase 4 - Python Server-Side Code)
+
+This was a verification subtask — all required code was already in place. No code changes needed.
+
+buyer_profile.py - Verified (no changes needed):
+- G2: _guard_system_fields correctly guards 12 system fields (total_orders, total_spent,
+  average_order_value, last_order_date, total_group_buys, total_commitments,
+  total_commitment_amount, successful_group_buys, total_purchase_value,
+  payment_on_time_rate, joined_at, created_by). Called first in validate() per Pattern 9.
+  Uses is_new() check, has_value_changed(), and frappe.PermissionError. ✓
+- G5: refetch_denormalized_fields covers all 3 required fetch_from fields:
+  - buyer_category_name from Buyer Category (via category_name) ✓
+  - tenant_name from Tenant (via tenant_name) ✓
+  - organization_name from Organization (via organization_name) ✓
+  Also covers user_full_name from User.
+- Pattern 9 ordering verified: _guard_system_fields → _validate_user →
+  refetch_denormalized_fields → _set_display_name → _validate_interest_categories →
+  _validate_addresses ✓
+
+Verification: 11/11 AST checks passed (syntax, method existence, call ordering,
+field coverage, source DocType correctness)
+
+=== END SESSION 15 ===
