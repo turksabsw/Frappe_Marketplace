@@ -602,7 +602,7 @@
    "fieldname": "primary_category",
    "fieldtype": "Link",
    "label": "Primary Category",
-   "options": "Category",
+   "options": "Product Category",
    "description": "Main category for the product",
    "set_only_once": 1
   },
