@@ -83,13 +83,13 @@ required_apps = ["tradehub_core"]
 
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.has_permission",
+}
 
 # DocType Class
 # -------------
