@@ -26,6 +26,12 @@
   "tenant_name",
   "column_break_tenant",
   "is_global",
+  "attribute_set_section",
+  "attribute_set",
+  "column_break_attribute_set",
+  "inherit_parent_attributes",
+  "category_attribute_sets_section",
+  "category_attribute_sets",
   "content_tab",
   "description_section",
   "description",
@@ -174,6 +180,41 @@
    "fieldtype": "Check",
    "label": "Is Global",
    "description": "Global categories are visible to all tenants"
+  },
+  {
+   "fieldname": "attribute_set_section",
+   "fieldtype": "Section Break",
+   "label": "Attribute Sets"
+  },
+  {
+   "fieldname": "attribute_set",
+   "fieldtype": "Link",
+   "label": "Default Attribute Set",
+   "options": "Attribute Set",
+   "description": "Primary attribute set for this category (legacy, use child table for multi-set)"
+  },
+  {
+   "fieldname": "column_break_attribute_set",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "inherit_parent_attributes",
+   "fieldtype": "Check",
+   "label": "Inherit Parent Attributes",
+   "description": "If checked, this category inherits attribute sets from its parent category"
+  },
+  {
+   "fieldname": "category_attribute_sets_section",
+   "fieldtype": "Section Break",
+   "label": "Category Attribute Sets"
+  },
+  {
+   "fieldname": "category_attribute_sets",
+   "fieldtype": "Table",
+   "label": "Category Attribute Sets",
+   "options": "Category Attribute Set",
+   "description": "Multiple attribute sets assigned to this category"
   },
   {
    "fieldname": "content_tab",
@@ -359,7 +400,7 @@
    "link_fieldname": "parent_product_category"
   }
  ],
- "modified": "2026-03-09 12:00:00.000000",
+ "modified": "2026-03-09 17:40:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Catalog",
  "name": "Product Category",
