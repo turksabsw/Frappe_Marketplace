@@ -175,11 +175,17 @@
   "n11_listing_section",
   "n11_display_price",
   "n11_stock_quantity",
+  "condition_section",
+  "condition",
+  "column_break_condition_1",
+  "condition_note",
   "compliance_tab",
   "compliance_section",
   "country_of_origin",
   "country_of_manufacture",
   "column_break_compliance_1",
+  "city_of_origin",
+  "manufactured_by",
   "is_hazardous",
   "hazard_class",
   "certifications_section",
@@ -1259,6 +1265,33 @@
    "description": "Stock quantity for N11"
   },
   {
+   "fieldname": "condition_section",
+   "fieldtype": "Section Break",
+   "label": "Condition"
+  },
+  {
+   "default": "New",
+   "fieldname": "condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Condition",
+   "options": "New\nNew with Defects\nRefurbished\nRenewed\nUsed - Like New\nUsed - Good\nUsed - Acceptable\nFor Parts or Not Working",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_condition_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:['Used - Like New','Used - Good','Used - Acceptable','Renewed'].includes(doc.condition)",
+   "fieldname": "condition_note",
+   "fieldtype": "Small Text",
+   "label": "Condition Note",
+   "mandatory_depends_on": "eval:['Used - Like New','Used - Good','Used - Acceptable','Renewed'].includes(doc.condition)"
+  },
+  {
    "fieldname": "compliance_tab",
    "fieldtype": "Tab Break",
    "label": "Compliance"
@@ -1285,6 +1318,19 @@
   {
    "fieldname": "column_break_compliance_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "city_of_origin",
+   "fieldtype": "Data",
+   "label": "City of Origin",
+   "description": "City where product originated"
+  },
+  {
+   "fieldname": "manufactured_by",
+   "fieldtype": "Data",
+   "label": "Manufactured By",
+   "length": 200,
+   "description": "Name of the manufacturer"
   },
   {
    "default": "0",
@@ -1783,7 +1829,7 @@
    "link_fieldname": "product"
   }
  ],
- "modified": "2026-03-04 12:00:00.000000",
+ "modified": "2026-03-09 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Catalog",
  "name": "PIM Product",
