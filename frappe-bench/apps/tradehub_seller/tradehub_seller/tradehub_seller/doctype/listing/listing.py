@@ -145,7 +145,7 @@ class Listing(Document):
         # Re-fetch category name
         if self.category:
             category_name = frappe.db.get_value(
-                "Category", self.category, "category_name"
+                "Product Category", self.category, "category_name"
             )
             if category_name:
                 self.category_name = category_name
