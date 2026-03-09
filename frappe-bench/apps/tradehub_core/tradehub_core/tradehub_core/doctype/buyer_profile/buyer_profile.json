@@ -370,13 +370,15 @@
    "default": "0",
    "fieldname": "email_verified",
    "fieldtype": "Check",
-   "label": "Email Verified"
+   "label": "Email Verified",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "phone_verified",
    "fieldtype": "Check",
-   "label": "Phone Verified"
+   "label": "Phone Verified",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_verification",
@@ -393,7 +395,8 @@
    "default": "0",
    "fieldname": "identity_verified",
    "fieldtype": "Check",
-   "label": "Identity Verified"
+   "label": "Identity Verified",
+   "read_only": 1
   },
   {
    "fieldname": "statistics_tab",

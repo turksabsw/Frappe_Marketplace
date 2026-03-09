@@ -282,12 +282,14 @@
   {
    "fieldname": "subscription_start_date",
    "fieldtype": "Date",
-   "label": "Subscription Start Date"
+   "label": "Subscription Start Date",
+   "read_only": 1
   },
   {
    "fieldname": "subscription_end_date",
    "fieldtype": "Date",
-   "label": "Subscription End Date"
+   "label": "Subscription End Date",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",

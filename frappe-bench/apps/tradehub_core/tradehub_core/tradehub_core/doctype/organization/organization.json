@@ -388,19 +388,22 @@
    "default": "0",
    "fieldname": "documents_verified",
    "fieldtype": "Check",
-   "label": "Identity Documents Verified"
+   "label": "Identity Documents Verified",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "tax_documents_verified",
    "fieldtype": "Check",
-   "label": "Tax Documents Verified"
+   "label": "Tax Documents Verified",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "trade_registry_verified",
    "fieldtype": "Check",
-   "label": "Trade Registry Verified"
+   "label": "Trade Registry Verified",
+   "read_only": 1
   },
   {
    "fieldname": "kyb_notes",

@@ -597,7 +597,8 @@
    "fieldtype": "Select",
    "label": "PEP Status",
    "options": "Unknown\nNot PEP\nPEP\nPEP Relative/Associate",
-   "description": "Politically Exposed Person status"
+   "description": "Politically Exposed Person status",
+   "read_only": 1
   },
   {
    "default": "Not Checked",
