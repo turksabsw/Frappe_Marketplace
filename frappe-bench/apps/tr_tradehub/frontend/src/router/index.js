@@ -10,6 +10,16 @@ const DashboardView = () => import('@/views/dashboard/DashboardView.vue')
 const ProductAddView = () => import('@/views/products/ProductAddView.vue')
 const DocTypeListView = () => import('@/views/doctype/DocTypeListView.vue')
 
+// Dashboard Module Pages (lazy-loaded)
+const PlatformOverview = () => import('@/views/dashboard/PlatformOverview.vue')
+const OrdersDashboard = () => import('@/views/dashboard/OrdersDashboard.vue')
+const PaymentsDashboard = () => import('@/views/dashboard/PaymentsDashboard.vue')
+const SellersDashboard = () => import('@/views/dashboard/SellersDashboard.vue')
+const CatalogDashboard = () => import('@/views/dashboard/CatalogDashboard.vue')
+const LogisticsDashboard = () => import('@/views/dashboard/LogisticsDashboard.vue')
+const MarketingDashboard = () => import('@/views/dashboard/MarketingDashboard.vue')
+const ComplianceDashboard = () => import('@/views/dashboard/ComplianceDashboard.vue')
+
 const routes = [
   {
     path: '/login',
@@ -26,8 +36,50 @@ const routes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: DashboardView,
+        component: PlatformOverview,
         meta: { title: 'Genel Bakış', breadcrumb: 'Genel Bakış' },
+      },
+      {
+        path: 'dashboard/orders',
+        name: 'OrdersDashboard',
+        component: OrdersDashboard,
+        meta: { title: 'Sipariş Dashboard', breadcrumb: 'Siparişler' },
+      },
+      {
+        path: 'dashboard/payments',
+        name: 'PaymentsDashboard',
+        component: PaymentsDashboard,
+        meta: { title: 'Ödeme Dashboard', breadcrumb: 'Ödemeler' },
+      },
+      {
+        path: 'dashboard/sellers',
+        name: 'SellersDashboard',
+        component: SellersDashboard,
+        meta: { title: 'Satıcı Dashboard', breadcrumb: 'Satıcılar' },
+      },
+      {
+        path: 'dashboard/catalog',
+        name: 'CatalogDashboard',
+        component: CatalogDashboard,
+        meta: { title: 'Katalog Dashboard', breadcrumb: 'Katalog' },
+      },
+      {
+        path: 'dashboard/logistics',
+        name: 'LogisticsDashboard',
+        component: LogisticsDashboard,
+        meta: { title: 'Lojistik Dashboard', breadcrumb: 'Lojistik' },
+      },
+      {
+        path: 'dashboard/marketing',
+        name: 'MarketingDashboard',
+        component: MarketingDashboard,
+        meta: { title: 'Pazarlama Dashboard', breadcrumb: 'Pazarlama' },
+      },
+      {
+        path: 'dashboard/compliance',
+        name: 'ComplianceDashboard',
+        component: ComplianceDashboard,
+        meta: { title: 'Uyumluluk Dashboard', breadcrumb: 'Uyumluluk' },
       },
       {
         path: 'app/product-add',
