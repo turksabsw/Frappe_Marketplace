@@ -187,7 +187,9 @@
             "command": "cd frappe-bench && python -c \"import json; sp=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/seller_profile/seller_profile.json')); fields={f['fieldname']:f for f in sp['fields']}; ff=[f for f in fields.values() if f.get('fetch_from')]; print(f'Seller Profile: {len(ff)} fetch_from fields - OK')\"",
             "expected": "fetch_from fields - OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Added cascading discount fields (discount_1, show_discount_tiers, discount_2, discount_3, effective_discount_pct, discount_amount) to listing.json following order.json pattern. Verified seller_profile.json already has all required G2 (read_only:1 on metrics/system fields) and G5 (fetch_from for tenant_name, tier_name, district_name, neighborhood_name, organization_name) changes. Listing.json already had set_only_once:1 on seller, read_only:1 on system fields, and fetch_from for seller_name, category_name, tenant_name.",
+          "updated_at": "2026-03-09T09:08:35.184565+00:00"
         },
         {
           "id": "subtask-2-4",
@@ -204,7 +206,9 @@
             "command": "cd frappe-bench && python -c \"import json; d=json.load(open('apps/tradehub_seller/tradehub_seller/tradehub_seller/doctype/buy_box_entry/buy_box_entry.json')); ro=[f for f in d['fields'] if f.get('read_only')==1]; print(f'{len(ro)} read_only fields - OK')\"",
             "expected": "read_only fields - OK"
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Verified buy_box_entry.json: all 27 system/computed fields already have read_only:1 (fetch_from fields, scoring fields, system dates), primary links (sku_product, seller) have set_only_once:1, admin fields (status, internal_notes) have permlevel:1. No changes needed. seller_application.json: added read_only:1 to erpnext_supplier (system-assigned ERPNext Supplier link). Verified all 18 read_only, 1 set_only_once, 10 permlevel protections correct.",
+          "updated_at": "2026-03-09T14:30:00.000000+00:00"
         },
         {
           "id": "subtask-2-5",
@@ -925,12 +929,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T09:04:06.922Z",
+  "updated_at": "2026-03-09T09:09:14.439Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T08:10:19.348519+00:00"
   },
-  "last_updated": "2026-03-09T09:03:44.977976+00:00"
+  "last_updated": "2026-03-09T09:08:35.184582+00:00"
 }

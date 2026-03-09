@@ -822,7 +822,9 @@
    "fieldtype": "Link",
    "label": "ERPNext Supplier",
    "in_list_view": 0,
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1,
+   "description": "System-assigned ERPNext Supplier record"
   },
   {
    "fieldname": "requested_tier",
