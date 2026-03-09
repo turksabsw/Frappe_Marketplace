@@ -247,8 +247,8 @@
             "expected": "read_only fields - OK"
           },
           "status": "completed",
-          "notes": "G2: Reviewed all 3 files. coupon.json already fully protected (6 read_only, 2 set_only_once, 1 permlevel:1). campaign.json already fully protected (12 read_only, 1 set_only_once, 4 permlevel:1). marketplace_shipment.json: Added read_only:1 to 16 system/carrier-managed fields (delivery_status, delivery_attempts, actual_delivery_date, delivery_time, delivered_to, delivery_signature, proof_of_delivery, label_generated, label_url, manifest_id, batch_id, total_volume, pod_verified, received_by, receiver_signature, signature_captured_at). Total: 31 read_only, 4 set_only_once, 2 permlevel:1.",
-          "updated_at": "2026-03-09T10:00:00.000000+00:00"
+          "notes": "G2: Reviewed all 3 files. coupon.json already fully protected (6 read_only, 2 set_only_once, 1 permlevel:1). campaign.json already fully protected (12 read_only, 1 set_only_once, 4 permlevel:1). marketplace_shipment.json: Added read_only:1 to 16 system/carrier-managed fields (delivery_status, delivery_attempts, actual_delivery_date, delivery_time, delivered_to, delivery_signature, proof_of_delivery, label_generated, label_url, manifest_id, batch_id, total_volume, pod_verified, received_by, receiver_signature, signature_captured_at). Total: 31 read_only, 4 set_only_once, 2 permlevel:1. Commit: b6cef13",
+          "updated_at": "2026-03-09T09:30:04.627795+00:00"
         }
       ]
     },
@@ -279,8 +279,9 @@
             "command": "cd frappe-bench && python -c \"import importlib.util; spec=importlib.util.spec_from_file_location('patch', 'apps/tradehub_commerce/tradehub_commerce/patches/migrate_discount_to_cascading.py'); mod=importlib.util.module_from_spec(spec); print('Patch file valid - OK')\"",
             "expected": "Patch file valid - OK"
           },
-          "status": "pending",
-          "notes": "Call frappe.reload_doc() for Order, Sub Order, Marketplace Order FIRST. Query records WHERE discount_percentage IS NOT NULL AND discount_percentage != 0 AND discount_1 IS NULL (or = 0). Copy discount_percentage → discount_1."
+          "status": "completed",
+          "notes": "Created migrate_discount_to_cascading.py with idempotent migration for Order, Sub Order, and Marketplace Order. Uses frappe.db.has_column() checks for both discount_percentage and discount_1 columns. Queries WHERE discount_percentage IS NOT NULL AND != 0 AND (discount_1 IS NULL OR = 0). Double-checks idempotency via flt(doc.discount_1, 2) > 0 before saving. Sets flags.ignore_validate and flags.ignore_permissions. Calls frappe.reload_doc() first. Follows migrate_json_to_child_tables.py pattern exactly.",
+          "updated_at": "2026-03-09T15:00:00.000000+00:00"
         },
         {
           "id": "subtask-3-2",
@@ -933,12 +934,12 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T09:24:11.498Z",
+  "updated_at": "2026-03-09T09:30:37.426Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,
     "type": "PLANNING_COMPLETE",
     "timestamp": "2026-03-09T08:10:19.348519+00:00"
   },
-  "last_updated": "2026-03-09T09:23:42.034844+00:00"
+  "last_updated": "2026-03-09T09:30:04.627804+00:00"
 }
