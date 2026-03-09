@@ -1298,3 +1298,722 @@
 - Ortalama İndirim Artışı (avg of sale_boost)
 - Stokta Yok Cezası (avg of out_of_stock_penalty)
 - Düşük Değerlendirme Cezası (avg of low_rating_penalty)
+
+---
+
+## 6. LOJİSTİK YÖNETİMİ (tradehub_logistics)
+
+### 6.1 Marketplace Shipment (Pazar Yeri Kargosu)
+
+#### 6.1.1 KPI Kartları
+- Toplam Kargo Sayısı
+- Teslim Edilen Kargo Sayısı (status = Delivered)
+- Bekleyen Kargo Sayısı (status = Pending)
+- Transit Kargo Sayısı (status = In Transit)
+- Başarısız Teslimat Sayısı (status = Failed Delivery)
+- İade Kargo Sayısı (is_return = 1)
+- Toplam Beyan Değeri (sum of declared_value)
+- Toplam Kargo Maliyeti (sum of shipping_cost)
+- Toplam Sigorta Maliyeti (sum of insurance_cost)
+- Toplam Ek Masraf (sum of additional_charges)
+- Toplam Toplam Maliyet (sum of total_cost)
+- Toplam Ağırlık (sum of total_weight)
+- Toplam Hacimsel Ağırlık (sum of volumetric_weight)
+- Ortalama Paket Sayısı (avg of package_count)
+- Toplam Teslimat Denemesi (sum of delivery_attempts)
+- Kırılacak İçerikli Kargo Sayısı (contains_fragile = 1)
+- Tehlikeli Madde İçerikli Sayı (contains_hazmat = 1)
+- İmza Gerektiren Sayı (requires_signature = 1)
+- Etiket Oluşturulmuş Sayı (label_generated = 1)
+- POD Doğrulanmış Sayı (pod_verified = 1)
+
+#### 6.1.2 Dağılım Grafikleri
+- Kargo Durumu: Pending, Label Generated, Pickup Scheduled, Picked Up, In Transit, Out for Delivery, Delivered, Failed Delivery, Returning, Returned, Exception, Cancelled
+- Kargo Tipi: Standard, Express, Same Day, Next Day, Economy, International
+- Kargo Firması: Yurtici Kargo, Aras Kargo, MNG Kargo, SuratKargo, PTT Kargo, UPS, DHL, FedEx, Trendyol Express, HepsiJet, Other
+- Teslimat Durumu: Pending, Attempted, Delivered, Failed, Refused, Returning, Returned
+- Etiket Formatı: PDF, ZPL, PNG, GIF
+- Ağırlık Birimi: kg, lb, g
+- Boyut Birimi: cm, in, m
+
+#### 6.1.3 Zaman Serisi
+- Günlük Kargo Oluşturma Trendi (created_at)
+- Teslim Alma Trendi (picked_up_at)
+- Transit Başlangıç Trendi (in_transit_at)
+- Dağıtıma Çıkma Trendi (out_for_delivery_at)
+- Teslim Trendi (delivered_at)
+- İstisna Trendi (exception_at)
+- Son Senkronizasyon Trendi (last_sync_at)
+
+#### 6.1.4 Çubuk Grafik
+- Kargo Firması Bazında Kargo Sayısı
+- Kargo Firması Bazında Toplam Maliyet
+- Kargo Tipi Bazında Sayı
+- Varış Ülkesi Bazında Kargo Sayısı
+- Satıcı Bazında Kargo Sayısı
+
+#### 6.1.5 Harita Widget'ları
+- Çıkış ve Varış Ülke Haritası (origin_country, destination_country)
+- Aktif Kargo Konumları
+
+#### 6.1.6 Gantt Grafik
+- Kargo Yaşam Döngüsü: Created → Picked Up → In Transit → Out for Delivery → Delivered
+
+#### 6.1.7 Tablo Widget'ları
+- Bekleyen Kargolar
+- Transit Kargolar
+- Başarısız Teslimatlar
+- İstisna Durumundaki Kargolar
+- İade Kargoları
+- Bugün Teslim Edilecek Kargolar
+- Geciken Kargolar (expected vs actual delivery)
+
+### 6.2 Shipment (Genel Kargo - B2B)
+
+#### 6.2.1 KPI Kartları
+- Toplam Kargo Sayısı
+- Toplam Sipariş Değeri (sum of order_total)
+- Toplam Kargo Maliyeti (sum of total_shipping_cost)
+- Toplam Sigorta Değeri (sum of insurance_value)
+- Toplam Gümrük Değeri (sum of customs_value)
+- Toplam Gümrük Vergisi (sum of customs_duty_amount + customs_tax_amount)
+- Ortalama Toplam Ağırlık (avg of total_weight)
+- Ortalama Toplam Hacim (avg of total_volume)
+- Gümrük Gerektiren Kargo Sayısı (requires_customs = 1)
+- Sigortalı Kargo Sayısı (is_insured = 1)
+- Tehlikeli Kargo Sayısı (is_hazardous = 1)
+- İstisna Durumlu Kargo Sayısı (has_exception = 1)
+
+#### 6.2.2 Dağılım Grafikleri
+- Kargo Durumu: Draft, Pending Pickup, Picked Up, In Transit, At Customs, Customs Cleared, Out for Delivery, Delivered, Exception, Returned, Cancelled
+- Kargo Tipi: Standard, Express, Overnight, Economy, Freight, Sea Freight, Air Freight, Rail Freight
+- Öncelik: Low, Normal, High, Urgent
+- Kargo Yöntemi: Air, Sea, Road, Rail, Courier, Multi-Modal
+- Gümrük Durumu: Not Required, Pending, In Progress, Cleared, Held, Rejected
+- Incoterm: EXW, FOB, CIF, DDP, DAP, FCA, CPT, CIP, DAT, DPU
+
+#### 6.2.3 Zaman Serisi
+- Kargo Oluşturma Trendi (shipment_date)
+- Teslim Trendi (actual_delivery_date)
+- Gümrük İşlem Trendi (customs_clearance_date)
+- Son Takip Güncelleme Trendi (last_tracking_update)
+
+### 6.3 Tracking Event (Takip Olayı)
+
+#### 6.3.1 KPI Kartları
+- Toplam Takip Olayı Sayısı
+- Kilometre Taşı Olay Sayısı (is_milestone = 1)
+- İstisna Olay Sayısı (is_exception = 1)
+- Bildirim Gönderilen Sayı (notification_sent = 1)
+
+#### 6.3.2 Dağılım Grafikleri
+- Kargo Firması: Yurtici, Aras, MNG, Surat, PTT, UPS, DHL, FedEx, Trendyol Express, HepsiJet, Other
+- Olay Durumu: Pending, Label Created, Picked Up, In Transit, At Hub, At Customs, Out for Delivery, Delivered, Exception, Returned (14 seçenek)
+- Olay Tipi: 40+ detaylı takip olay tipi
+- Önem Derecesi: Info, Warning, Error, Critical
+- İstisna Tipi: 19 farklı istisna
+- Kaynak: Carrier API, Manual Entry, Webhook, Import, Scraping, Third Party API, System
+
+#### 6.3.3 Zaman Serisi
+- Olay Sayısı Trendi (event_timestamp)
+- İstisna Trendi
+- Kargo Firması Bazında Olay Trendi
+- Bildirim Gönderme Trendi
+
+### 6.4 Logistics Provider (Lojistik Sağlayıcı)
+
+#### 6.4.1 KPI Kartları
+- Toplam Sağlayıcı Sayısı
+- Aktif Sağlayıcı Sayısı
+- Ortalama Zamanında Teslimat Oranı (avg of on_time_delivery_rate)
+- Ortalama Hasar Oranı (avg of damage_rate)
+- Ortalama Teslimat Günü (avg of average_delivery_days)
+- Toplam Kargo Sayısı (sum of total_shipments)
+- Toplam Sorun Sayısı (sum of total_issues)
+- API Aktif Sağlayıcı Sayısı (api_enabled = 1)
+- Takip Destekleyen Sayı (supports_tracking = 1)
+- Ekspres Destekleyen Sayı (supports_express = 1)
+- Aynı Gün Destekleyen Sayı (supports_same_day = 1)
+- Kapıda Ödeme Destekleyen Sayı (supports_cod = 1)
+
+#### 6.4.2 Dağılım Grafikleri
+- Sağlayıcı Tipi: Carrier, Courier, Freight, Post, Dropship, Fulfillment, Last Mile
+- Durum: Active, Inactive, Suspended, Testing
+- Hizmet Tipi: Domestic Only, International Only, Both
+- Ücret Hesaplama: Weight Based, Volumetric, Higher of Weight/Volume, Flat Rate, Distance Based, API Based
+- Etiket Formatı: PDF, ZPL, PNG, EPL, DPL
+
+### 6.5 Carrier (Taşıyıcı)
+
+#### 6.5.1 KPI Kartları
+- Toplam Taşıyıcı Sayısı
+- Aktif Taşıyıcı Sayısı
+- Toplam Kargo Sayısı (sum of shipment_count)
+- Ortalama Transit Günü (avg of default_transit_days)
+- API Entegre Taşıyıcı Sayısı (has_api_integration = 1)
+- Öne Çıkan Taşıyıcı Sayısı (featured = 1)
+
+#### 6.5.2 Dağılım Grafikleri
+- Taşıyıcı Tipi: Courier, Freight, Postal, Express, Specialized, Local Delivery, Other
+- API Durumu: Unknown, Online, Offline, Error, Maintenance
+- API Ortamı: Sandbox, Production
+
+### 6.6 Shipping Rule (Kargo Kuralı)
+
+#### 6.6.1 KPI Kartları
+- Toplam Kural Sayısı
+- Aktif Kural Sayısı
+- Ortalama Baz Ücret (avg of base_rate)
+- Ortalama Ücretsiz Kargo Eşiği (avg of free_shipping_threshold)
+- Ekspres Mevcut Sayı (express_available = 1)
+- Ücretsiz Kargo Aktif Sayı (free_shipping_enabled = 1)
+
+#### 6.6.2 Dağılım Grafikleri
+- Kural Tipi: Standard, Flat Rate, Weight Based, Price Based, Item Based, Free Shipping, Local Pickup, Express
+- Hesaplama Yöntemi: Fixed, Weight Based, Price Percentage, Item Count, Weight Tiered, Price Tiered, Combined
+
+---
+
+## 7. UYUMLULUK & GÜVENLİK (tradehub_compliance)
+
+### 7.1 Review (Değerlendirme/Yorum)
+
+#### 7.1.1 KPI Kartları
+- Toplam Yorum Sayısı
+- Yayınlanan Yorum Sayısı (status = Published)
+- Bekleyen Yorum Sayısı (status = Pending Review)
+- Ortalama Genel Değerlendirme (avg of rating)
+- Ortalama Ürün Kalitesi Değerlendirmesi (avg of product_quality_rating)
+- Ortalama Fiyat/Performans Değerlendirmesi (avg of value_for_money_rating)
+- Ortalama Kargo Değerlendirmesi (avg of shipping_rating)
+- Ortalama Satıcı İletişimi Değerlendirmesi (avg of seller_communication_rating)
+- Ortalama Doğruluk Değerlendirmesi (avg of accuracy_rating)
+- Ortalama Faydalılık Skoru (avg of helpfulness_score)
+- Toplam Faydalı Oy (sum of helpful_count)
+- Toplam Faydasız Oy (sum of unhelpful_count)
+- Toplam Rapor (sum of report_count)
+- Doğrulanmış Alım Yorum Sayısı (is_verified_purchase = 1)
+- Anonim Yorum Sayısı (is_anonymous = 1)
+- Öne Çıkan Yorum Sayısı (is_featured = 1)
+- Satıcı Yanıtı Olan Sayı (has_seller_response = 1)
+
+#### 7.1.2 Dağılım Grafikleri
+- Yorum Durumu: Draft, Pending Review, Published, Rejected, Hidden, Removed
+- Yorum Tipi: Product, Seller, Order Experience
+- Yorumcu Tipi: Individual, Business, Organization
+- Moderasyon Durumu: Pending, Approved, Rejected, Flagged, Under Review
+- Red Nedeni: Spam, Inappropriate Content, Fake Review, Off-topic, Violates Guidelines, Seller Manipulation, Conflict of Interest, Other
+
+#### 7.1.3 Zaman Serisi
+- Günlük Yorum Trendi (submitted_at)
+- Yayınlama Trendi (published_at)
+- Moderasyon Trendi (moderated_at)
+- Satıcı Yanıt Trendi (seller_response_at)
+
+#### 7.1.4 Histogram
+- Değerlendirme Dağılımı (1-5 yıldız)
+- Kategori Bazında Değerlendirme Dağılımı (product_quality, value_for_money, shipping, communication, accuracy)
+
+#### 7.1.5 Çubuk Grafik
+- Satıcı Bazında Ortalama Değerlendirme (Top/Bottom 20)
+- Listeleme Bazında Ortalama Değerlendirme
+- Kategori Bazında Ortalama Değerlendirme
+
+#### 7.1.6 Tablo Widget'ları
+- Moderasyon Bekleyen Yorumlar
+- En Faydalı Yorumlar
+- Raporlanan Yorumlar
+- Satıcı Yanıtı Bekleyen Yorumlar
+- En Düşük Değerlendirmeli Ürünler
+- En Yüksek Değerlendirmeli Ürünler
+
+### 7.2 Moderation Case (Moderasyon Vakası)
+
+#### 7.2.1 KPI Kartları
+- Toplam Vaka Sayısı
+- Açık Vaka Sayısı (status = Open)
+- İnceleme Altında Sayı (status = In Review)
+- Çözülmüş Vaka Sayısı (status = Resolved)
+- Tırmanmış Vaka Sayısı (is_escalated = 1)
+- İtiraz Edilen Vaka Sayısı (appeal_status != Not Appealed)
+- Otomatik Tespit Edilen Sayı (is_auto_detected = 1)
+- Tekrar Suç Sayısı (is_repeat_offense = 1)
+- Ortalama Bekleme Süresi (avg of wait_time_hours) saat
+- Ortalama Çözüm Süresi (avg of resolution_time_hours) saat
+- Ortalama İnceleme Süresi (avg of review_time_seconds) saniye
+- Ortalama Tespit Güveni (avg of detection_confidence)
+- SLA İhlali Sayısı (sla_status = Breached)
+
+#### 7.2.2 Dağılım Grafikleri
+- Vaka Tipi: Content Report, Content Review, Appeal Review, Proactive Review, Quality Audit, Compliance Check, IP Infringement, Counterfeit Report, Safety Concern, Legal Request
+- Öncelik: Critical, High, Medium, Low
+- Durum: Open, Assigned, In Review, Pending Info, Escalated, Resolved, Closed, Appealed, Reopened
+- Rapor Kaynağı: User Report, Seller Report, Auto Detection, Admin Review, External Report, Legal Request, Government Request, Brand Protection, QA Audit
+- Raportör Tipi: Buyer, Seller, Competitor, Brand Owner, General Public, Employee, Partner
+- Rapor Nedeni: Prohibited Content, Counterfeit Product, IP Violation, Misleading Information, Fraud/Scam, Inappropriate Content, Harassment, Spam, Price Manipulation, Fake Reviews, Policy Violation, Safety Concern, Legal Issue, Privacy Violation, Hate Speech, Violent Content, Adult Content, Other
+- Rapor Kategorisi: Product Listing, Product Image, Product Description, Review, Seller Profile, Storefront, Message, User Profile, Other
+- İhlal Tipi: No Violation, Minor, Moderate, Severe, Critical
+- İhlal Edilen Politika: Community Guidelines, Prohibited Items Policy, IP Policy, Counterfeit Policy, Listing Standards, Review Guidelines, Seller Conduct Policy, Anti-Fraud Policy, Price Policy, Content Policy, Privacy Policy, Safety Policy, Terms of Service, Local Laws, Multiple Policies
+- Tespit Yöntemi: Image Recognition, Text Analysis, ML Classification, Keyword Filter, Pattern Matching, Behavior Analysis, External API, Hash Matching, Price Anomaly, Duplicate Detection
+- Karar: Approved, Rejected, Removed, Edits Required, Warning Issued, Account Action, No Action Needed, Escalate, Pending Legal
+- Alınan Aksiyon: None, Content Removed, Content Hidden, Content Edited, Content Flagged, Warning Sent, Account Warning, Account Restriction, Account Suspension, Account Ban, Listing Delisted, Listing Modified, Review Rejected, Multiple Actions
+- İtiraz Durumu: Not Appealed, Appeal Submitted, Under Review, Approved, Rejected, Partially Approved
+- Tırmanma Seviyesi: Level 1 - Team Lead, Level 2 - Senior Moderator, Level 3 - Manager, Level 4 - Legal, Level 5 - Executive
+- SLA Durumu: On Track, At Risk, Breached, Exempt
+
+#### 7.2.3 Zaman Serisi
+- Vaka Oluşturma Trendi (creation_date)
+- Atama Trendi (assigned_at)
+- İnceleme Başlama Trendi (review_started_at)
+- İnceleme Tamamlama Trendi (review_completed_at)
+- İtiraz Trendi (appeal_submitted_at)
+- İtiraz Karar Trendi (appeal_decided_at)
+- Tırmanma Trendi (escalated_at)
+
+#### 7.2.4 Huni Grafik
+- Moderasyon Hunisi: Open → Assigned → In Review → Resolved/Closed
+- İtiraz Hunisi: Appeal Submitted → Under Review → Approved/Rejected
+
+#### 7.2.5 Tablo Widget'ları
+- Acil Vakalar (priority = Critical)
+- Atanmamış Vakalar
+- SLA İhlali Riski Olan Vakalar
+- İtiraz Bekleyen Vakalar
+- Tırmanmış Vakalar
+- En Çok Vaka Olan Satıcılar
+
+### 7.3 Risk Score (Risk Skoru)
+
+#### 7.3.1 KPI Kartları
+- Toplam Risk Profili Sayısı
+- Aktif Profil Sayısı
+- Ortalama Risk Skoru (avg of risk_score)
+- Yüksek Riskli Profil Sayısı (risk_level = High/Very High/Critical)
+- Düşük Riskli Profil Sayısı (risk_level = Low/Very Low)
+- Toplam Kredi Limiti (sum of credit_limit)
+- Ortalama Pozitif Faktör (avg of positive_factors_count)
+- Ortalama Negatif Faktör (avg of negative_factors_count)
+- Kritik Faktör Sayısı (sum of critical_factors_count)
+- Uyarı Sayısı (sum of alert_count)
+- Otomatik Onay Sayısı (credit_decision = Auto Approve)
+- Red Sayısı (credit_decision = Reject)
+- Askıya Alma Sayısı (credit_decision = Suspend)
+
+#### 7.3.2 Dağılım Grafikleri
+- Profil Tipi: Seller, Buyer
+- Durum: Draft, Active, Expired, Suspended, Under Review
+- Risk Seviyesi: Very Low, Low, Medium, High, Very High, Critical
+- Risk Kategorisi: Financial, Fraud, Compliance, Operational, Credit, Reputation, Identity, Transaction, Mixed
+- Skor Trendi: Improving, Stable, Worsening
+- Güven Seviyesi: Very Low, Low, Medium, High, Very High
+- Kredi Kararı: Auto Approve, Approve, Approve with Conditions, Review, Review with Caution, Reject, Suspend
+- İnceleme Sıklığı: Weekly, Bi-Weekly, Monthly, Quarterly, Semi-Annually, Annually, On Event
+
+#### 7.3.3 Göstergeler (Gauge)
+- Platform Ortalama Risk Skoru (0-100)
+- Yüksek Risk Oranı
+- Otomatik Onay Oranı
+
+#### 7.3.4 Isı Haritası
+- Satıcı x Risk Kategorisi Isı Haritası
+- Zaman x Risk Seviyesi Isı Haritası
+
+### 7.4 Certificate (Sertifika)
+
+#### 7.4.1 KPI Kartları
+- Toplam Sertifika Sayısı
+- Aktif Sertifika Sayısı (status = Active)
+- Doğrulanmış Sertifika Sayısı (verification_status = Verified)
+- Süresi Yaklaşan Sertifika Sayısı (expiry_status = Expiring Soon)
+- Süresi Geçmiş Sertifika Sayısı (expiry_status = Expired)
+- Yenileme Gerektiren Sayı (requires_renewal = 1)
+- Yenileme Hatırlatıcısı Gönderilen Sayı (renewal_reminder_sent = 1)
+- Ortalama Süre Sonu Günü (avg of days_until_expiry)
+
+#### 7.4.2 Dağılım Grafikleri
+- Sertifika Durumu: Pending Verification, Under Review, Verified, Rejected, Active, Expired, Suspended, Revoked
+- Süre Sonu Durumu: Valid, Expiring Soon, Expired, No Expiry
+- Doğrulama Durumu: Pending, In Progress, Verified, Failed, Not Applicable
+
+#### 7.4.3 Zaman Serisi
+- Sertifika Verme Trendi (issue_date)
+- Süre Sonu Trendi (expiry_date)
+- Doğrulama Trendi (verification_date)
+
+### 7.5 Certificate Type (Sertifika Tipi)
+
+#### 7.5.1 KPI Kartları
+- Toplam Sertifika Tipi Sayısı
+- Zorunlu Sertifika Sayısı (is_mandatory = 1)
+- Fiziksel Denetim Gerektiren Sayı (requires_physical_audit = 1)
+- Toplam Sertifika Sayısı (sum of certificate_count)
+
+#### 7.5.2 Dağılım Grafikleri
+- Sertifika Kategorisi: Compliance, Quality, Environmental, Social, Safety, Organic, Sustainability, Industry Specific, Other
+- Uygulanabilirlik: Product, Seller, Both
+
+### 7.6 Consent Record (Onay Kaydı)
+
+#### 7.6.1 KPI Kartları
+- Toplam Onay Kaydı Sayısı
+- Aktif Onay Sayısı (status = Active)
+- İptal Edilen Onay Sayısı (status = Revoked)
+- Süresi Geçmiş Onay Sayısı (status = Expired)
+- Doğrulanmış Onay Sayısı (is_verified = 1)
+- Çift Onay Tamamlanan Sayı (double_opt_in_completed = 1)
+
+#### 7.6.2 Dağılım Grafikleri
+- Onay Durumu: Pending, Active, Revoked, Expired
+- Doğrulama Yöntemi: Email Link, SMS Code, Phone Call, Manual
+
+### 7.7 Marketplace Consent Record
+
+#### 7.7.1 KPI Kartları
+- Toplam Pazar Yeri Onay Sayısı
+- Aktif Onay Sayısı
+- İptal Edilen Onay Sayısı
+- Doğrulanmış Onay Sayısı
+- Veri Silme Talebi Olan Sayı (data_deletion_requested = 1)
+- Üçüncü Taraf İçeren Sayı (involves_third_party = 1)
+- Otomatik Yenileme Aktif Sayı (auto_renew = 1)
+
+#### 7.7.2 Dağılım Grafikleri
+- Onay Tipi: Data Processing, Marketing Communications, Third Party Sharing, International Transfer, Profiling, Automated Decision Making, Cookies, Analytics, Newsletter, SMS/Push/Email Notifications, Phone Calls, Location Tracking, Biometric Data, Health Data, Financial Data, KYC Verification, Payment Processing, Other
+- Durum: Pending Verification, Active, Withdrawn, Expired, Superseded, Invalid
+- Hukuki Dayanak: Consent, Contract Performance, Legal Obligation, Vital Interests, Public Interest, Legitimate Interest
+- Veriliş Yolu: Web Form, Mobile App, API, Checkbox, Verbal, Written Document, Email/SMS Confirmation, Double Opt-in, Implicit, Other
+- Doğrulama Yöntemi: Email Link, SMS Code, Phone Call, Manual Review, Automatic, Not Required
+- Transfer Güvenceleri: Adequacy Decision, Standard Contractual Clauses, Binding Corporate Rules, Explicit Consent, etc.
+
+### 7.8 Contract Template & Instance
+
+#### 7.8.1 KPI Kartları
+- Toplam Sözleşme Şablonu Sayısı
+- Yayınlanan Şablon Sayısı
+- Toplam Sözleşme Örneği Sayısı
+- İmzalanan Sözleşme Sayısı (status = Signed)
+- Bekleyen İmza Sayısı (status = Pending Signature)
+- Reddedilen Sözleşme Sayısı (status = Rejected)
+- Süresi Geçmiş Sözleşme Sayısı (status = Expired)
+
+#### 7.8.2 Dağılım Grafikleri (Template)
+- Şablon Durumu: Draft, Published, Archived
+- Sözleşme Tipi: Terms of Service, Privacy Policy, Seller Agreement, Buyer Agreement, NDA, Partnership Agreement, Other
+- İmza Yöntemi: Any, Digital Only, Wet Only
+
+#### 7.8.3 Dağılım Grafikleri (Instance)
+- Örnek Durumu: Draft, Sent, Pending Signature, Signed, Rejected, Expired
+- İmza Yöntemi: Digital, Wet
+
+#### 7.8.4 Zaman Serisi
+- Sözleşme Oluşturma Trendi (created_at)
+- Gönderme Trendi (sent_at)
+- İmzalama Trendi (signed_at)
+
+### 7.9 Contract Rule (Sözleşme Kuralı)
+
+#### 7.9.1 KPI Kartları
+- Toplam Kural Sayısı
+- Aktif Kural Sayısı
+- Engelleme Aksiyonlu Kural Sayısı (blocking_action = 1)
+- Toplam Tetikleme Sayısı (sum of trigger_count)
+- Toplam Kabul Sayısı (sum of acceptance_count)
+- Toplam Red Sayısı (sum of rejection_count)
+
+#### 7.9.2 Dağılım Grafikleri
+- Durum: Active, Inactive, Draft, Archived
+- Tetikleme Noktası: Registration, First Order, First Sale, Profile Update, Subscription Change, Level Upgrade, Verification Complete, Document Upload, Payment Method Add, Manual
+- Uygulama Hedefi: All Users, Sellers Only, Buyers Only, Specific User Type, Specific Level
+- Eşleşme Tipi: All, Any
+
+### 7.10 Moderation (Hesap Aksiyonu - Account Action)
+
+#### 7.10.1 KPI Kartları
+- Toplam Aksiyon Sayısı
+- Aktif Aksiyon Sayısı (status = Active)
+- Kalıcı Aksiyon Sayısı (is_permanent = 1)
+- İtiraz Edilebilir Aksiyon Sayısı (is_appealable = 1)
+- Tırmanmış Aksiyon Sayısı (escalation_level > 1)
+- Satış Kısıtlamalı Sayı (restrict_selling = 1)
+- Alım Kısıtlamalı Sayı (restrict_buying = 1)
+- Mesaj Kısıtlamalı Sayı (restrict_messaging = 1)
+- Yorum Kısıtlamalı Sayı (restrict_reviews = 1)
+- Tüm Aktivite Kısıtlamalı Sayı (restrict_all_activity = 1)
+
+#### 7.10.2 Dağılım Grafikleri
+- Aksiyon Tipi: Warning, Restriction, Suspension, Temporary Ban, Permanent Ban, Account Termination, Probation, Fine, Commission Increase, Feature Limitation
+- Önem Derecesi: Low, Medium, High, Critical
+- Durum: Draft, Pending Approval, Active, Expired, Lifted, Appealed, Overturned, Escalated, Cancelled
+- Hedef Tipi: User, Seller Profile, Organization
+- Neden Kodu: Policy Violation, Fraud, Counterfeit Products, IP Violation, Prohibited Items, Misleading Information, Poor Service Quality, Late Delivery, Order Cancellation Abuse, Review Manipulation, Payment Issues, Identity Fraud, Spam, Harassment, Security Breach, KYC Failure, AML Violation, Tax Compliance, Dispute Abuse, Refund Abuse, Other
+- İhlal Tipi: First Offense, Repeat Offense, Escalated Offense, Severe Violation, Pattern Violation
+- İtiraz Durumu: Not Appealed, Appeal Submitted, Under Review, Approved, Rejected, Partially Approved
+
+### 7.11 Message & Message Thread (Mesajlaşma)
+
+#### 7.11.1 KPI Kartları
+- Toplam Mesaj Sayısı
+- Toplam Mesaj Konusu Sayısı
+- Aktif Konu Sayısı
+- Okunmamış Mesaj Sayısı (sum of unread_count)
+- Toplam Mesaj Sayısı (sum of message_count)
+- Gönderilen Mesaj Sayısı (status = Sent)
+- Teslim Edilen Mesaj Sayısı (status = Delivered)
+- Okunan Mesaj Sayısı (status = Read)
+- Başarısız Mesaj Sayısı (status = Failed)
+- Ek İçeren Mesaj Sayısı (has_attachments = 1)
+- Sistem Mesajı Sayısı (is_system_message = 1)
+- İşaretlenmiş Mesaj Sayısı (is_flagged = 1)
+
+#### 7.11.2 Dağılım Grafikleri
+- Mesaj Tipi: Text, Rich Text, System Notification, Auto Reply, Quotation Response, RFQ Response, Order Update, Shipping Update
+- Mesaj Durumu: Draft, Sent, Delivered, Read, Failed
+- Gönderen Tipi: Buyer, Seller, System, Support
+- Konu Durumu: Active, Pending, Closed, Archived
+- Konu Tipi: General, RFQ Discussion, Order Inquiry, Sample Discussion, Quotation Discussion, Support, Negotiation, Complaint, Feedback
+- Öncelik: Low, Normal, High, Urgent
+- Başlatıcı Tipi: Buyer, Seller, System
+
+#### 7.11.3 Zaman Serisi
+- Günlük Mesaj Trendi (sent_at)
+- Konu Oluşturma Trendi
+- Son Mesaj Trendi (last_message_date)
+
+### 7.12 Sample Request (Numune Talebi)
+
+#### 7.12.1 KPI Kartları
+- Toplam Numune Talebi Sayısı
+- Onaylanan Talep Sayısı
+- Teslim Edilen Sayı
+- Tamamlanan Sayı
+- Toplam Numune Maliyeti (sum of total_cost)
+- Toplam Kargo Maliyeti (sum of shipping_cost)
+- Ortalama Kalite Değerlendirmesi (avg of quality_rating)
+- Siparişe Çevrilen Numune Sayısı (credit_to_order = 1)
+
+#### 7.12.2 Dağılım Grafikleri
+- Durum: Requested, Under Review, Approved, Rejected, In Production, Ready to Ship, Shipped, Delivered, Completed, Cancelled
+- Numune Tipi: Standard, Custom, Prototype, Pre-production
+- Öncelik: Low, Normal, High, Urgent
+- Ödeme Durumu: Pending, Paid, Refunded, Waived
+- Ödeme Yöntemi: Bank Transfer, Credit Card, PayPal, Other
+- Kargo Yöntemi: Standard, Express, Overnight, Pick Up
+- Onay Kararı: Approved for Production, Requires Modifications, Rejected
+
+### 7.13 ESign Transaction (E-İmza İşlemi)
+
+#### 7.13.1 KPI Kartları
+- Toplam E-İmza İşlem Sayısı
+- Tamamlanan İşlem Sayısı (status = Completed)
+- Bekleyen İşlem Sayısı (status = Pending)
+- Başarısız İşlem Sayısı (status = Failed)
+
+#### 7.13.2 Dağılım Grafikleri
+- Durum: Initiated, Pending, Completed, Rejected, Expired, Failed
+
+---
+
+## 8. PAZARLAMA YÖNETİMİ (tradehub_marketing)
+
+### 8.1 Campaign (Kampanya)
+
+#### 8.1.1 KPI Kartları
+- Toplam Kampanya Sayısı
+- Aktif Kampanya Sayısı (status = Active)
+- Planlanmış Kampanya Sayısı (status = Scheduled)
+- Toplam Bütçe (sum of total_budget)
+- Harcanan Tutar (sum of spent_amount)
+- Kalan Bütçe (sum of remaining_budget)
+- Toplam Gelir (sum of revenue_generated)
+- Bütçe Kullanım Oranı (spent / budget)
+- ROI (revenue / spent)
+- Toplam Kullanım (sum of total_usage)
+- Toplam Benzersiz Kullanıcı (sum of unique_users)
+- Toplam Görüntülenme (sum of views_count)
+- Toplam Tıklama (sum of clicks_count)
+- Toplam Sipariş (sum of orders_count)
+- Tıklama/Görüntülenme Oranı (CTR)
+- Sipariş/Tıklama Oranı (Conversion Rate)
+- Ortalama İndirim Değeri (avg of discount_value)
+- Ortalama Max İndirim Tutarı (avg of max_discount_amount)
+- Ortalama Min Sipariş Tutarı (avg of min_order_amount)
+- Öne Çıkan Kampanya Sayısı (is_featured = 1)
+- Otomatik Kupon Oluşturan Kampanya (auto_generate_coupon = 1)
+
+#### 8.1.2 Dağılım Grafikleri
+- Kampanya Tipi: Discount, Flash Sale, Seasonal, Clearance, Buy X Get Y, Free Shipping, Bundle Deal, Loyalty, Referral, New Customer, Holiday, Other
+- Durum: Draft, Scheduled, Active, Paused, Ended, Cancelled
+- İndirim Tipi: Percentage, Fixed Amount, Free Shipping, Buy X Get Y, Bundle Price, No Discount
+- Uygulama Hedefi: All Products, Specific Categories, Specific Sellers, Specific Products
+- Hedef Kitle: All Customers, New Customers, Returning Customers, VIP Customers, Inactive Customers, Specific Levels
+
+#### 8.1.3 Zaman Serisi
+- Kampanya Başlangıç Trendi (start_date)
+- Kampanya Bitiş Trendi (end_date)
+- Kullanım Trendi
+- Gelir Trendi
+
+#### 8.1.4 Göstergeler (Gauge)
+- Bütçe Kullanım Oranı (0-100%)
+- ROI Göstergesi
+- Dönüşüm Oranı
+
+### 8.2 Coupon (Kupon)
+
+#### 8.2.1 KPI Kartları
+- Toplam Kupon Sayısı
+- Aktif Kupon Sayısı (status = Active)
+- Süresi Geçmiş Kupon Sayısı (status = Expired)
+- Tükenmiş Kupon Sayısı (status = Used Up)
+- Toplam Kullanım (sum of used_count)
+- Toplam Kullanım Limiti (sum of usage_limit)
+- Kullanım Oranı (used / limit)
+- Ortalama İndirim Değeri (avg of discount_value)
+- Ortalama Max İndirim Tutarı (avg of max_discount_amount)
+- Ortalama Min Sipariş Tutarı (avg of min_order_amount)
+- Birleştirilebilir Kupon Sayısı (stackable = 1)
+- Yeni Müşteriye Özel Kupon Sayısı (new_customers_only = 1)
+
+#### 8.2.2 Dağılım Grafikleri
+- Kupon Durumu: Draft, Active, Expired, Used Up, Deactivated
+- İndirim Tipi: Percentage, Fixed Amount, Free Shipping, Buy X Get Y
+- Uygulama Hedefi: All Products, Specific Categories, Specific Products
+
+#### 8.2.3 Zaman Serisi
+- Kupon Oluşturma Trendi
+- Geçerlilik Başlangıç/Bitiş Trendi (valid_from, valid_until)
+- Kullanım Trendi
+
+### 8.3 Group Buy (Grup Alım)
+
+#### 8.3.1 KPI Kartları
+- Toplam Grup Alım Sayısı
+- Aktif Grup Alım Sayısı (status = Active)
+- Finanse Edilen Sayı (status = Funded)
+- Tamamlanan Sayı (status = Completed)
+- Süresi Geçmiş Sayı (status = Expired)
+- Toplam Hedef Miktar (sum of target_quantity)
+- Toplam Mevcut Miktar (sum of current_quantity)
+- Hedef Ulaşma Oranı (current / target)
+- Toplam Katılımcı (sum of participant_count)
+- Toplam Taahhüt Tutarı (sum of total_commitment_amount)
+- Ortalama Fiyat (avg of current_price)
+- En İyi Fiyat (min of best_price)
+- Ortalama Görüntülenme (avg of view_count)
+- Öne Çıkan Sayı (is_featured = 1)
+- Doğrulanmış Sayı (is_verified = 1)
+
+#### 8.3.2 Dağılım Grafikleri
+- Durum: Draft, Pending Approval, Scheduled, Active, Funded, Completed, Expired, Cancelled
+- Grup Alım Tipi: Standard, Flash, Pre-Order, Bulk
+- Dönem Tipi: Fixed, Open-Ended, Target-Based
+- Kargo Tipi: Seller Ships, Platform Ships, Buyer Pickup
+- Görünürlük: Public, Private, Invite Only
+
+#### 8.3.3 Zaman Serisi
+- Grup Alım Oluşturma Trendi (created_at)
+- Finanse Edilme Trendi (funded_at)
+- Tamamlanma Trendi (completed_at)
+- Başlangıç/Bitiş Trendi (start_date, end_date)
+
+#### 8.3.4 Göstergeler
+- Ortalama Hedef Ulaşma Oranı (0-100%)
+- Aktif/Toplam Oranı
+- Başarı Oranı (Completed / Total)
+
+### 8.4 Group Buy Commitment & Payment
+
+#### 8.4.1 KPI Kartları
+- Toplam Taahhüt Sayısı
+- Aktif Taahhüt Sayısı
+- Ödeme Yapılmış Taahhüt Sayısı
+- İptal Edilen Taahhüt Sayısı
+- Toplam Taahhüt Tutarı (sum of total_amount)
+- Toplam İade Tutarı (sum of refund_amount)
+- Toplam Ödeme Sayısı
+- Tamamlanan Ödeme Sayısı
+- Toplam Ödeme Tutarı (sum of amount)
+- Toplam Platform Ücreti (sum of platform_fee)
+- Toplam Net Tutar (sum of net_amount)
+
+#### 8.4.2 Dağılım Grafikleri
+- Taahhüt Durumu: Active, Payment Pending, Paid, Cancelled, Refunded, Expired
+- Ödeme Durumu: Pending, Processing, Completed, Failed, Refunded, Partially Refunded, Cancelled
+- Ödeme Yöntemi: Credit Card, Debit Card, Bank Transfer, Digital Wallet, Cash on Delivery, Other
+- İade Durumu: None, Requested, Processing, Completed, Failed
+
+### 8.5 Subscription & Subscription Package (Abonelik)
+
+#### 8.5.1 KPI Kartları
+- Toplam Abonelik Sayısı
+- Aktif Abonelik Sayısı (status = Active)
+- Deneme Sürümündeki Sayı (status = Trial)
+- Askıda Olan Sayı (status = Suspended/Grace Period)
+- İptal Edilen Sayı (status = Cancelled)
+- Toplam Faturalanan (sum of total_billed)
+- Toplam Ödenen (sum of total_paid)
+- Toplam Bakiye (sum of outstanding_amount)
+- Ortalama Mevcut Fiyat (avg of current_price)
+- Ortalama Ürün Limiti (avg of max_products)
+- Toplam Mevcut Ürün Sayısı (sum of current_product_count)
+- Otomatik Yenileme Aktif Sayı (auto_renew = 1)
+- Toplam Başarısız Yenileme Denemesi (sum of failed_renewal_attempts)
+- Toplam Yeniden Aktivasyon (sum of reactivation_count)
+
+#### 8.5.2 Dağılım Grafikleri
+- Abonelik Durumu: Draft, Trial, Active, Pending Payment, Grace Period, Suspended, Cancelled, Expired
+- Abone Tipi: Seller, Buyer, Organization
+- Askıya Alma Tipi: Payment Overdue, Manual, Policy Violation, Fraud, Other
+
+#### 8.5.3 Paket KPI
+- Toplam Paket Sayısı
+- Aktif Paket Sayısı
+- Toplam Abone Sayısı (sum of subscriber_count)
+- Aktif Abone Sayısı (sum of active_subscriber_count)
+- Toplam Gelir (sum of total_revenue)
+- Ortalama Fiyat (avg of price)
+- Ortalama Komisyon Oranı (avg of commission_rate)
+
+#### 8.5.4 Paket Dağılım
+- Paket Durumu: Active, Inactive, Deprecated
+- Faturalama Dönemi: Monthly, Quarterly, Semi-Annual, Annual, Lifetime
+- Hedef Kitle: Small Business, Medium Business, Enterprise, Individual Sellers
+
+#### 8.5.5 Zaman Serisi
+- Yeni Abonelik Trendi (start_date)
+- İptal Trendi (cancellation_date)
+- Yenileme Trendi
+- Gelir Trendi (total_revenue by month)
+
+### 8.6 Wholesale Offer (Toptan Teklif)
+
+#### 8.6.1 KPI Kartları
+- Toplam Teklif Sayısı
+- Aktif Teklif Sayısı
+- Toplam Teklif Değeri (sum of total_value)
+- Toplam Ürün Sayısı (sum of total_products)
+- Ortalama İndirim Yüzdesi (avg of discount_percentage)
+- Toplam Kullanım (sum of current_usage)
+- Kullanım Oranı (current / limit)
+
+#### 8.6.2 Dağılım Grafikleri
+- Durum: Draft, Pending Review, Active, Expired, Paused, Cancelled, Completed
+- Fiyatlandırma Tipi: Fixed Price, Discount Percentage, Fixed Discount Amount
+
+### 8.7 Storefront (Vitrin)
+
+#### 8.7.1 KPI Kartları
+- Toplam Vitrin Sayısı
+- Yayınlanmış Vitrin Sayısı (is_published = 1)
+- Öne Çıkan Vitrin Sayısı (is_featured = 1)
+- Toplam Görüntülenme (sum of total_views)
+- Toplam Takipçi (sum of total_followers)
+- Toplam Yorum (sum of total_reviews)
+- Toplam Satış (sum of total_sales)
+- Ortalama Değerlendirme (avg of average_rating)
+- Toplam Ürün Sayısı (sum of total_products)
+
+#### 8.7.2 Dağılım Grafikleri
+- Durum: Draft, Pending Review, Active, Suspended, Archived
+- Tema: Default, Modern, Classic, Minimal, Bold, Elegant, Custom
+- Düzen: Grid, List, Masonry, Carousel
