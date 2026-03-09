@@ -2017,3 +2017,337 @@
 - Durum: Draft, Pending Review, Active, Suspended, Archived
 - Tema: Default, Modern, Classic, Minimal, Bold, Elegant, Custom
 - Düzen: Grid, List, Masonry, Carousel
+
+---
+
+## 9. TEKLİF YÖNETİMİ (tradehub_commerce)
+
+### 9.1 RFQ (Teklif Talebi)
+
+#### 9.1.1 KPI Kartları
+- Toplam RFQ Sayısı
+- Yayınlanan RFQ Sayısı (status = Published)
+- Teklif Alınan RFQ Sayısı (status = Quoting)
+- Müzakere Aşamasındaki RFQ (status = Negotiation)
+- Kabul Edilen RFQ Sayısı (status = Accepted)
+- Siparişe Dönüşen RFQ Sayısı (status = Ordered)
+- Kapatılan RFQ Sayısı (status = Closed)
+- İptal Edilen RFQ Sayısı (status = Cancelled)
+- Ortalama Bütçe Min (avg of budget_min)
+- Ortalama Bütçe Max (avg of budget_max)
+- Toplam Miktar (sum of quantity)
+- Ortalama Teklif Sayısı (avg of quote_count)
+- NDA Gerektiren RFQ Sayısı (requires_nda = 1)
+- Kısmi Teklif İzni Olan RFQ Sayısı (allow_partial_quotes = 1)
+- Görüntüleme Limitli RFQ Sayısı (is_view_limited = 1)
+- Toplam Görüntülenme (sum of current_views)
+- RFQ-to-Order Dönüşüm Oranı
+
+#### 9.1.2 Dağılım Grafikleri
+- RFQ Durumu: Draft, Published, Quoting, Negotiation, Accepted, Ordered, Closed, Cancelled
+- Hedef Tipi: Public, Category, Selected
+
+#### 9.1.3 Zaman Serisi
+- RFQ Oluşturma Trendi (created_date)
+- Yayınlama Trendi (published_at)
+- Kapanış Trendi (closed_at)
+- Son Teslim Tarihi Trendi (deadline)
+
+#### 9.1.4 Huni Grafik
+- RFQ Hunisi: Draft → Published → Quoting → Negotiation → Accepted → Ordered
+
+#### 9.1.5 Tablo Widget'ları
+- Açık RFQ'lar
+- Son Tarihi Yaklaşan RFQ'lar
+- Teklif Bekleyen RFQ'lar
+- En Yüksek Bütçeli RFQ'lar
+- Kategorisine Göre RFQ'lar
+
+### 9.2 RFQ Quote (RFQ Teklifi)
+
+#### 9.2.1 KPI Kartları
+- Toplam Teklif Sayısı
+- Gönderilen Teklif Sayısı (status = Submitted)
+- İnceleme Altındaki Sayı (status = Under Review)
+- Kısa Listeye Alınan Sayı (status = Shortlisted)
+- Kabul Edilen Teklif Sayısı (status = Accepted)
+- Reddedilen Teklif Sayısı (status = Rejected)
+- Geri Çekilen Sayı (status = Withdrawn)
+- Ortalama Teklif Tutarı (avg of total_amount)
+- Ortalama Birim Fiyat (avg of unit_price)
+- Ortalama Teslimat Günü (avg of delivery_days)
+- Ortalama Revizyon Sayısı (avg of revision_count)
+- Toplam Final Tutar (sum of final_amount)
+- Kabul Oranı (Accepted / Total)
+
+#### 9.2.2 Dağılım Grafikleri
+- Teklif Durumu: Submitted, Under Review, Shortlisted, Accepted, Rejected, Withdrawn
+
+#### 9.2.3 Zaman Serisi
+- Teklif Gönderim Trendi (submitted_at)
+- Kabul Trendi (accepted_at)
+- Red Trendi (rejected_at)
+- Revizyon Trendi (last_revised_at)
+
+#### 9.2.4 Çubuk Grafik
+- Satıcı Bazında Teklif Sayısı
+- Satıcı Bazında Kabul Oranı
+- Satıcı Bazında Ortalama Teklif Tutarı
+
+### 9.3 Quotation (B2B Teklif)
+
+#### 9.3.1 KPI Kartları
+- Toplam Teklif Sayısı
+- Gönderilen Teklif Sayısı
+- Seçilen Teklif Sayısı (status = Selected)
+- Reddedilen Teklif Sayısı
+- Süresi Geçmiş Teklif Sayısı (status = Expired)
+- Ortalama Toplam Tutar (avg of total_amount)
+- Ortalama İndirim Yüzdesi (avg of discount_percentage)
+- Ortalama Teslimat Günü (avg of delivery_days)
+- Ortalama Üretim Süresi (avg of production_time_days)
+- Ortalama Min Sipariş Miktarı (avg of minimum_order_quantity)
+- Ortalama Aylık Kapasite (avg of capacity_per_month)
+- Toplam Avans Tutarı (sum of advance_amount)
+
+#### 9.3.2 Dağılım Grafikleri
+- Teklif Durumu: Draft, Submitted, Under Review, Selected, Rejected, Expired, Cancelled
+- Incoterm: EXW, FOB, CIF, DDP, DAP, FCA
+- Kargo Yöntemi: Sea Freight, Air Freight, Land Transport, Courier, Multi-Modal
+- Ödeme Koşulları: 30/70, 50/50, 100% Advance, LC, Net 30/60/90, Custom
+
+#### 9.3.3 Zaman Serisi
+- Teklif Oluşturma Trendi (created_date)
+- Gönderim Trendi (submitted_date)
+- İnceleme Trendi (reviewed_date)
+- Karar Trendi (decided_date)
+
+### 9.4 RFQ Message Thread (RFQ Mesaj Konusu)
+
+#### 9.4.1 KPI Kartları
+- Toplam Mesaj Konusu Sayısı
+- Açık Konu Sayısı (status = Open)
+- Kapalı Konu Sayısı (status = Closed)
+- Toplam Okunmamış Mesaj (sum of unread_count)
+
+#### 9.4.2 Zaman Serisi
+- Son Mesaj Trendi (last_message_at)
+
+### 9.5 Incoterm Price (Incoterm Fiyatlandırma)
+
+#### 9.5.1 KPI Kartları
+- Toplam Incoterm Fiyat Kaydı
+- Aktif Kayıt Sayısı
+- Ortalama Baz Fiyat (avg of base_price)
+- Ortalama Transit Gün (avg of estimated_transit_days)
+- Navlun Dahil Sayısı (freight_included = 1)
+- Sigorta Dahil Sayısı (insurance_included = 1)
+- Gümrük Vergisi Dahil Sayısı (customs_duties_included = 1)
+
+#### 9.5.2 Dağılım Grafikleri
+- Incoterm: EXW, FOB, CIF, DDP
+- Durum: Active, Inactive, Expired
+
+---
+
+## 10. SİSTEM & ENTEGRASYON (tradehub_core)
+
+### 10.1 ECA Rule (Event-Condition-Action Kuralları)
+
+#### 10.1.1 KPI Kartları
+- Toplam Kural Sayısı
+- Aktif Kural Sayısı
+- Toplam Günlük Çalıştırma Limiti (sum of max_daily_executions)
+- Loglama Aktif Kural Sayısı (enable_logging = 1)
+
+#### 10.1.2 Dağılım Grafikleri
+- Olay Tipi: before_insert, after_insert, validate, before_save, after_save, on_update, on_submit, on_cancel, on_trash, on_update_after_submit, before_rename, after_rename, on_change
+- Koşul Mantığı: AND, OR, Custom
+- Zamanlama Tipi: Event-based, Cron
+- Kategori: Commerce, Communication, Compliance, Integration, Notification, Workflow, Custom
+
+#### 10.1.3 Zaman Serisi
+- Son Çalıştırma Trendi (last_execution)
+
+### 10.2 ECA Rule Log (ECA Kural Logları)
+
+#### 10.2.1 KPI Kartları
+- Toplam Log Sayısı
+- Başarılı Çalıştırma Sayısı (status = Success)
+- Başarısız Çalıştırma Sayısı (status = Failed/Error)
+- Atlanan Çalıştırma Sayısı (status = Skipped)
+- Ortalama Çalıştırma Süresi (avg of execution_time_ms) ms
+- Toplam Başarılı Aksiyon (sum of actions_succeeded)
+- Toplam Başarısız Aksiyon (sum of actions_failed)
+
+#### 10.2.2 Dağılım Grafikleri
+- Log Durumu: Success, Partial, Failed, Skipped, Error
+
+#### 10.2.3 Zaman Serisi
+- Tetikleme Trendi (trigger_time)
+- Hata Trendi
+
+### 10.3 ERPNext Integration Settings
+
+#### 10.3.1 KPI Kartları
+- Bağlantı Durumu (connection_status)
+- Toplam Senkronize Ürün (total_synced_products)
+- Toplam Senkronize Sipariş (total_synced_orders)
+- Senkron Hata Sayısı (sync_error_count)
+- Son Senkronizasyon Zamanı (last_sync_time)
+
+#### 10.3.2 Göstergeler
+- Bağlantı Durumu: Not Tested, Connected, Failed
+- Senkron Sıklığı: Every 15/30 Minutes, Hourly, Daily, Weekly
+
+### 10.4 Import Job (Veri İçe Aktarma)
+
+#### 10.4.1 KPI Kartları
+- Toplam İçe Aktarma Sayısı
+- İşlenen Sayı (status = Completed)
+- Hatalı Tamamlanan Sayı (status = Completed with Errors)
+- Başarısız Sayı (status = Failed)
+- Toplam İşlenen Satır (sum of processed_rows)
+- Toplam Başarılı Satır (sum of successful_rows)
+- Toplam Başarısız Satır (sum of failed_rows)
+- Toplam Atlanan Satır (sum of skipped_rows)
+- Ortalama İşlem Hızı (avg of rows_per_second)
+- Ortalama İlerleme (avg of progress_percent)
+- Ortalama Süre (avg of duration_seconds)
+- Başarı Oranı (successful / total rows)
+
+#### 10.4.2 Dağılım Grafikleri
+- İçe Aktarma Tipi: Listing, Listing Variant, SKU, Category, Media Asset, Inventory Update, Price Update
+- Durum: Pending, Validating, Queued, Processing, Paused, Completed, Completed with Errors, Failed, Cancelled
+- Dosya Formatı: CSV, Excel (XLSX), Excel (XLS), JSON
+- Öncelik: Low, Medium, High, Critical
+- Varsayılan Durum: Draft, Pending Review, Active
+
+#### 10.4.3 Zaman Serisi
+- İçe Aktarma Başlama Trendi (started_at)
+- Tamamlama Trendi (completed_at)
+- Hata Trendi
+
+### 10.5 Notification Template (Bildirim Şablonu)
+
+#### 10.5.1 KPI Kartları
+- Toplam Şablon Sayısı
+- Aktif Şablon Sayısı
+- Toplam Gönderim (sum of sent_count)
+- Toplam Teslim (sum of delivered_count)
+- Toplam Başarısız (sum of failed_count)
+- Teslim Oranı (delivered / sent)
+
+#### 10.5.2 Dağılım Grafikleri
+- Bildirim Kanalı: Email, Push Notification, SMS, In-App, Webhook
+- Olay Tipi: General, Order Created/Confirmed/Shipped/Delivered/Cancelled, Payment Received/Failed/Reminder, RFQ Created/Response Received/Expired, Quotation Received/Accepted/Rejected, Sample Request events, Message Received, Verification events, Certificate events, Stock/Price/Product alerts, Welcome Email, Password Reset, Account Deactivated
+- Öncelik: Low, Normal, High, Urgent
+- Zamanlama: Immediate, Delayed, Scheduled Window
+
+### 10.6 Keycloak Settings
+
+#### 10.6.1 KPI Kartları
+- Bağlantı Durumu
+- Toplam Senkronize Kullanıcı (total_users_synced)
+- Son Senkronizasyon Tarihi (last_sync_date)
+- Aktif Sosyal Giriş Sayısı (Google, Facebook, Apple, LinkedIn)
+
+---
+
+## 11. ÇAPRAZ ANALİZ & KARŞILAŞTIRMA WİDGET'LARI
+
+### 11.1 Satıcı Performans Karşılaştırma
+- Satıcı Skoru vs Sipariş Sayısı (Scatter Plot)
+- Satıcı Değerlendirmesi vs İade Oranı (Scatter Plot)
+- Satıcı Seviyesi vs Ortalama Sipariş Tutarı (Grouped Bar)
+- Satıcı Tier vs Komisyon Oranı (Grouped Bar)
+- Satıcı Yanıt Süresi vs Müşteri Memnuniyeti (Scatter Plot)
+- Premium vs Standard Satıcı Performans Karşılaştırma (Dual Axis)
+
+### 11.2 Ürün & Kategori Analizi
+- Kategori Bazında Gelir Dağılımı (Treemap)
+- Marka Bazında Satış Performansı (Bar + Line)
+- Ürün Tamamlanma Skoru vs Satış (Scatter Plot)
+- Kanal Bazında Ürün Dağılımı (Stacked Bar)
+- Fiyat Aralığı vs Satış Hacmi (Bubble Chart)
+- Kategori Komisyon Oranı vs Satış Hacmi (Scatter Plot)
+
+### 11.3 Sipariş & Ödeme Akışı
+- Sipariş Durumu Sankey Diagramı (status transitions)
+- Ödeme Yöntemi vs Başarı Oranı (Grouped Bar)
+- Sipariş Kaynağı vs Ortalama Tutar (Grouped Bar)
+- Escrow Yaşam Döngüsü (Waterfall Chart)
+- Sipariş → Kargo → Teslim Süre Analizi (Box Plot)
+- İade Nedeni vs Ürün Kategorisi (Heat Map)
+
+### 11.4 Lojistik Performans
+- Kargo Firması vs Zamanında Teslimat Oranı (Bar)
+- Kargo Firması vs Ortalama Maliyet (Bar)
+- Kargo Tipi vs Teslimat Süresi (Box Plot)
+- Bölge vs Teslimat Performansı (Choropleth Map)
+- Kargo Firması Karşılaştırma Radarı (Radar Chart)
+
+### 11.5 Uyumluluk & Risk
+- Risk Skoru Dağılımı - Satıcı vs Alıcı (Dual Histogram)
+- Moderasyon Vaka Tipi vs Çözüm Süresi (Box Plot)
+- Sertifika Durumu Heatmap (Kategori x Durum)
+- KYC Doğrulama Hunisi (Funnel)
+- Onay Tipi Dağılımı (Sunburst Chart)
+
+### 11.6 Pazarlama Etkinliği
+- Kampanya ROI Karşılaştırma (Bar + Line)
+- Kupon Kullanım Oranı vs İndirim Değeri (Scatter)
+- Grup Alım Başarı Oranı Trendi (Line)
+- Abonelik Churn Oranı (Line)
+- Promosyon Kanalı vs Dönüşüm Oranı (Grouped Bar)
+
+---
+
+## ÖZET İSTATİSTİKLER
+
+| Metrik | Değer |
+|--------|-------|
+| **Toplam Uygulama** | 7 |
+| **Toplam DocType** | 234 |
+| **Standalone DocType** | 127 |
+| **Child Table DocType** | 107 |
+| **Toplam Ana Kategori** | 11 |
+| **Toplam Alt Kategori** | ~95 |
+| **Toplam Widget Alt Bölümü** | ~380 |
+| **Toplam Widget Seçeneği** | ~3.200+ |
+
+### Uygulama Bazında DocType Dağılımı
+
+| Uygulama | DocType Sayısı |
+|----------|---------------|
+| tradehub_catalog | 54 |
+| tradehub_commerce | 52 |
+| tradehub_seller | 39 |
+| tradehub_compliance | 32 |
+| tradehub_core | 31 |
+| tradehub_marketing | 14 |
+| tradehub_logistics | 12 |
+
+### Widget Tipi Dağılımı
+
+| Widget Tipi | Yaklaşık Sayı |
+|-------------|--------------|
+| KPI Kartları | ~850 |
+| Dağılım Grafikleri (Pasta/Halka) | ~650 |
+| Zaman Serisi Grafikleri | ~380 |
+| Çubuk Grafikleri | ~280 |
+| Tablo/Liste Widget'ları | ~320 |
+| Göstergeler (Gauge) | ~120 |
+| Huni Grafikleri | ~40 |
+| Isı Haritaları | ~30 |
+| Radar/Örümcek Grafikleri | ~20 |
+| Scatter/Bubble Grafikleri | ~80 |
+| Diğer (Gantt, Harita, Treemap, Sankey, vb.) | ~50 |
+
+---
+
+> Bu dosya, TradeHub platformunun 7 uygulamasındaki 234 DocType ve binlerce alanın detaylı analizi sonucunda oluşturulmuştur. Her widget seçeneği, gerçek veritabanı alanlarına dayalı somut önerilerdir ve doğrudan Frappe Dashboard API'si ile implemente edilebilir.
+
+---
+
+END OF FILE.
