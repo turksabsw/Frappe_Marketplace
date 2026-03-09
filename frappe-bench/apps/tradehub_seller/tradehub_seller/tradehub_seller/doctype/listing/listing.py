@@ -205,7 +205,7 @@ class Listing(Document):
     def set_attribute_set_from_category(self):
         """Set attribute set from the selected category."""
         if self.category:
-            attribute_set = frappe.db.get_value("Category", self.category, "attribute_set")
+            attribute_set = frappe.db.get_value("Product Category", self.category, "attribute_set")
             if attribute_set:
                 self.attribute_set = attribute_set
 
@@ -313,16 +313,16 @@ class Listing(Document):
         if not self.category:
             frappe.throw(_("Category is required"))
 
-        if not frappe.db.exists("Category", self.category):
+        if not frappe.db.exists("Product Category", self.category):
             frappe.throw(_("Category {0} does not exist").format(self.category))
 
         # Validate subcategory if specified
         if self.subcategory:
-            if not frappe.db.exists("Category", self.subcategory):
+            if not frappe.db.exists("Product Category", self.subcategory):
                 frappe.throw(_("Subcategory {0} does not exist").format(self.subcategory))
 
             # Check if subcategory is child of category
-            parent = frappe.db.get_value("Category", self.subcategory, "parent_category")
+            parent = frappe.db.get_value("Product Category", self.subcategory, "parent_product_category")
             if parent != self.category:
                 frappe.throw(
                     _("Subcategory {0} is not a child of Category {1}").format(
