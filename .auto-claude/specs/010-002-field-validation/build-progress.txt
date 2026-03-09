@@ -730,3 +730,61 @@ Verification: 23 calculate references ✓, 55 flt() calls ✓, 15 cascading disc
 0 console.log ✓
 
 === END SESSION 18 ===
+
+=== SESSION 19 (subtask-6-1) ===
+
+Completed subtask-6-1: Build & Integration Verification
+
+NOTE: bench build/migrate/clear-cache cannot be executed in isolated worktree
+(no Frappe virtual environment, no database, no site_config.json).
+Performed comprehensive pre-flight validation instead.
+
+Validation Results:
+
+1. Modified File Syntax (30 files changed across 20 commits):
+   - 16 JS files: ALL pass node --check syntax validation ✓
+   - 12 Python files: ALL pass AST parse validation ✓
+   - 2 metadata JSON files: valid ✓
+
+2. Full App-Wide Validation (simulates bench build):
+   - 227 DocType JSON schemas: ALL valid, zero duplicate fieldnames ✓
+   - 227 Python controllers: ALL pass AST syntax check ✓
+   - 52 JS controller files: ALL pass node --check ✓
+   - 233 __init__.py files: ALL intact across 7 apps ✓
+   - 7/7 triple-nested directory structures: intact ✓
+   - 7/7 hooks.py files: valid Python syntax ✓
+   - 4 patches.txt files: ALL referenced patch files exist ✓
+
+3. Cascading Discount Fields (G3) - 8 DocTypes verified:
+   - order, cart_line, sub_order, sub_order_item ✓
+   - marketplace_order, marketplace_order_item ✓
+   - rfq_quote_item, quotation_item ✓
+   - All 5 fields present in each (discount_1/2/3, show_discount_tiers, effective_discount_pct) ✓
+
+4. Field Protection (G2) - verified:
+   - set_only_once: order.buyer, order.seller, rfq.buyer, rfq_quote.seller,
+     rfq_quote.rfq, listing.seller — all set_only_once:1 ✓
+   - fetch_from + read_only: order.buyer_name, seller_profile.tenant_name,
+     buyer_profile.tenant_name, listing.seller_name — all correctly configured ✓
+
+5. Python Code Patterns:
+   - _guard_system_fields: 8/8 controllers have guards called from validate() ✓
+   - calculate_totals: 6/6 controllers implement with flt() ✓
+   - Cascading discount formula: 4/4 controllers (order, cart, sub_order, listing) ✓
+
+6. JS Code Patterns:
+   - calculate_totals/calculate_order_totals/calculate_line_totals: all main controllers ✓
+   - flt() usage: all controllers ✓
+   - Cascading discount handlers: 4/4 controllers (order, cart, sub_order, marketplace_order) ✓
+
+7. Structural Integrity:
+   - No __init__.py files deleted or emptied ✓
+   - Triple-nested directory structure preserved for all 7 apps ✓
+   - hooks.py files intact (not overwritten) ✓
+   - patches.txt files reference valid patch files ✓
+
+Conclusion: All pre-flight validations pass. The codebase is structurally sound
+and should build cleanly with bench build. Actual bench build/migrate must be
+executed in the full Frappe bench environment (not isolated worktree).
+
+=== END SESSION 19 ===
