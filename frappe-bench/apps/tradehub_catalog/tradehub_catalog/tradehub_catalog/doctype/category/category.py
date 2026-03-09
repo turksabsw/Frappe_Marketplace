@@ -1,6 +1,9 @@
 # Copyright (c) 2024, TR TradeHub and contributors
 # For license information, please see license.txt
 
+import os
+import re
+
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
@@ -31,6 +34,7 @@ class Category(NestedSet):
         self.validate_commission_rates()
         self.validate_parent_category()
         self.validate_deactivation()
+        self.validate_icon()
         self.generate_route()
 
     def on_update(self):
@@ -103,6 +107,107 @@ class Category(NestedSet):
             frappe.throw(
                 _("Cannot deactivate Category with {0} active listings. Please deactivate or move listings first.").format(active_listings)
             )
+
+    def validate_icon(self):
+        """Validate icon fields: SVG file, icon_class, icon_color, and auto-populate icon_name."""
+        # Validate and sanitize SVG icon file
+        if self.icon:
+            self._validate_svg_icon()
+            self._auto_populate_icon_name()
+
+        # Validate icon_class format
+        if self.icon_class:
+            self._validate_icon_class()
+
+        # Validate icon_color format
+        if self.icon_color:
+            self._validate_icon_color()
+
+    def _validate_svg_icon(self):
+        """Validate SVG icon file: extension, size, and sanitize content."""
+        file_url = self.icon
+
+        # Check .svg extension
+        if not file_url.lower().endswith(".svg"):
+            frappe.throw(_("Icon must be an SVG file (.svg extension)"))
+
+        # Get the file document to check size and read content
+        file_doc = frappe.db.get_value(
+            "File",
+            {"file_url": file_url},
+            ["name", "file_size", "file_url"],
+            as_dict=True
+        )
+
+        if not file_doc:
+            # File might be a URL or not yet saved; skip further validation
+            return
+
+        # Check file size (50KB max)
+        max_size = 50 * 1024  # 50KB in bytes
+        if file_doc.file_size and file_doc.file_size > max_size:
+            frappe.throw(
+                _("Icon file size ({0} KB) exceeds maximum allowed size of 50 KB").format(
+                    round(file_doc.file_size / 1024, 1)
+                )
+            )
+
+        # Read and sanitize SVG content
+        try:
+            file_path = frappe.get_doc("File", file_doc.name).get_full_path()
+            if file_path and os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as f:
+                    svg_content = f.read()
+
+                sanitized_content = sanitize_svg(svg_content)
+
+                # Write back the sanitized content
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(sanitized_content)
+        except Exception:
+            frappe.log_error(
+                title=_("SVG Sanitization Error"),
+                message=frappe.get_traceback()
+            )
+            frappe.throw(_("Failed to sanitize SVG icon file. Please upload a valid SVG."))
+
+    def _auto_populate_icon_name(self):
+        """Auto-populate icon_name from the uploaded icon filename."""
+        if self.icon and not self.icon_name:
+            # Extract filename without extension from the file URL
+            filename = os.path.basename(self.icon)
+            name_without_ext = os.path.splitext(filename)[0]
+            # Clean up the name: replace hyphens/underscores with spaces, title case
+            clean_name = name_without_ext.replace("-", " ").replace("_", " ")
+            self.icon_name = clean_name.strip().title()
+
+    def _validate_icon_class(self):
+        """Validate icon_class matches allowed pattern."""
+        icon_class_pattern = re.compile(r"^[a-zA-Z0-9_\- ]+$")
+        if not icon_class_pattern.match(self.icon_class):
+            frappe.throw(
+                _("Icon Class can only contain letters, numbers, spaces, hyphens, and underscores")
+            )
+
+    def _validate_icon_color(self):
+        """Validate icon_color is a valid hex or rgb color."""
+        color = self.icon_color.strip()
+
+        # Check hex color: #RGB, #RRGGBB, #RRGGBBAA
+        hex_pattern = re.compile(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+        if hex_pattern.match(color):
+            return
+
+        # Check rgb/rgba color: rgb(r, g, b) or rgba(r, g, b, a)
+        rgb_pattern = re.compile(
+            r"^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$"
+        )
+        if rgb_pattern.match(color):
+            return
+
+        frappe.throw(
+            _("Icon Color must be a valid hex color (e.g., #333333) or RGB color (e.g., rgb(51, 51, 51))")
+        )
 
     def generate_route(self):
         """Generate URL route for category page if not set."""
@@ -230,6 +335,56 @@ class Category(NestedSet):
         """Get count of products in this category and all descendants."""
         categories = self.get_descendants(include_self=True)
         return frappe.db.count("Listing", {"category": ["in", categories]})
+
+
+def sanitize_svg(content):
+    """
+    Sanitize SVG content by removing dangerous elements and attributes.
+
+    Uses defusedxml for safe XML parsing (prevents XXE and XML bombs),
+    then removes:
+    - <script> elements
+    - <foreignObject> elements
+    - on* event handler attributes (onclick, onload, etc.)
+    - javascript: URI values in any attribute
+
+    Args:
+        content: Raw SVG file content as string
+
+    Returns:
+        Sanitized SVG content as string
+    """
+    import defusedxml.ElementTree as DefusedET
+    from xml.etree.ElementTree import tostring
+
+    root = DefusedET.fromstring(content)
+
+    # Tags to remove (lowercase for case-insensitive comparison)
+    dangerous_tags = {"script", "foreignobject"}
+
+    # Walk parent→child to safely remove dangerous elements
+    # (stdlib ElementTree has no getparent(), must use parent→child iteration)
+    for parent in list(root.iter()):
+        for child in list(parent):
+            # Handle namespace-prefixed tags: {http://www.w3.org/2000/svg}script
+            tag = child.tag.split("}")[-1] if "}" in str(child.tag) else str(child.tag)
+            if tag.lower() in dangerous_tags:
+                parent.remove(child)
+
+    # Strip dangerous attributes from all remaining elements
+    for elem in root.iter():
+        for attr in list(elem.attrib):
+            # Handle namespace-prefixed attributes
+            attr_local = attr.split("}")[-1] if "}" in attr else attr
+
+            # Remove on* event handlers (onclick, onload, onerror, etc.)
+            if attr_local.lower().startswith("on"):
+                del elem.attrib[attr]
+            # Remove javascript: URI values
+            elif "javascript:" in str(elem.attrib[attr]).lower():
+                del elem.attrib[attr]
+
+    return tostring(root, encoding="unicode")
 
 
 @frappe.whitelist()
