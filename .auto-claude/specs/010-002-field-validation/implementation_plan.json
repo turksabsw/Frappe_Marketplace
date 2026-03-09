@@ -428,7 +428,7 @@
             "command": "cd frappe-bench && python -c \"from tradehub_commerce.tradehub_commerce.doctype.rfq.rfq import RFQ; from tradehub_commerce.tradehub_commerce.doctype.rfq_quote.rfq_quote import RFQQuote; print('Import OK')\"",
             "expected": "Import OK"
           },
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "subtask-4-5",
@@ -941,7 +941,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T09:59:29.603Z",
+  "updated_at": "2026-03-09T10:02:11.034Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,

@@ -10,7 +10,7 @@ Main RFQ document with workflow management.
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime, getdate, today
+from frappe.utils import flt, now_datetime, getdate, today
 import hashlib
 
 
@@ -44,6 +44,7 @@ class RFQ(Document):
         self.validate_deadline()
         self.validate_nda_requirements()
         self.validate_targeting()
+        self.calculate_totals()
 
     def _guard_system_fields(self):
         """Prevent modification of system-generated fields after creation."""
@@ -152,6 +153,28 @@ class RFQ(Document):
 
         if self.target_type == "Category" and not self.get("target_categories"):
             frappe.throw(_("At least one category must be selected for 'Category' target type"))
+
+    def calculate_totals(self):
+        """
+        Calculate and normalize RFQ numeric fields with flt precision.
+
+        Ensures all currency and quantity fields use flt(value, 2) for
+        financial precision. Validates budget range consistency.
+        """
+        # Normalize budget fields with flt precision
+        self.budget_min = flt(self.budget_min, 2)
+        self.budget_max = flt(self.budget_max, 2)
+
+        # Validate budget range
+        if flt(self.budget_min, 2) > 0 and flt(self.budget_max, 2) > 0:
+            if flt(self.budget_min, 2) > flt(self.budget_max, 2):
+                frappe.throw(_("Minimum budget cannot exceed maximum budget"))
+
+        # Normalize item quantities and target prices
+        if self.items:
+            for item in self.items:
+                item.quantity = flt(item.quantity, 2)
+                item.target_price = flt(item.target_price, 2)
 
     def before_save(self):
         """Handle status-specific logic."""

@@ -10,7 +10,7 @@ Seller quotes with NDA check and deadline validation.
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import flt, now_datetime
 
 
 class RFQQuote(Document):
@@ -34,6 +34,7 @@ class RFQQuote(Document):
         self.validate_deadline()
         self.validate_duplicate_quote()
         self.validate_rfq_status()
+        self.calculate_totals()
 
     def _guard_system_fields(self):
         """Prevent modification of system-generated fields after creation."""
@@ -160,6 +161,37 @@ class RFQQuote(Document):
                     rfq.status
                 )
             )
+
+    def calculate_totals(self):
+        """
+        Calculate quote totals with flt precision.
+
+        Uses flt(value, 2) on all currency operations for financial precision.
+        Computes total_price from qty * unit_price, then derives total_amount
+        and final_amount after applying system-set discount.
+        """
+        # Normalize price fields with flt precision
+        self.price = flt(self.price, 2)
+        self.unit_price = flt(self.unit_price, 2)
+        self.qty = flt(self.qty, 2)
+
+        # Calculate total_price from qty and unit_price if both provided
+        if flt(self.qty, 2) > 0 and flt(self.unit_price, 2) > 0:
+            self.total_price = flt(flt(self.qty, 2) * flt(self.unit_price, 2), 2)
+        else:
+            # Fall back to price as total
+            self.total_price = flt(self.price, 2)
+
+        # Normalize discount_amount
+        self.discount_amount = flt(self.discount_amount, 2)
+
+        # Calculate total after discount
+        self.total_amount = flt(
+            flt(self.total_price, 2) - flt(self.discount_amount, 2), 2
+        )
+
+        # Set final amount
+        self.final_amount = flt(self.total_amount, 2)
 
     def after_insert(self):
         """Post-insert processing."""
