@@ -85,10 +85,12 @@ app_include_js = "/assets/tradehub_catalog/js/category_icon.js"
 
 permission_query_conditions = {
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.get_permission_query_conditions",
+	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.get_permission_query_conditions",
 }
 
 has_permission = {
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.has_permission",
+	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.has_permission",
 }
 
 # DocType Class
@@ -121,7 +123,8 @@ scheduler_events = {
 		"tradehub_catalog.tasks.media_processor"
 	],
 	"daily": [
-		"tradehub_catalog.tasks.ranking"
+		"tradehub_catalog.tasks.ranking",
+		"tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.remind_pending_proposals"
 	]
 }
 
@@ -183,3 +186,15 @@ scheduler_events = {
 # auth_hooks = [
 # 	"tradehub_catalog.auth.validate"
 # ]
+
+# Fixtures
+# --------
+
+# Ordered fixtures for Category Proposal workflow system.
+# Workflow State and Workflow Action Master must be loaded before Workflow.
+fixtures = [
+	"Workflow State",
+	"Workflow Action Master",
+	{"dt": "Workflow", "filters": [["document_type", "=", "Category Proposal"]]},
+	{"dt": "Notification", "filters": [["document_type", "=", "Category Proposal"]]},
+]

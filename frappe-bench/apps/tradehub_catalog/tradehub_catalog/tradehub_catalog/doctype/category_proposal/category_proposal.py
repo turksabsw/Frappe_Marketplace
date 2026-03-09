@@ -397,3 +397,56 @@ def has_permission(doc, ptype=None, user=None):
     except Exception:
         frappe.log_error("Category Proposal has_permission error")
         return False
+
+
+def remind_pending_proposals():
+    """
+    Daily scheduler job: remind System Managers about proposals pending >48 hours.
+
+    Sends a system notification for each Category Proposal that has been in
+    'Pending Review' status for more than 48 hours without being actioned.
+    """
+    threshold = add_days(getdate(), -2)
+
+    pending_proposals = frappe.get_all(
+        "Category Proposal",
+        filters={
+            "status": "Pending Review",
+            "modified": ["<=", threshold]
+        },
+        fields=["name", "proposed_name", "seller", "creation"]
+    )
+
+    if not pending_proposals:
+        return
+
+    # Get all System Manager users
+    system_managers = frappe.get_all(
+        "Has Role",
+        filters={"role": "System Manager", "parenttype": "User"},
+        fields=["parent"],
+        distinct=True
+    )
+
+    if not system_managers:
+        return
+
+    for proposal in pending_proposals:
+        for manager in system_managers:
+            try:
+                frappe.sendmail(
+                    recipients=[manager.parent],
+                    subject=_("Category Proposal Pending Review: {0}").format(
+                        proposal.proposed_name
+                    ),
+                    message=_(
+                        "The category proposal '{0}' (ID: {1}) has been pending review "
+                        "for more than 48 hours. Please review it at your earliest convenience."
+                    ).format(proposal.proposed_name, proposal.name),
+                    now=True
+                )
+            except Exception:
+                frappe.log_error(
+                    title=_("Category Proposal Reminder Error"),
+                    message=frappe.get_traceback()
+                )
