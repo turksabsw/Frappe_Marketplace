@@ -23,6 +23,7 @@
   "category",
   "category_name",
   "subcategory",
+  "seller_custom_category",
   "column_break_category",
   "attribute_set",
   "brand",
@@ -267,15 +268,22 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Category",
-   "options": "Category",
+   "options": "Product Category",
    "reqd": 1
   },
   {
    "fieldname": "subcategory",
    "fieldtype": "Link",
    "label": "Subcategory",
-   "options": "Category",
+   "options": "Product Category",
    "description": "Optional subcategory for more specific classification"
+  },
+  {
+   "fieldname": "seller_custom_category",
+   "fieldtype": "Link",
+   "label": "Seller Custom Category",
+   "options": "Seller Custom Category",
+   "description": "Seller-defined custom category for internal organization"
   },
   {
    "fieldname": "column_break_category",
