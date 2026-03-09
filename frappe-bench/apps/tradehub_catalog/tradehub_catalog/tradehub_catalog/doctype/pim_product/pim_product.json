@@ -41,6 +41,8 @@
   "attribute_values",
   "class_field_values_section",
   "class_field_values",
+  "product_attribute_sets_section",
+  "product_attribute_sets",
   "content_tab",
   "descriptions_section",
   "descriptions",
@@ -478,6 +480,19 @@
    "label": "Class Field Values",
    "options": "PIM Product Class Field Value",
    "description": "Custom field values defined by the Product Class"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "product_attribute_sets_section",
+   "fieldtype": "Section Break",
+   "label": "Product Attribute Sets"
+  },
+  {
+   "fieldname": "product_attribute_sets",
+   "fieldtype": "Table",
+   "label": "Product Attribute Sets",
+   "options": "Product Attribute Set",
+   "description": "Attribute sets assigned to this product"
   },
   {
    "fieldname": "content_tab",

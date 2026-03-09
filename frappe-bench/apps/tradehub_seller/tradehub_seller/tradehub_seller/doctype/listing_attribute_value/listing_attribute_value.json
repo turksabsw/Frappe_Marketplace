@@ -7,6 +7,7 @@
  "field_order": [
   "attribute",
   "attribute_name",
+  "attribute_set",
   "column_break_1",
   "value",
   "value_label",
@@ -35,6 +36,13 @@
    "read_only": 1,
    "fetch_from": "attribute.attribute_name",
    "description": "Auto-fetched attribute name"
+  },
+  {
+   "fieldname": "attribute_set",
+   "fieldtype": "Link",
+   "label": "Attribute Set",
+   "options": "Attribute Set",
+   "description": "The attribute set this attribute value belongs to"
   },
   {
    "fieldname": "column_break_1",

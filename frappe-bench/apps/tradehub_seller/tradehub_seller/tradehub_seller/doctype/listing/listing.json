@@ -80,6 +80,8 @@
   "gtin",
   "has_variants",
   "variant_of",
+  "product_attribute_sets_section",
+  "product_attribute_sets",
   "attributes_section",
   "attribute_values",
   "attributes",
@@ -647,6 +649,19 @@
    "label": "Variant Of",
    "options": "Listing",
    "set_only_once": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "product_attribute_sets_section",
+   "fieldtype": "Section Break",
+   "label": "Product Attribute Sets"
+  },
+  {
+   "fieldname": "product_attribute_sets",
+   "fieldtype": "Table",
+   "label": "Product Attribute Sets",
+   "options": "Product Attribute Set",
+   "description": "Attribute sets assigned to this product"
   },
   {
    "collapsible": 1,
