@@ -421,3 +421,105 @@ Changes made to sub_order.py:
 Verification: Syntax OK, AST parse OK, formula tests passed (10/5/2% = 16.21%)
 
 === END SESSION 11 ===
+
+=== SESSION 12 (subtask-4-4) ===
+
+Completed subtask-4-4: Update rfq.py and rfq_quote.py (Phase 4 - Python Server-Side Code)
+
+Changes made to rfq.py:
+- G1: Added flt to imports from frappe.utils
+- G1: Implemented calculate_totals():
+  - Normalizes budget_min and budget_max with flt(value, 2)
+  - Validates budget range (budget_min <= budget_max)
+  - Normalizes item quantities and target_prices with flt(value, 2)
+  - Added if self.items guard before iterating
+- G1: Added calculate_totals() call at end of validate() (Pattern 9)
+- G2: Verified _guard_system_fields - correctly guards rfq_code, published_at,
+  closed_at, quote_count, current_views. Uses is_new() check, has_value_changed(),
+  and frappe.PermissionError. Follows order.py pattern ✓
+- G5: Verified refetch_denormalized_fields covers:
+  - buyer_name (from Buyer Profile) ✓
+  - buyer_company (from Buyer Profile) ✓
+  - buyer_email (from Buyer Profile) ✓
+  - tenant_name (from Tenant) ✓
+  - No seller on RFQ (correct - it's a buyer's request document)
+
+Changes made to rfq_quote.py:
+- G1: Added flt to imports from frappe.utils
+- G1: Implemented calculate_totals():
+  - Normalizes price, unit_price, qty with flt(value, 2)
+  - Calculates total_price = flt(flt(qty, 2) * flt(unit_price, 2), 2) with outer wrapping
+  - Falls back to price as total when qty/unit_price not provided
+  - Normalizes discount_amount with flt(value, 2)
+  - Calculates total_amount = total_price - discount_amount
+  - Sets final_amount = total_amount
+- G1: Added calculate_totals() call at end of validate() (Pattern 9)
+- G2: Verified _guard_system_fields - correctly guards submitted_at, revision_count,
+  last_revised_at, accepted_at, rejected_at, discount_amount, total_amount.
+  Uses is_new() check, has_value_changed(), and frappe.PermissionError ✓
+- G5: Verified refetch_denormalized_fields covers:
+  - seller_name (from Seller Profile) ✓
+  - tenant (from Seller Profile) ✓
+  - rfq_title (from RFQ) ✓
+  - rfq_buyer (from RFQ) ✓
+  - tenant_name (from Tenant) ✓
+
+Verification: 18/18 checks passed - syntax OK, all G1/G2/G5 requirements met
+Commit: 14d89b0
+
+=== END SESSION 12 ===
+
+=== SESSION 13 (subtask-4-5) ===
+
+Completed subtask-4-5: Update listing.py in tradehub_seller (Phase 4 - Python Server-Side Code)
+
+Changes made:
+
+- G1: Implemented calculate_totals() with flt(value, 2):
+  - Normalizes pricing tier values (price, min_qty, max_qty, discount_percentage)
+  - Added calculate_totals() call in validate() before update_status_based_on_inventory
+  - Follows Pattern 9 ordering (calculations come after validation)
+
+- G2: Verified _guard_system_fields and _guard_primary_links:
+  - _guard_system_fields guards 16 fields (listing_code, erpnext_item, view_count,
+    wishlist_count, order_count, last_sold_at, average_rating, review_count,
+    quality_score, ranking_score, ranking_updated_at, conversion_rate,
+    click_through_rate, seller_score, moderated_by/at, published_at, created_by)
+  - _guard_primary_links guards ['seller'] - correctly set_only_once
+  - Both called first in validate() per Pattern 9 ✓
+
+- G3: Added cascading discount formula:
+  - Validates discount_1/2/3 in 0-100 range
+  - Formula: base * (1-d1/100) * (1-d2/100) * (1-d3/100)
+  - Computes discount_amount and effective_discount_pct
+  - Zero-division guard on base_price
+  - Uses flt(value, 2) on all operations
+
+- G4: Replaced all json.loads/json.dumps with child table operations:
+  - Removed import json (no longer needed)
+  - before_insert: Removed deprecated JSON field initializations
+    (images="[]", attributes="{}", bulk_pricing_tiers="[]")
+  - validate_b2b_settings: self.bulk_pricing_tiers -> self.pricing_tiers
+  - validate_bulk_pricing_tiers: Rewritten to iterate self.pricing_tiers child table
+    instead of json.loads(self.bulk_pricing_tiers)
+  - validate_images: Rewritten to check self.listing_images child table
+    instead of json.loads(self.images)
+  - calculate_quality_score: Uses self.listing_images and self.attribute_values
+    instead of json.loads(self.images) and json.loads(self.attributes)
+  - get_price/get_bulk_tier_price: Uses self.pricing_tiers child table
+    instead of json.loads(self.bulk_pricing_tiers)
+  - get_listing API: Serializes child tables (listing_images, attribute_values)
+    to list/dict format instead of json.loads on deprecated fields
+
+- G5: Verified refetch_denormalized_fields covers:
+  - seller_name (from Seller Profile) ✓
+  - seller_company (from Seller Profile via company_name) ✓
+  - tenant (from Seller Profile) ✓
+  - tenant_name (from Tenant) ✓
+  - category_name (from Category) ✓
+
+Verification: Syntax OK, AST check passed (no json imports remain),
+zero json.loads/json.dumps references in file
+Commit: fba7aa7
+
+=== END SESSION 13 ===

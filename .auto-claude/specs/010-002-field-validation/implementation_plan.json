@@ -447,7 +447,7 @@
             "command": "cd frappe-bench && python -c \"from tradehub_seller.tradehub_seller.doctype.listing.listing import Listing; print('Import OK')\"",
             "expected": "Import OK"
           },
-          "status": "pending",
+          "status": "completed",
           "notes": "IMPORTANT: listing.py is a large file. Check if json.loads() calls remain for attributes/images/bulk_pricing_tiers — these should now use self.attribute_values (child table) etc. Do NOT touch json.loads() for fields that are KEEP (not in MIGRATE list)."
         },
         {
@@ -941,7 +941,7 @@
   "planStatus": "in_progress",
   "xstateState": "coding",
   "executionPhase": "coding",
-  "updated_at": "2026-03-09T10:02:11.034Z",
+  "updated_at": "2026-03-09T10:10:24.547Z",
   "lastEvent": {
     "eventId": "7c0b4b88-e0e3-44e4-94a4-8aac749f53d1",
     "sequence": 0,
