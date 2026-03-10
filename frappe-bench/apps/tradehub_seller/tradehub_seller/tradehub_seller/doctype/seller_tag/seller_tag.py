@@ -98,6 +98,46 @@ class SellerTag(Document):
             )
 
 
+def get_permission_query_conditions(user=None):
+    """
+    Return SQL conditions for Seller Tag list queries.
+
+    System Managers see all records. Other users see global tags (is_global=1)
+    and tags belonging to their current tenant. Enforces tenant isolation for
+    non-global tags.
+
+    Args:
+        user (str, optional): The user to check permissions for.
+            Defaults to current session user.
+
+    Returns:
+        str: SQL WHERE clause fragment (without WHERE keyword).
+    """
+    user = user or frappe.session.user
+
+    # System Manager sees all
+    if "System Manager" in frappe.get_roles(user):
+        return ""
+
+    # Tenant isolation: show global tags + tags for current tenant
+    try:
+        from tradehub_core.tradehub_core.utils.tenant import get_current_tenant
+        current_tenant = get_current_tenant()
+    except ImportError:
+        current_tenant = None
+
+    if current_tenant:
+        escaped_tenant = frappe.db.escape(current_tenant)
+        return (
+            "(`tabSeller Tag`.`is_global` = 1"
+            " OR `tabSeller Tag`.`tenant` = {tenant}"
+            " OR `tabSeller Tag`.`tenant` IS NULL"
+            " OR `tabSeller Tag`.`tenant` = '')"
+        ).format(tenant=escaped_tenant)
+
+    return ""
+
+
 def get_active_tags():
     """Get all active tags for display."""
     return frappe.get_all(

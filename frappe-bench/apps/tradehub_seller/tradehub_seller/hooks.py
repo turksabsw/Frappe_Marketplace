@@ -83,10 +83,10 @@ required_apps = ["tradehub_core", "tradehub_catalog"]
 
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
+permission_query_conditions = {
+	"Seller Tag": "tradehub_seller.tradehub_seller.doctype.seller_tag.seller_tag.get_permission_query_conditions",
+}
+
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
@@ -119,13 +119,19 @@ doc_events = {
 
 # Seller-specific scheduled tasks: buybox_rotation, kpi_tasks, tier_tasks
 # These tasks are moved from the monolithic tr_tradehub app during decomposition
+# Seller tag tasks: refresh_seller_metrics, evaluate_all_rules, cleanup_old_metrics
 scheduler_events = {
 	"hourly": [
-		"tradehub_seller.tasks.buybox_rotation"
+		"tradehub_seller.tasks.buybox_rotation",
+		"tradehub_seller.tradehub_seller.seller_tags.tasks.refresh_seller_metrics"
 	],
 	"daily": [
 		"tradehub_seller.tasks.kpi_tasks",
-		"tradehub_seller.tasks.tier_tasks"
+		"tradehub_seller.tasks.tier_tasks",
+		"tradehub_seller.tradehub_seller.seller_tags.tasks.evaluate_all_rules"
+	],
+	"weekly": [
+		"tradehub_seller.tradehub_seller.seller_tags.tasks.cleanup_old_metrics"
 	]
 }
 
