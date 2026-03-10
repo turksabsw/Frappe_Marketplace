@@ -63,7 +63,7 @@ required_apps = ["tradehub_core", "tradehub_catalog"]
 # ------------
 
 # before_install = "tradehub_seller.install.before_install"
-# after_install = "tradehub_seller.install.after_install"
+after_install = "tradehub_seller.tradehub_seller.doctype.seller_profile.seller_profile.setup_delivery_note_custom_fields"
 
 # Uninstallation
 # --------------
@@ -111,6 +111,9 @@ doc_events = {
 		"on_update": "tradehub_seller.webhooks.erpnext_hooks.on_supplier_update",
 		"after_insert": "tradehub_seller.webhooks.erpnext_hooks.on_supplier_insert",
 		"on_trash": "tradehub_seller.webhooks.erpnext_hooks.on_supplier_delete"
+	},
+	"Delivery Note": {
+		"validate": "tradehub_seller.tradehub_seller.doctype.seller_profile.seller_profile.set_delivery_note_warehouse"
 	}
 }
 

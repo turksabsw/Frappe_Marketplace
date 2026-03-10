@@ -927,6 +927,177 @@ class SellerProfile(Document):
 
         return None
 
+    # =====================================================
+    # Stock Management Methods
+    # =====================================================
+
+    def get_stock_by_location(self, location_idx):
+        """
+        Get available stock for a specific seller location.
+
+        Queries ERPNext Bin table via the location's erpnext_warehouse
+        to retrieve current stock levels for all items.
+
+        Args:
+            location_idx: The idx of the location in the locations child table.
+
+        Returns:
+            dict: Mapping of {item_code: qty_available} for items in the warehouse.
+
+        Raises:
+            frappe.ValidationError: If location not found or has no warehouse.
+        """
+        location = self.get_location_by_idx(location_idx)
+        if not location:
+            frappe.throw(
+                _("Location with idx {0} not found for seller {1}").format(
+                    location_idx, self.name
+                )
+            )
+
+        if not location.erpnext_warehouse:
+            frappe.throw(
+                _("Location '{0}' does not have an ERPNext Warehouse linked").format(
+                    location.location_name
+                )
+            )
+
+        bins = frappe.get_all(
+            "Bin",
+            filters={"warehouse": location.erpnext_warehouse},
+            fields=["item_code", "actual_qty"]
+        )
+
+        return {row.item_code: flt(row.actual_qty) for row in bins}
+
+    def validate_location_stock(self, location_idx, items):
+        """
+        Pre-fulfillment stock validation for a specific location.
+
+        Checks that sufficient stock exists at the given location for
+        all requested items. Raises an error with details if any item
+        has insufficient stock.
+
+        Args:
+            location_idx: The idx of the location in the locations child table.
+            items: list of dicts with 'item_code' and 'qty' keys.
+                   Example: [{"item_code": "ITEM-001", "qty": 5}]
+
+        Raises:
+            frappe.ValidationError: If any item has insufficient stock.
+        """
+        stock = self.get_stock_by_location(location_idx)
+
+        insufficient = []
+        for item in items:
+            item_code = item.get("item_code")
+            required_qty = flt(item.get("qty"))
+            available_qty = flt(stock.get(item_code, 0))
+
+            if available_qty < required_qty:
+                insufficient.append({
+                    "item_code": item_code,
+                    "required": required_qty,
+                    "available": available_qty,
+                })
+
+        if insufficient:
+            details = ", ".join(
+                _("{0}: required {1}, available {2}").format(
+                    row["item_code"], row["required"], row["available"]
+                )
+                for row in insufficient
+            )
+            frappe.throw(
+                _("Insufficient stock at location: {0}").format(details)
+            )
+
+    def create_inter_location_transfer(self, from_idx, to_idx, items):
+        """
+        Create a Material Transfer Stock Entry between two seller locations.
+
+        Transfers inventory from one seller location's warehouse to another
+        by creating an ERPNext Stock Entry of type 'Material Transfer'.
+
+        Args:
+            from_idx: The idx of the source location in the locations child table.
+            to_idx: The idx of the destination location in the locations child table.
+            items: list of dicts with 'item_code' and 'qty' keys.
+                   Example: [{"item_code": "ITEM-001", "qty": 10}]
+
+        Returns:
+            str: Name of the created Stock Entry document.
+
+        Raises:
+            frappe.ValidationError: If locations not found, missing warehouses,
+                or insufficient stock at source location.
+        """
+        from_location = self.get_location_by_idx(from_idx)
+        to_location = self.get_location_by_idx(to_idx)
+
+        if not from_location:
+            frappe.throw(
+                _("Source location with idx {0} not found").format(from_idx)
+            )
+
+        if not to_location:
+            frappe.throw(
+                _("Destination location with idx {0} not found").format(to_idx)
+            )
+
+        if not from_location.erpnext_warehouse:
+            frappe.throw(
+                _("Source location '{0}' does not have an ERPNext Warehouse linked").format(
+                    from_location.location_name
+                )
+            )
+
+        if not to_location.erpnext_warehouse:
+            frappe.throw(
+                _("Destination location '{0}' does not have an ERPNext Warehouse linked").format(
+                    to_location.location_name
+                )
+            )
+
+        # Validate stock at source location
+        self.validate_location_stock(from_idx, items)
+
+        # Determine company from warehouse
+        company = frappe.db.get_value(
+            "Warehouse", from_location.erpnext_warehouse, "company"
+        )
+        if not company:
+            frappe.throw(
+                _("Could not determine company from warehouse {0}").format(
+                    from_location.erpnext_warehouse
+                )
+            )
+
+        stock_entry = frappe.get_doc({
+            "doctype": "Stock Entry",
+            "stock_entry_type": "Material Transfer",
+            "company": company,
+            "remarks": _("Inter-location transfer for seller {0}: {1} → {2}").format(
+                self.seller_name,
+                from_location.location_name,
+                to_location.location_name,
+            ),
+        })
+
+        for item in items:
+            stock_entry.append("items", {
+                "item_code": item.get("item_code"),
+                "qty": flt(item.get("qty")),
+                "s_warehouse": from_location.erpnext_warehouse,
+                "t_warehouse": to_location.erpnext_warehouse,
+            })
+
+        stock_entry.flags.ignore_permissions = True
+        stock_entry.insert()
+        stock_entry.submit()
+
+        return stock_entry.name
+
 
 # API Endpoints
 @frappe.whitelist()
@@ -1400,3 +1571,176 @@ def get_seller_fulfillment_locations(seller):
         }
         for loc in fulfillment_locations
     ]
+
+
+# =====================================================
+# Stock Management API Endpoints
+# =====================================================
+
+@frappe.whitelist()
+def get_stock_by_seller_location(seller, location_idx):
+    """
+    Get available stock at a seller's specific location.
+
+    Queries ERPNext Bin table via the location's linked erpnext_warehouse
+    to retrieve current stock levels.
+
+    Args:
+        seller: Name of the seller profile
+        location_idx: The idx of the location in the seller's locations child table
+
+    Returns:
+        dict: Mapping of {item_code: qty_available}
+    """
+    if not frappe.has_permission("Seller Profile", "read"):
+        frappe.throw(_("Not permitted to view seller stock"))
+
+    seller_doc = frappe.get_doc("Seller Profile", seller)
+    return seller_doc.get_stock_by_location(cint(location_idx))
+
+
+@frappe.whitelist()
+def validate_seller_location_stock(seller, location_idx, items=None):
+    """
+    Validate that a seller's location has sufficient stock for given items.
+
+    Pre-fulfillment check that raises an error if any item has
+    insufficient stock at the specified location.
+
+    Args:
+        seller: Name of the seller profile
+        location_idx: The idx of the location in the seller's locations child table
+        items: JSON string or list of dicts with 'item_code' and 'qty' keys
+
+    Returns:
+        dict: Success status
+    """
+    if not frappe.has_permission("Seller Profile", "read"):
+        frappe.throw(_("Not permitted to validate seller stock"))
+
+    if isinstance(items, str):
+        items = frappe.parse_json(items)
+
+    if not items:
+        frappe.throw(_("Items list is required"))
+
+    seller_doc = frappe.get_doc("Seller Profile", seller)
+    seller_doc.validate_location_stock(cint(location_idx), items)
+
+    return {"status": "success", "message": _("All items have sufficient stock")}
+
+
+@frappe.whitelist()
+def create_seller_inter_location_transfer(seller, from_idx, to_idx, items=None):
+    """
+    Create a Material Transfer Stock Entry between two seller locations.
+
+    Transfers inventory from one seller location's warehouse to another
+    via an ERPNext Stock Entry.
+
+    Args:
+        seller: Name of the seller profile
+        from_idx: The idx of the source location
+        to_idx: The idx of the destination location
+        items: JSON string or list of dicts with 'item_code' and 'qty' keys
+
+    Returns:
+        dict: Result with Stock Entry name
+    """
+    if not frappe.has_permission("Seller Profile", "write"):
+        frappe.throw(_("Not permitted to create stock transfers"))
+
+    if isinstance(items, str):
+        items = frappe.parse_json(items)
+
+    if not items:
+        frappe.throw(_("Items list is required"))
+
+    seller_doc = frappe.get_doc("Seller Profile", seller)
+    stock_entry_name = seller_doc.create_inter_location_transfer(
+        cint(from_idx), cint(to_idx), items
+    )
+
+    return {
+        "status": "success",
+        "message": _("Stock transfer created successfully"),
+        "stock_entry": stock_entry_name,
+    }
+
+
+# =====================================================
+# Delivery Note Integration
+# =====================================================
+
+def set_delivery_note_warehouse(doc, method=None):
+    """
+    Set warehouse on Delivery Note items from seller's fulfillment location.
+
+    Called as a doc_event hook on Delivery Note validate. If the Delivery Note
+    has a seller_profile and fulfillment_location_name set, and the matching
+    location has an erpnext_warehouse, use it as the default warehouse for
+    items that don't already have a warehouse specified.
+
+    Args:
+        doc: Delivery Note document
+        method: Hook method name (unused)
+    """
+    seller_profile = doc.get("seller_profile")
+    location_name = doc.get("fulfillment_location_name")
+
+    if not seller_profile or not location_name:
+        return
+
+    try:
+        seller_doc = frappe.get_doc("Seller Profile", seller_profile)
+    except frappe.DoesNotExistError:
+        return
+
+    location = seller_doc.get_location_by_name(location_name)
+    if not location or not location.erpnext_warehouse:
+        return
+
+    warehouse = location.erpnext_warehouse
+    for item in doc.items:
+        if not item.warehouse:
+            item.warehouse = warehouse
+
+
+def setup_delivery_note_custom_fields():
+    """
+    Create Custom Fields on Delivery Note for seller fulfillment integration.
+
+    Adds:
+    - seller_profile: Link to Seller Profile
+    - fulfillment_location_name: Data field (read_only) for the location name
+
+    Should be called from after_install hook or manually during setup.
+    """
+    from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+    custom_fields = {
+        "Delivery Note": [
+            {
+                "fieldname": "seller_profile",
+                "label": "Seller Profile",
+                "fieldtype": "Link",
+                "options": "Seller Profile",
+                "insert_after": "customer_name",
+                "reqd": 0,
+                "read_only": 0,
+                "in_standard_filter": 1,
+                "description": "Linked Seller Profile for marketplace fulfillment",
+            },
+            {
+                "fieldname": "fulfillment_location_name",
+                "label": "Fulfillment Location",
+                "fieldtype": "Data",
+                "insert_after": "seller_profile",
+                "reqd": 0,
+                "read_only": 1,
+                "description": "Name of the seller's fulfillment location",
+            },
+        ]
+    }
+
+    create_custom_fields(custom_fields, ignore_validate=True)
