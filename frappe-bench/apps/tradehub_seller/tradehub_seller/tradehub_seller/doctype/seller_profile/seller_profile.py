@@ -63,6 +63,7 @@ class SellerProfile(Document):
         self.validate_e_invoice_alias()
         self.validate_seller_limits()
         self.validate_vacation_mode()
+        self.validate_default_location()
         self.modified_by = frappe.session.user
         self.last_active_at = now_datetime()
 
@@ -804,6 +805,128 @@ class SellerProfile(Document):
 
         return max(0, cint(self.max_listings) - current_listings)
 
+    # =====================================================
+    # Location Helper Methods
+    # =====================================================
+
+    def validate_default_location(self):
+        """
+        Validate and manage default location in the locations child table.
+
+        Rules:
+        - If seller has only one active location, auto-set it as default.
+        - If multiple locations are marked as default, keep only the first one.
+        - If the current default location is deactivated, promote the next
+          active location to default.
+        """
+        if not self.locations:
+            return
+
+        active_locations = [loc for loc in self.locations if cint(loc.is_active)]
+        default_locations = [loc for loc in active_locations if cint(loc.is_default)]
+
+        if len(active_locations) == 1:
+            # Auto-default single active location
+            for loc in self.locations:
+                loc.is_default = 1 if (cint(loc.is_active) and loc == active_locations[0]) else 0
+            return
+
+        if len(default_locations) > 1:
+            # Resolve multiple defaults — keep only the first one
+            first_default = default_locations[0]
+            for loc in self.locations:
+                if cint(loc.is_default) and loc != first_default:
+                    loc.is_default = 0
+
+        elif len(default_locations) == 0 and active_locations:
+            # No active default exists — promote the first active location
+            active_locations[0].is_default = 1
+
+    def get_default_location(self):
+        """
+        Get the default active location from the locations child table.
+
+        Returns:
+            Location Item row or None if no default active location exists.
+        """
+        if not self.locations:
+            return None
+
+        for loc in self.locations:
+            if cint(loc.is_default) and cint(loc.is_active):
+                return loc
+
+        return None
+
+    def get_fulfillment_locations(self):
+        """
+        Get all active locations that can fulfill orders.
+
+        Returns:
+            list: Location Item rows where can_fulfill_orders=1 and is_active=1.
+        """
+        if not self.locations:
+            return []
+
+        return [
+            loc for loc in self.locations
+            if cint(loc.can_fulfill_orders) and cint(loc.is_active)
+        ]
+
+    def get_return_locations(self):
+        """
+        Get all active locations that can accept returns.
+
+        Returns:
+            list: Location Item rows where can_accept_returns=1 and is_active=1.
+        """
+        if not self.locations:
+            return []
+
+        return [
+            loc for loc in self.locations
+            if cint(loc.can_accept_returns) and cint(loc.is_active)
+        ]
+
+    def get_location_by_name(self, location_name):
+        """
+        Get a location by its location_name.
+
+        Args:
+            location_name: The location_name to search for.
+
+        Returns:
+            Location Item row or None if not found.
+        """
+        if not self.locations:
+            return None
+
+        for loc in self.locations:
+            if loc.location_name == location_name:
+                return loc
+
+        return None
+
+    def get_location_by_idx(self, idx):
+        """
+        Get a location by its child table idx.
+
+        Args:
+            idx: The idx (row number) of the location in the child table.
+
+        Returns:
+            Location Item row or None if not found.
+        """
+        if not self.locations:
+            return None
+
+        idx = cint(idx)
+        for loc in self.locations:
+            if loc.idx == idx:
+                return loc
+
+        return None
+
 
 # API Endpoints
 @frappe.whitelist()
@@ -1202,3 +1325,78 @@ def validate_iban(iban):
         "is_valid": is_valid,
         "iban_formatted": f"{iban_cleaned[:4]} {iban_cleaned[4:8]} {iban_cleaned[8:12]} {iban_cleaned[12:16]} {iban_cleaned[16:20]} {iban_cleaned[20:24]} {iban_cleaned[24:]}"
     }
+
+
+@frappe.whitelist()
+def get_seller_locations(seller):
+    """
+    Get all locations for a seller profile.
+
+    Args:
+        seller: Name of the seller profile
+
+    Returns:
+        list: All locations with their details
+    """
+    if not frappe.has_permission("Seller Profile", "read"):
+        frappe.throw(_("Not permitted to view seller locations"))
+
+    seller_doc = frappe.get_doc("Seller Profile", seller)
+
+    return [
+        {
+            "idx": loc.idx,
+            "location_name": loc.location_name,
+            "location_type": loc.location_type,
+            "location_code": loc.location_code,
+            "is_default": cint(loc.is_default),
+            "is_active": cint(loc.is_active),
+            "can_fulfill_orders": cint(loc.can_fulfill_orders),
+            "can_accept_returns": cint(loc.can_accept_returns),
+            "city": loc.city,
+            "city_name": loc.city_name,
+            "district": loc.district,
+            "district_name": loc.district_name,
+            "street_address": loc.street_address,
+            "erpnext_warehouse": loc.erpnext_warehouse,
+        }
+        for loc in seller_doc.locations
+    ]
+
+
+@frappe.whitelist()
+def get_seller_fulfillment_locations(seller):
+    """
+    Get active fulfillment locations for a seller profile.
+
+    Returns only locations where can_fulfill_orders=1 and is_active=1.
+
+    Args:
+        seller: Name of the seller profile
+
+    Returns:
+        list: Active fulfillment locations with their details
+    """
+    if not frappe.has_permission("Seller Profile", "read"):
+        frappe.throw(_("Not permitted to view seller locations"))
+
+    seller_doc = frappe.get_doc("Seller Profile", seller)
+    fulfillment_locations = seller_doc.get_fulfillment_locations()
+
+    return [
+        {
+            "idx": loc.idx,
+            "location_name": loc.location_name,
+            "location_type": loc.location_type,
+            "location_code": loc.location_code,
+            "is_default": cint(loc.is_default),
+            "can_accept_returns": cint(loc.can_accept_returns),
+            "city": loc.city,
+            "city_name": loc.city_name,
+            "district": loc.district,
+            "district_name": loc.district_name,
+            "street_address": loc.street_address,
+            "erpnext_warehouse": loc.erpnext_warehouse,
+        }
+        for loc in fulfillment_locations
+    ]
