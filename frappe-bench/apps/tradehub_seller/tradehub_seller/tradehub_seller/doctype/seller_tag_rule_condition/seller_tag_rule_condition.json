@@ -7,10 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "condition_section",
-  "field",
+  "metric_field",
   "operator",
   "column_break_condition",
   "value",
+  "threshold_value",
+  "settings_section",
+  "weight",
+  "logic_group",
+  "column_break_settings",
   "logic"
  ],
  "fields": [
@@ -20,12 +25,12 @@
    "label": "Condition"
   },
   {
-   "description": "Field to evaluate for this condition",
-   "fieldname": "field",
+   "description": "Metric field to evaluate for this condition",
+   "fieldname": "metric_field",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Field",
-   "options": "category\nseller_level\norder_count\ntotal_revenue\nrating\nproduct_count\ndays_since_registration\nverification_status\nsubscription_plan\nregion\ncountry",
+   "label": "Metric Field",
+   "options": "total_orders\ntotal_sales_amount\navg_rating\navg_response_time_hours\ncancellation_rate\nreturn_rate\non_time_delivery_rate\ncomplaint_rate\nlisting_count\nactive_listing_count\nactive_days\nlast_order_date\nverification_status\npremium_seller\ntotal_reviews\npositive_review_rate\nrepeat_customer_rate",
    "reqd": 1
   },
   {
@@ -49,6 +54,34 @@
    "label": "Value"
   },
   {
+   "description": "Threshold value for numeric comparisons",
+   "fieldname": "threshold_value",
+   "fieldtype": "Float",
+   "label": "Threshold Value"
+  },
+  {
+   "fieldname": "settings_section",
+   "fieldtype": "Section Break",
+   "label": "Settings"
+  },
+  {
+   "default": "1.0",
+   "description": "Weight of this condition in the overall rule evaluation",
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Weight"
+  },
+  {
+   "description": "Group name for logical grouping of conditions",
+   "fieldname": "logic_group",
+   "fieldtype": "Data",
+   "label": "Logic Group"
+  },
+  {
+   "fieldname": "column_break_settings",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "AND",
    "description": "Logical operator to combine with next condition",
    "fieldname": "logic",
@@ -69,7 +102,7 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 0,
- "search_fields": "field, operator, value",
+ "search_fields": "metric_field, operator, value",
  "sort_field": "idx",
  "sort_order": "ASC",
  "track_changes": 0
