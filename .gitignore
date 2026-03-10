@@ -34,6 +34,10 @@ Thumbs.db
 # Auto Claude data directory
 .auto-claude/
 
+# Frontend build output (deployed via GitHub Actions)
+/assets/
+/index.html
+
 # Auto Claude generated files
 .auto-claude-security.json
 .auto-claude-status
