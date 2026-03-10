@@ -29,6 +29,8 @@
   "awb_number",
   "addresses_tab",
   "origin_section",
+  "fulfillment_location_idx",
+  "fulfillment_location_name",
   "sender_name",
   "sender_phone",
   "origin_address_line1",
@@ -282,6 +284,21 @@
    "fieldname": "origin_section",
    "fieldtype": "Section Break",
    "label": "Origin Address"
+  },
+  {
+   "default": "0",
+   "description": "Index of the seller's fulfillment location in Seller Profile locations table",
+   "fieldname": "fulfillment_location_idx",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Fulfillment Location Idx"
+  },
+  {
+   "description": "Name of the fulfillment location used as origin for this shipment",
+   "fieldname": "fulfillment_location_name",
+   "fieldtype": "Data",
+   "label": "Fulfillment Location",
+   "read_only": 1
   },
   {
    "fieldname": "sender_name",
@@ -946,7 +963,7 @@
    "link_fieldname": "shipment"
   }
  ],
- "modified": "2026-02-12 16:00:00.000000",
+ "modified": "2026-03-10 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Logistics",
  "name": "Marketplace Shipment",
