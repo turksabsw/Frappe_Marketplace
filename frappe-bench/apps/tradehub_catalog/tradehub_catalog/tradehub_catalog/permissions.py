@@ -5,13 +5,14 @@
 Permission hooks for Trade Hub Catalog module.
 
 This module provides permission query conditions and document-level permission
-checks for Brand, Brand Gating, Brand Ownership Claim, and Brand Authorization
-Request DocTypes.
+checks for Brand, Brand Gating, Brand Ownership Claim, Brand Authorization
+Request, and Variant Request DocTypes.
 
 Functions are registered in hooks.py under:
 - permission_query_conditions (brand_gating_conditions, brand_ownership_claim_conditions,
-  brand_authorization_request_conditions)
-- has_permission (brand_has_permission, brand_gating_has_permission)
+  brand_authorization_request_conditions, variant_request_conditions)
+- has_permission (brand_has_permission, brand_gating_has_permission,
+  variant_request_has_permission)
 
 Key Behaviors:
 - System Manager always has full access (bypass all checks)
@@ -19,6 +20,8 @@ Key Behaviors:
 - Brand Gating: owner_seller can create, read, write for own brand entries
 - Brand Authorization Request: requesting_seller sees own requests,
   brand owner_seller sees requests for their brands
+- Variant Request: requesting_seller sees own requests,
+  brand owner_seller can read+write requests for their brands
 - Tenant isolation via get_current_tenant() from tradehub_core
 """
 
@@ -387,3 +390,131 @@ def brand_authorization_request_conditions(user=None):
     except Exception:
         frappe.log_error("Brand Authorization Request permission query conditions error")
         return "1=0"
+
+
+# =============================================================================
+# VARIANT REQUEST QUERY CONDITIONS
+# =============================================================================
+
+
+def variant_request_conditions(user=None):
+    """
+    Return SQL conditions for Variant Request list queries.
+
+    System Managers see all records. Sellers see requests where they are
+    the requesting_seller OR the brand owner_seller (so brand owners can
+    review variant requests for their brands). Tenant isolation is enforced.
+
+    Args:
+        user (str, optional): The user to check permissions for.
+            Defaults to current session user.
+
+    Returns:
+        str: SQL WHERE clause fragment (without WHERE keyword).
+    """
+    try:
+        user = user or frappe.session.user
+
+        # System Manager sees all
+        if "System Manager" in frappe.get_roles(user):
+            return ""
+
+        # Get seller profile for user
+        seller = _get_seller_for_user(user)
+        if not seller:
+            return "1=0"
+
+        escaped_seller = frappe.db.escape(seller)
+
+        # Tenant isolation
+        current_tenant = _get_current_tenant()
+        tenant_condition = ""
+        if current_tenant:
+            escaped_tenant = frappe.db.escape(current_tenant)
+            tenant_condition = (
+                " AND `tabVariant Request`.`tenant` = {tenant}"
+            ).format(tenant=escaped_tenant)
+
+        # Seller sees requests where they are the requesting_seller
+        # OR where they are the brand owner_seller (brand owner can review)
+        return (
+            "("
+            "`tabVariant Request`.`requesting_seller` = {seller}"
+            " OR `tabVariant Request`.`brand` IN ("
+            "SELECT `name` FROM `tabBrand` WHERE `owner_seller` = {seller}"
+            ")"
+            ")"
+            "{tenant_condition}"
+        ).format(
+            seller=escaped_seller,
+            tenant_condition=tenant_condition
+        )
+    except Exception:
+        frappe.log_error("Variant Request permission query conditions error")
+        return "1=0"
+
+
+# =============================================================================
+# VARIANT REQUEST PERMISSION
+# =============================================================================
+
+
+def variant_request_has_permission(doc, ptype=None, user=None):
+    """
+    Check if user has permission to access a Variant Request document.
+
+    System Managers have full access. The requesting_seller can read and
+    create their own requests. The brand owner_seller can read and write
+    variant requests for their brands.
+
+    Args:
+        doc: The Variant Request document (dict or Document object).
+        ptype (str, optional): Permission type (read, write, create, etc.).
+            Defaults to 'read'.
+        user (str, optional): The user to check permissions for.
+            Defaults to current session user.
+
+    Returns:
+        bool: True if user has permission, False otherwise.
+    """
+    try:
+        user = user or frappe.session.user
+        ptype = ptype or "read"
+
+        # System Manager bypass
+        if "System Manager" in frappe.get_roles(user):
+            return True
+
+        seller = _get_seller_for_user(user)
+        if not seller:
+            return False
+
+        # Check if user is the requesting seller
+        requesting_seller = _get_doc_field(doc, "requesting_seller")
+        if requesting_seller == seller:
+            # Requesting seller can read and create their own requests
+            if ptype in ("read", "create"):
+                return True
+
+        # Check if user is the brand owner_seller
+        brand = _get_doc_field(doc, "brand")
+        if brand:
+            brand_owner_seller = frappe.db.get_value(
+                "Brand", brand, "owner_seller", cache=True
+            )
+            if brand_owner_seller and brand_owner_seller == seller:
+                # Brand owner can read and write variant requests for their brand
+                if ptype in ("read", "write"):
+                    return True
+
+        # Tenant isolation check
+        doc_tenant = _get_doc_field(doc, "tenant")
+        if doc_tenant:
+            current_tenant = _get_current_tenant()
+            if current_tenant and doc_tenant != current_tenant:
+                return False
+
+        return False
+    except Exception:
+        frappe.log_error("Variant Request has_permission error")
+        return False
