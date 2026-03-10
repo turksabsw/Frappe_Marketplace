@@ -88,6 +88,7 @@ permission_query_conditions = {
 	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.get_permission_query_conditions",
 	"Brand Gating": "tradehub_catalog.tradehub_catalog.permissions.brand_gating_conditions",
 	"Brand Ownership Claim": "tradehub_catalog.tradehub_catalog.permissions.brand_ownership_claim_conditions",
+	"Brand Authorization Request": "tradehub_catalog.tradehub_catalog.permissions.brand_authorization_request_conditions",
 }
 
 has_permission = {

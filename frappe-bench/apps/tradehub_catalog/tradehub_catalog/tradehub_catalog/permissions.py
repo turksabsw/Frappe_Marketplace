@@ -5,16 +5,20 @@
 Permission hooks for Trade Hub Catalog module.
 
 This module provides permission query conditions and document-level permission
-checks for Brand, Brand Gating, and Brand Ownership Claim DocTypes.
+checks for Brand, Brand Gating, Brand Ownership Claim, and Brand Authorization
+Request DocTypes.
 
 Functions are registered in hooks.py under:
-- permission_query_conditions (brand_gating_conditions, brand_ownership_claim_conditions)
+- permission_query_conditions (brand_gating_conditions, brand_ownership_claim_conditions,
+  brand_authorization_request_conditions)
 - has_permission (brand_has_permission, brand_gating_has_permission)
 
 Key Behaviors:
 - System Manager always has full access (bypass all checks)
 - Brand owner_seller gets write access to allowed profile fields only
 - Brand Gating: owner_seller can create, read, write for own brand entries
+- Brand Authorization Request: requesting_seller sees own requests,
+  brand owner_seller sees requests for their brands
 - Tenant isolation via get_current_tenant() from tradehub_core
 """
 
@@ -320,4 +324,66 @@ def brand_ownership_claim_conditions(user=None):
         )
     except Exception:
         frappe.log_error("Brand Ownership Claim permission query conditions error")
+        return "1=0"
+
+
+# =============================================================================
+# BRAND AUTHORIZATION REQUEST QUERY CONDITIONS
+# =============================================================================
+
+
+def brand_authorization_request_conditions(user=None):
+    """
+    Return SQL conditions for Brand Authorization Request list queries.
+
+    System Managers see all records. Sellers see requests where they are
+    the requesting_seller OR the brand owner_seller (so brand owners can
+    review requests for their brands). Tenant isolation is enforced.
+
+    Args:
+        user (str, optional): The user to check permissions for.
+            Defaults to current session user.
+
+    Returns:
+        str: SQL WHERE clause fragment (without WHERE keyword).
+    """
+    try:
+        user = user or frappe.session.user
+
+        # System Manager sees all
+        if "System Manager" in frappe.get_roles(user):
+            return ""
+
+        # Get seller profile for user
+        seller = _get_seller_for_user(user)
+        if not seller:
+            return "1=0"
+
+        escaped_seller = frappe.db.escape(seller)
+
+        # Tenant isolation
+        current_tenant = _get_current_tenant()
+        tenant_condition = ""
+        if current_tenant:
+            escaped_tenant = frappe.db.escape(current_tenant)
+            tenant_condition = (
+                " AND `tabBrand Authorization Request`.`tenant` = {tenant}"
+            ).format(tenant=escaped_tenant)
+
+        # Seller sees requests where they are the requesting_seller
+        # OR where they are the brand owner_seller (brand owner can review)
+        return (
+            "("
+            "`tabBrand Authorization Request`.`requesting_seller` = {seller}"
+            " OR `tabBrand Authorization Request`.`brand` IN ("
+            "SELECT `name` FROM `tabBrand` WHERE `owner_seller` = {seller}"
+            ")"
+            ")"
+            "{tenant_condition}"
+        ).format(
+            seller=escaped_seller,
+            tenant_condition=tenant_condition
+        )
+    except Exception:
+        frappe.log_error("Brand Authorization Request permission query conditions error")
         return "1=0"
