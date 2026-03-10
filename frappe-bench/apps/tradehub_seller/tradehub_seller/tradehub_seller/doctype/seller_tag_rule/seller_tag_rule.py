@@ -19,7 +19,8 @@ class SellerTagRule(Document):
     Controller for Seller Tag Rule DocType.
 
     Rules define conditions for automatic tag assignment using
-    AND/OR logic with nested groups.
+    AND/OR logic with nested groups, structured conditions table,
+    or a combination of both.
     """
 
     def before_insert(self):
@@ -31,13 +32,25 @@ class SellerTagRule(Document):
 
     def validate(self):
         """Validate rule data."""
+        self.validate_rule_definition()
         self.validate_rule_json()
         self.validate_target_tag()
+        self.validate_scoring_config()
+
+    def validate_rule_definition(self):
+        """Ensure at least one rule definition method is provided."""
+        has_conditions = self.conditions and len(self.conditions) > 0
+        has_rule_json = self.rule_json and self.rule_json.strip() not in ("", "{}", "null")
+
+        if not has_conditions and not has_rule_json:
+            frappe.throw(
+                _("Either structured Conditions or Rule JSON must be provided")
+            )
 
     def validate_rule_json(self):
-        """Validate the rule JSON structure."""
-        if not self.rule_json:
-            frappe.throw(_("Rule JSON is required"))
+        """Validate the rule JSON structure if provided."""
+        if not self.rule_json or self.rule_json.strip() in ("", "{}", "null"):
+            return
 
         try:
             rule_config = json.loads(self.rule_json)
@@ -130,6 +143,17 @@ class SellerTagRule(Document):
                     _("Target tag '{0}' is not active").format(self.target_tag)
                 )
 
+    def validate_scoring_config(self):
+        """Validate scoring configuration values."""
+        if self.grace_period_days is not None and self.grace_period_days < 0:
+            frappe.throw(_("Grace Period Days cannot be negative"))
+
+        if self.warning_threshold_pct is not None:
+            if self.warning_threshold_pct < 0 or self.warning_threshold_pct > 100:
+                frappe.throw(
+                    _("Warning Threshold must be between 0 and 100")
+                )
+
     @frappe.whitelist()
     def test_rule(self, seller_id=None):
         """
@@ -152,7 +176,7 @@ class SellerTagRule(Document):
         }
 
         try:
-            rule_config = json.loads(self.rule_json)
+            rule_config = json.loads(self.rule_json) if self.rule_json else {}
         except json.JSONDecodeError as e:
             result["errors"].append(f"Invalid JSON: {str(e)}")
             return result

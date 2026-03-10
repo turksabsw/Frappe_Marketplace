@@ -11,11 +11,20 @@
   "naming_series",
   "rule_name",
   "target_tag",
+  "tag_category",
   "column_break_basic",
   "enabled",
   "priority",
   "evaluation_schedule",
+  "tenant",
+  "scoring_section",
+  "scoring_mode",
+  "column_break_scoring",
+  "grace_period_days",
+  "warning_threshold_pct",
   "definition_tab",
+  "conditions_section",
+  "conditions",
   "rule_section",
   "rule_json",
   "rule_description",
@@ -72,6 +81,14 @@
    "set_only_once": 1
   },
   {
+   "fetch_from": "target_tag.tag_category",
+   "fieldname": "tag_category",
+   "fieldtype": "Data",
+   "label": "Tag Category",
+   "read_only": 1,
+   "description": "Category of the target tag (fetched automatically)"
+  },
+  {
    "fieldname": "column_break_basic",
    "fieldtype": "Column Break"
   },
@@ -99,20 +116,73 @@
    "description": "How often to evaluate this rule"
   },
   {
+   "fetch_from": "target_tag.tenant",
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "read_only": 1,
+   "description": "Tenant scope inherited from target tag"
+  },
+  {
+   "fieldname": "scoring_section",
+   "fieldtype": "Section Break",
+   "label": "Scoring Configuration"
+  },
+  {
+   "default": "All Must Pass",
+   "fieldname": "scoring_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Scoring Mode",
+   "options": "All Must Pass\nWeakest Link\nWeighted Average",
+   "description": "How conditions are evaluated: All Must Pass (AND), Weakest Link (min score), Weighted Average (weighted sum)"
+  },
+  {
+   "fieldname": "column_break_scoring",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "fieldname": "grace_period_days",
+   "fieldtype": "Int",
+   "label": "Grace Period (Days)",
+   "description": "Number of days before removing a tag when conditions are no longer met"
+  },
+  {
+   "default": "80",
+   "fieldname": "warning_threshold_pct",
+   "fieldtype": "Float",
+   "label": "Warning Threshold (%)",
+   "description": "Percentage threshold below which a warning is triggered before tag removal"
+  },
+  {
    "fieldname": "definition_tab",
    "fieldtype": "Tab Break",
    "label": "Definition"
   },
   {
+   "fieldname": "conditions_section",
+   "fieldtype": "Section Break",
+   "label": "Rule Conditions"
+  },
+  {
+   "fieldname": "conditions",
+   "fieldtype": "Table",
+   "label": "Conditions",
+   "options": "Seller Tag Rule Condition",
+   "description": "Structured conditions for tag assignment evaluation"
+  },
+  {
    "fieldname": "rule_section",
    "fieldtype": "Section Break",
-   "label": "Rule Definition"
+   "label": "Rule Definition (JSON)",
+   "collapsible": 1
   },
   {
    "fieldname": "rule_json",
    "fieldtype": "JSON",
    "label": "Rule JSON",
-   "reqd": 1,
    "description": "JSON structure defining AND/OR conditions. See documentation for format."
   },
   {
@@ -217,7 +287,7 @@
   }
  ],
  "quick_entry": 0,
- "search_fields": "rule_name, target_tag, enabled",
+ "search_fields": "rule_name, target_tag, enabled, scoring_mode",
  "sort_field": "priority",
  "sort_order": "ASC",
  "states": [],
