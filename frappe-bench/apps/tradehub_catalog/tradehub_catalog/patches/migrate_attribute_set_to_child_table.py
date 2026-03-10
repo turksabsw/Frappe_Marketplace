@@ -31,8 +31,8 @@ def execute():
     category_attribute_sets child table with is_default=1.
     """
     # Reload DocTypes to ensure schema is up to date
-    frappe.reload_doc("tradehub_catalog", "doctype", "category_attribute_set")
-    frappe.reload_doc("tradehub_catalog", "doctype", "product_category")
+    frappe.reload_doc("TradeHub Catalog", "doctype", "category_attribute_set")
+    frappe.reload_doc("TradeHub Catalog", "doctype", "product_category")
 
     # Check if Product Category has the legacy attribute_set field
     if not frappe.db.has_column("Product Category", "attribute_set"):
