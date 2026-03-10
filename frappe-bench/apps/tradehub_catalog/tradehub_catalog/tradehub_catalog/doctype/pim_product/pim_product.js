@@ -120,5 +120,22 @@ frappe.ui.form.on('PIM Product', {
         if (!frm.doc.primary_category) {
             frm.set_value('primary_category_name', '');
         }
+    },
+
+    // =========================================================================
+    // CONDITION CHANGE HANDLER
+    // =========================================================================
+
+    condition: function(frm) {
+        if (frm.doc.condition === 'New') {
+            // Clear condition_note when condition is set to New
+            frm.set_value('condition_note', '');
+        } else if (['Used - Like New', 'Used - Good', 'Used - Acceptable', 'Renewed'].includes(frm.doc.condition)) {
+            // Remind user that condition_note is required for Used/Renewed conditions
+            frappe.show_alert({
+                message: __('Condition Note is required (min 20 characters) for {0} condition', [frm.doc.condition]),
+                indicator: 'orange'
+            });
+        }
     }
 });

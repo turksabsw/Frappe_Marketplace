@@ -23,10 +23,14 @@
   "category",
   "category_name",
   "subcategory",
+  "seller_custom_category",
   "column_break_category",
   "attribute_set",
   "brand",
   "manufacturer",
+  "condition_section",
+  "condition",
+  "condition_note",
   "description_tab",
   "description_section",
   "short_description",
@@ -79,6 +83,8 @@
   "gtin",
   "has_variants",
   "variant_of",
+  "product_attribute_sets_section",
+  "product_attribute_sets",
   "attributes_section",
   "attribute_values",
   "attributes",
@@ -106,6 +112,9 @@
   "ships_from_country",
   "ships_from_city",
   "handling_days",
+  "country_of_origin",
+  "city_of_origin",
+  "manufactured_by",
   "settings_tab",
   "settings_section",
   "is_featured",
@@ -267,15 +276,22 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Category",
-   "options": "Category",
+   "options": "Product Category",
    "reqd": 1
   },
   {
    "fieldname": "subcategory",
    "fieldtype": "Link",
    "label": "Subcategory",
-   "options": "Category",
+   "options": "Product Category",
    "description": "Optional subcategory for more specific classification"
+  },
+  {
+   "fieldname": "seller_custom_category",
+   "fieldtype": "Link",
+   "label": "Seller Custom Category",
+   "options": "Seller Custom Category",
+   "description": "Seller-defined custom category for internal organization"
   },
   {
    "fieldname": "column_break_category",
@@ -297,6 +313,30 @@
    "fieldname": "manufacturer",
    "fieldtype": "Data",
    "label": "Manufacturer"
+  },
+  {
+   "fieldname": "condition_section",
+   "fieldtype": "Section Break",
+   "label": "Condition"
+  },
+  {
+   "default": "New",
+   "fieldname": "condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Condition",
+   "options": "New\nNew with Defects\nRefurbished\nRenewed\nUsed - Like New\nUsed - Good\nUsed - Acceptable\nFor Parts or Not Working",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:['Used - Like New','Used - Good','Used - Acceptable','Renewed'].includes(doc.condition)",
+   "description": "Describe the condition of the product (minimum 20 characters)",
+   "fieldname": "condition_note",
+   "fieldtype": "Small Text",
+   "label": "Condition Note",
+   "mandatory_depends_on": "eval:['Used - Like New','Used - Good','Used - Acceptable','Renewed'].includes(doc.condition)"
   },
   {
    "fieldname": "description_tab",
@@ -642,6 +682,19 @@
   },
   {
    "collapsible": 1,
+   "fieldname": "product_attribute_sets_section",
+   "fieldtype": "Section Break",
+   "label": "Product Attribute Sets"
+  },
+  {
+   "fieldname": "product_attribute_sets",
+   "fieldtype": "Table",
+   "label": "Product Attribute Sets",
+   "options": "Product Attribute Set",
+   "description": "Attribute sets assigned to this product"
+  },
+  {
+   "collapsible": 1,
    "fieldname": "attributes_section",
    "fieldtype": "Section Break",
    "label": "Attributes"
@@ -799,6 +852,26 @@
    "fieldname": "handling_days",
    "fieldtype": "Int",
    "label": "Handling Days"
+  },
+  {
+   "fieldname": "country_of_origin",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Country of Origin",
+   "options": "Country",
+   "search_index": 1
+  },
+  {
+   "fieldname": "city_of_origin",
+   "fieldtype": "Data",
+   "label": "City of Origin"
+  },
+  {
+   "description": "Name of the manufacturer",
+   "fieldname": "manufactured_by",
+   "fieldtype": "Data",
+   "label": "Manufactured By",
+   "length": 200
   },
   {
    "fieldname": "settings_tab",
@@ -1270,7 +1343,7 @@
    "link_fieldname": "listing"
   }
  ],
- "modified": "2026-03-04 12:55:54.321726",
+ "modified": "2026-03-09 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Seller",
  "name": "Listing",

@@ -16,11 +16,15 @@ Key Features:
 - Level and path tracking for navigation
 """
 
+import os
 import re
+
 import frappe
 from frappe import _
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
+
+from tradehub_catalog.tradehub_catalog.doctype.category.category import sanitize_svg
 
 
 class ProductCategory(NestedSet):
@@ -47,6 +51,8 @@ class ProductCategory(NestedSet):
         self.validate_tenant_consistency()
         self.validate_circular_reference()
         self.validate_seo_fields()
+        self.validate_icon()
+        self.validate_category_attribute_sets()
 
         # Update computed fields
         self.set_level()
@@ -164,6 +170,121 @@ class ProductCategory(NestedSet):
                 _("SEO Description exceeds recommended length of 160 characters"),
                 indicator="orange"
             )
+
+    def validate_category_attribute_sets(self):
+        """Validate that only one row in category_attribute_sets has is_default=1."""
+        if not self.category_attribute_sets:
+            return
+
+        default_rows = [
+            row for row in self.category_attribute_sets if cint(row.is_default)
+        ]
+        if len(default_rows) > 1:
+            frappe.throw(
+                _("Only one Attribute Set can be marked as default in Category Attribute Sets. "
+                  "Found {0} rows marked as default.").format(len(default_rows))
+            )
+
+    def validate_icon(self):
+        """Validate icon fields: SVG file, icon_class, icon_color, and auto-populate icon_name."""
+        # Validate and sanitize SVG icon file
+        if self.icon:
+            self._validate_svg_icon()
+            self._auto_populate_icon_name()
+
+        # Validate icon_class format
+        if self.icon_class:
+            self._validate_icon_class()
+
+        # Validate icon_color format
+        if self.icon_color:
+            self._validate_icon_color()
+
+    def _validate_svg_icon(self):
+        """Validate SVG icon file: extension, size, and sanitize content."""
+        file_url = self.icon
+
+        # Check .svg extension
+        if not file_url.lower().endswith(".svg"):
+            frappe.throw(_("Icon must be an SVG file (.svg extension)"))
+
+        # Get the file document to check size and read content
+        file_doc = frappe.db.get_value(
+            "File",
+            {"file_url": file_url},
+            ["name", "file_size", "file_url"],
+            as_dict=True
+        )
+
+        if not file_doc:
+            # File might be a URL or not yet saved; skip further validation
+            return
+
+        # Check file size (50KB max)
+        max_size = 50 * 1024  # 50KB in bytes
+        if file_doc.file_size and file_doc.file_size > max_size:
+            frappe.throw(
+                _("Icon file size ({0} KB) exceeds maximum allowed size of 50 KB").format(
+                    round(file_doc.file_size / 1024, 1)
+                )
+            )
+
+        # Read and sanitize SVG content
+        try:
+            file_path = frappe.get_doc("File", file_doc.name).get_full_path()
+            if file_path and os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as f:
+                    svg_content = f.read()
+
+                sanitized_content = sanitize_svg(svg_content)
+
+                # Write back the sanitized content
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(sanitized_content)
+        except Exception:
+            frappe.log_error(
+                title=_("SVG Sanitization Error"),
+                message=frappe.get_traceback()
+            )
+            frappe.throw(_("Failed to sanitize SVG icon file. Please upload a valid SVG."))
+
+    def _auto_populate_icon_name(self):
+        """Auto-populate icon_name from the uploaded icon filename."""
+        if self.icon and not self.icon_name:
+            # Extract filename without extension from the file URL
+            filename = os.path.basename(self.icon)
+            name_without_ext = os.path.splitext(filename)[0]
+            # Clean up the name: replace hyphens/underscores with spaces, title case
+            clean_name = name_without_ext.replace("-", " ").replace("_", " ")
+            self.icon_name = clean_name.strip().title()
+
+    def _validate_icon_class(self):
+        """Validate icon_class matches allowed pattern."""
+        icon_class_pattern = re.compile(r"^[a-zA-Z0-9_\- ]+$")
+        if not icon_class_pattern.match(self.icon_class):
+            frappe.throw(
+                _("Icon Class can only contain letters, numbers, spaces, hyphens, and underscores")
+            )
+
+    def _validate_icon_color(self):
+        """Validate icon_color is a valid hex or rgb color."""
+        color = self.icon_color.strip()
+
+        # Check hex color: #RGB, #RRGGBB, #RRGGBBAA
+        hex_pattern = re.compile(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+        if hex_pattern.match(color):
+            return
+
+        # Check rgb/rgba color: rgb(r, g, b) or rgba(r, g, b, a)
+        rgb_pattern = re.compile(
+            r"^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$"
+        )
+        if rgb_pattern.match(color):
+            return
+
+        frappe.throw(
+            _("Icon Color must be a valid hex color (e.g., #333333) or RGB color (e.g., rgb(51, 51, 51))")
+        )
 
     # =========================================================================
     # COMPUTED FIELD METHODS

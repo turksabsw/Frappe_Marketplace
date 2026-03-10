@@ -14,8 +14,8 @@ required_apps = ["tradehub_core"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/tradehub_catalog/css/tradehub_catalog.css"
-# app_include_js = "/assets/tradehub_catalog/js/tradehub_catalog.js"
+app_include_css = "/assets/tradehub_catalog/css/category_icon.css"
+app_include_js = "/assets/tradehub_catalog/js/category_icon.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/tradehub_catalog/css/tradehub_catalog.css"
@@ -83,13 +83,15 @@ required_apps = ["tradehub_core"]
 
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.get_permission_query_conditions",
+	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.has_permission",
+	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.has_permission",
+}
 
 # DocType Class
 # -------------
@@ -121,7 +123,8 @@ scheduler_events = {
 		"tradehub_catalog.tasks.media_processor"
 	],
 	"daily": [
-		"tradehub_catalog.tasks.ranking"
+		"tradehub_catalog.tasks.ranking",
+		"tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.remind_pending_proposals"
 	]
 }
 
@@ -183,3 +186,15 @@ scheduler_events = {
 # auth_hooks = [
 # 	"tradehub_catalog.auth.validate"
 # ]
+
+# Fixtures
+# --------
+
+# Ordered fixtures for Category Proposal workflow system.
+# Workflow State and Workflow Action Master must be loaded before Workflow.
+fixtures = [
+	"Workflow State",
+	"Workflow Action Master",
+	{"dt": "Workflow", "filters": [["document_type", "=", "Category Proposal"]]},
+	{"dt": "Notification", "filters": [["document_type", "=", "Category Proposal"]]},
+]
