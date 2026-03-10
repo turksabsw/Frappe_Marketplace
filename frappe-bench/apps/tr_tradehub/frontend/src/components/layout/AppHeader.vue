@@ -1,54 +1,78 @@
 <template>
-  <header class="sticky top-0 z-30 bg-white border-b border-[#e8e8ef] h-[56px] flex items-center px-4 xl:px-5 gap-3">
-    <!-- Hamburger: visible when panel is collapsed -->
-    <button
-      v-if="!sidebar.panelVisible"
-      class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
-      @click="sidebar.togglePanel()"
-    >
-      <i class="fas fa-bars text-sm"></i>
-    </button>
-
-    <!-- Search Bar -->
-    <div class="relative flex-1 max-w-[200px] sm:max-w-[280px] lg:max-w-[380px] xl:max-w-[540px]">
-      <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[13px]"></i>
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Herşeyi Ara..."
-        class="w-full h-[38px] lg:h-[42px] pl-11 pr-4 text-[13px] bg-gray-50/80 border border-gray-200 rounded-full outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-500/10 focus:bg-white transition-all placeholder:text-gray-400"
-        @focus="showSearchResults = true"
-        @blur="hideSearchResults"
-        @keydown.escape="showSearchResults = false"
+  <header class="app-header">
+    <!-- Left: Hamburger + Breadcrumb -->
+    <div class="hdr-left">
+      <!-- Hamburger: visible when panel is collapsed -->
+      <button
+        v-if="!sidebar.panelVisible"
+        class="hdr-hamburger"
+        @click="sidebar.togglePanel()"
       >
-      <!-- Search Results -->
-      <GlobalSearch
-        v-if="showSearchResults && searchQuery.length >= 2"
-        :query="searchQuery"
-        @select="handleSearchSelect"
-      />
+        <AppIcon name="menu" :size="16" />
+      </button>
+
+      <!-- Dynamic Breadcrumb -->
+      <nav class="hdr-breadcrumb" aria-label="Breadcrumb">
+        <router-link to="/dashboard" class="hdr-crumb-link">Ana Sayfa</router-link>
+
+        <template v-if="sectionLabel && sectionLabel !== 'Ana Sayfa'">
+          <AppIcon name="chevron-right" :size="10" class="hdr-crumb-sep" />
+          <span class="hdr-crumb-text">{{ sectionLabel }}</span>
+        </template>
+
+        <template v-if="parentLabel">
+          <AppIcon name="chevron-right" :size="10" class="hdr-crumb-sep" />
+          <router-link v-if="parentRoute" :to="parentRoute" class="hdr-crumb-link">{{ parentLabel }}</router-link>
+          <span v-else class="hdr-crumb-text">{{ parentLabel }}</span>
+        </template>
+
+        <template v-if="currentLabel && currentLabel !== sectionLabel">
+          <AppIcon name="chevron-right" :size="10" class="hdr-crumb-sep" />
+          <span class="hdr-crumb-current">{{ currentLabel }}</span>
+        </template>
+      </nav>
     </div>
 
-    <!-- Spacer -->
-    <div class="flex-1"></div>
+    <!-- Right: Search + Raporlar -->
+    <div class="hdr-right">
+      <!-- Search -->
+      <div class="hdr-search-wrap">
+        <AppIcon name="search" :size="13" class="hdr-search-icon" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Ara.. (⌘K)"
+          class="hdr-search-input"
+          @focus="showSearchResults = true"
+          @blur="hideSearchResults"
+          @keydown.escape="showSearchResults = false"
+        >
+        <GlobalSearch
+          v-if="showSearchResults && searchQuery.length >= 2"
+          :query="searchQuery"
+          @select="handleSearchSelect"
+        />
+      </div>
 
-    <!-- Right Icons -->
-    <div class="flex items-center gap-0.5">
+      <!-- Raporlar -->
+      <button class="hdr-btn-outlined" @click="navigateTo('/app/report/general')" title="Raporlar">
+        <AppIcon name="file-bar-chart" :size="14" />
+        <span>Raporlar</span>
+      </button>
 
       <!-- Notifications -->
       <button class="hdr-icon-btn relative" @click.stop="handleNotificationClick" title="Bildirimler">
-        <i class="fas fa-bell text-[15px]"></i>
+        <AppIcon name="bell" :size="15" />
         <span
           v-if="notifications.hasUnread"
           class="absolute top-1.5 right-1.5 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white"
         ></span>
       </button>
 
-
       <!-- Quick Links -->
       <div class="relative">
         <button class="hdr-icon-btn" @click.stop="toggleQuickLinks" title="Quick Links">
-          <i class="fas fa-grip text-[15px]"></i>
+          <AppIcon name="grid-3x3" :size="15" />
         </button>
         <Transition name="dropdown">
           <div
@@ -62,25 +86,25 @@
             </div>
             <div class="grid grid-cols-2">
               <a href="#" class="flex flex-col items-center gap-2 py-5 border-r border-b border-gray-100 hover:bg-gray-50 transition-colors" @click.prevent="navigateTo('/app/accounting')">
-                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><i class="fas fa-file-invoice-dollar text-violet-600 text-lg"></i></div>
+                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><AppIcon name="file-text" :size="18" class="text-violet-600" /></div>
                 <div class="text-center"><p class="text-xs font-semibold text-gray-800">Muhasebe</p><p class="text-[10px] text-gray-400">Hesaplar</p></div>
               </a>
               <a href="#" class="flex flex-col items-center gap-2 py-5 border-b border-gray-100 hover:bg-gray-50 transition-colors" @click.prevent="navigateTo('/app/admin')">
-                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><i class="fas fa-shield-halved text-violet-600 text-lg"></i></div>
+                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><AppIcon name="shield" :size="18" class="text-violet-600" /></div>
                 <div class="text-center"><p class="text-xs font-semibold text-gray-800">Yönetim</p><p class="text-[10px] text-gray-400">Konsol</p></div>
               </a>
               <a href="#" class="flex flex-col items-center gap-2 py-5 border-r border-gray-100 hover:bg-gray-50 transition-colors" @click.prevent="navigateTo('/app/projects')">
-                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><i class="fas fa-folder-open text-violet-600 text-lg"></i></div>
+                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><AppIcon name="folder-open" :size="18" class="text-violet-600" /></div>
                 <div class="text-center"><p class="text-xs font-semibold text-gray-800">Projeler</p><p class="text-[10px] text-gray-400">Görevler</p></div>
               </a>
               <a href="#" class="flex flex-col items-center gap-2 py-5 hover:bg-gray-50 transition-colors" @click.prevent="navigateTo('/app/support')">
-                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><i class="fas fa-headset text-violet-600 text-lg"></i></div>
+                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center"><AppIcon name="headphones" :size="18" class="text-violet-600" /></div>
                 <div class="text-center"><p class="text-xs font-semibold text-gray-800">Destek</p><p class="text-[10px] text-gray-400">Talepler</p></div>
               </a>
             </div>
             <div class="px-4 py-2.5 border-t border-gray-100 text-center">
               <a href="#" class="text-xs font-medium text-gray-400 hover:text-violet-600 transition-colors" @click.prevent="navigateTo('/dashboard')">
-                Tümünü Gör <i class="fas fa-chevron-right text-[8px] ml-0.5"></i>
+                Tümünü Gör <AppIcon name="chevron-right" :size="8" class="ml-0.5 inline" />
               </a>
             </div>
           </div>
@@ -91,13 +115,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useNotificationStore } from '@/stores/notification'
 import { useOverlay } from '@/composables/useOverlay'
+import { railSections } from '@/data/navigation'
 import GlobalSearch from '@/components/common/GlobalSearch.vue'
+import AppIcon from '@/components/common/AppIcon.vue'
 
+const route = useRoute()
 const router = useRouter()
 const sidebar = useSidebarStore()
 const notifications = useNotificationStore()
@@ -106,6 +133,25 @@ const { active: activeOverlay, toggle: toggleOverlay, close: closeOverlays } = u
 const searchQuery = ref('')
 const showSearchResults = ref(false)
 
+// ── Breadcrumb computed ─────────────────────────────────────
+const sectionLabelMap = Object.fromEntries(
+  railSections.map((s) => [s.id, s.label])
+)
+
+const sectionLabel = computed(() => {
+  const section = route.meta?.section
+  if (!section) return null
+  return sectionLabelMap[section] || null
+})
+
+const parentLabel = computed(() => route.meta?.breadcrumbParent || null)
+const parentRoute = computed(() => route.meta?.breadcrumbParentRoute || null)
+
+const currentLabel = computed(() => {
+  return route.meta?.breadcrumb || route.meta?.title || null
+})
+
+// ── Handlers ────────────────────────────────────────────────
 function handleNotificationClick() {
   toggleOverlay('notifications')
 }

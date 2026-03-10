@@ -36,6 +36,10 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { CHART_PALETTE, DAYS_TR, HOURS } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const deliveryHeatmapOption = computed(() => {
   const cities = ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Adana', 'Konya']
@@ -92,7 +96,7 @@ const slaGaugeOption = computed(() => ({
     pointer: { length: '60%', width: 5, itemStyle: { color: '#6c5dd3' } },
     anchor: { show: true, size: 10, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
     title: { show: true, offsetCenter: [0, '72%'], fontSize: 12, fontWeight: 600 },
-    detail: { valueAnimation: true, fontSize: 28, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}%' },
+    detail: { valueAnimation: true, fontSize: 28, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', offsetCenter: [0, '45%'], formatter: '{value}%' },
     data: [{ value: 94.2, name: 'SLA Uyumu' }],
   }],
 }))

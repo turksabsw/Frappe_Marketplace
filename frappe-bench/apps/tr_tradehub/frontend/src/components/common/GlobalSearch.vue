@@ -2,7 +2,7 @@
   <div class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl shadow-black/8 max-h-[400px] overflow-y-auto z-50">
     <template v-if="filteredResults.length === 0">
       <div class="p-6 text-center">
-        <i class="fas fa-search text-gray-300 text-2xl mb-2"></i>
+        <AppIcon name="search" :size="24" class="text-gray-300 mb-2" />
         <p class="text-sm text-gray-400">Sonuç bulunamadı</p>
       </div>
     </template>
@@ -16,7 +16,7 @@
           @mousedown.prevent="handleClick(item)"
         >
           <div class="result-icon bg-violet-50 text-violet-500">
-            <i :class="item.icon"></i>
+            <AppIcon :name="item.icon" :size="14" />
           </div>
           <div class="result-text">
             <div class="title" v-html="highlight(item.label)"></div>
@@ -34,6 +34,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { searchData } from '@/data/navigation'
+import AppIcon from '@/components/common/AppIcon.vue'
 
 const props = defineProps({
   query: { type: String, default: '' },

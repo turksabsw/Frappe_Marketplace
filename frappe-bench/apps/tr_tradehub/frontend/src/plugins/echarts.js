@@ -72,34 +72,45 @@ const tradehubDark = {
     ],
     backgroundColor: 'transparent',
     textStyle: {
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontFamily: 'Roboto, system-ui, -apple-system, sans-serif',
         color: '#9CA3AF',
+        textBorderWidth: 0,
+        textShadowBlur: 0,
     },
     title: {
-        textStyle: { color: '#F9FAFB', fontSize: 14, fontWeight: 600 },
+        textStyle: { color: '#F9FAFB', fontSize: 14, fontWeight: 600, textBorderWidth: 0 },
     },
     legend: {
-        textStyle: { color: '#9CA3AF' },
+        textStyle: { color: '#9CA3AF', textBorderWidth: 0 },
         icon: 'roundRect',
     },
     tooltip: {
         backgroundColor: '#1F1F2A',
         borderColor: '#2A2A38',
-        textStyle: { color: '#F9FAFB', fontSize: 12 },
+        textStyle: { color: '#F9FAFB', fontSize: 12, textBorderWidth: 0 },
         extraCssText: 'box-shadow:0 8px 32px rgba(0,0,0,.5);border-radius:8px;',
     },
     categoryAxis: {
         axisLine: { lineStyle: { color: '#2A2A38' } },
         axisTick: { show: false },
-        axisLabel: { color: '#6B7280', fontSize: 11 },
+        axisLabel: { color: '#6B7280', fontSize: 11, textBorderWidth: 0 },
         splitLine: { lineStyle: { color: '#1F1F2A', type: 'dashed' } },
     },
     valueAxis: {
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: '#6B7280', fontSize: 11 },
+        axisLabel: { color: '#6B7280', fontSize: 11, textBorderWidth: 0 },
         splitLine: { lineStyle: { color: '#1F1F2A', type: 'dashed' } },
     },
+    line: { label: { textBorderWidth: 0 } },
+    bar: { label: { textBorderWidth: 0 } },
+    pie: { label: { textBorderWidth: 0 } },
+    scatter: { label: { textBorderWidth: 0 } },
+    gauge: { title: { textBorderWidth: 0 }, detail: { textBorderWidth: 0 } },
+    sankey: { label: { textBorderWidth: 0, color: '#d1d5db' } },
+    radar: { label: { textBorderWidth: 0 } },
+    funnel: { label: { textBorderWidth: 0 } },
+    treemap: { label: { textBorderWidth: 0 } },
 }
 
 // ── TradeHub Light Theme ────────────────────────────────────

@@ -51,7 +51,7 @@
     <!-- Empty State -->
     <div v-else-if="items.length === 0" class="card text-center py-12">
       <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center">
-        <i class="fas fa-inbox text-2xl text-gray-300"></i>
+        <i class="fas fa-inbox text-2xl text-gray-500 dark:text-gray-300"></i>
       </div>
       <h3 class="text-sm font-bold text-gray-700 mb-1">Henüz kayıt yok</h3>
       <p class="text-xs text-gray-400 mb-4">İlk {{ doctypeLabel }} kaydınızı oluşturun</p>
@@ -144,9 +144,9 @@ const pageSize = 20
 const showCreateModal = ref(false)
 
 const doctype = computed(() => {
-  // Convert slug back to DocType name: "rfq-quote" -> "RFQ Quote"
-  const slug = route.params.doctype || ''
-  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  // Preserve original DocType name from URL (e.g. 'Seller KPI' or 'Seller%20KPI')
+  const raw = route.params.doctype || ''
+  return decodeURIComponent(raw)
 })
 
 const doctypeLabel = computed(() => doctype.value || 'Döküman')
@@ -187,8 +187,7 @@ function refreshList() {
 }
 
 function openDoc(name) {
-  const slug = doctype.value.toLowerCase().replace(/\s+/g, '-')
-  router.push(`/app/${slug}/${encodeURIComponent(name)}`)
+  router.push(`/app/${encodeURIComponent(doctype.value)}/${encodeURIComponent(name)}`)
 }
 
 function getStatusClass(docstatus) {

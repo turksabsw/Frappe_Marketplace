@@ -12,7 +12,7 @@
         @click="sidebar.togglePanel()"
         title="Paneli Kapat"
       >
-        <i class="fas fa-angles-left text-sm"></i>
+        <AppIcon name="chevrons-left" :size="14" />
       </button>
     </div>
 
@@ -46,7 +46,7 @@
             :class="{ active: isItemActive(item) }"
             @click="handleItemClick(item)"
           >
-            <i :class="[item.icon, 'panel-item-icon']"></i>
+            <AppIcon :name="item.icon" :size="14" class="panel-item-icon" />
             {{ item.label }}
           </router-link>
         </div>
@@ -61,6 +61,7 @@ import { useNavigationStore } from '@/stores/navigation'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useRoute } from 'vue-router'
+import AppIcon from '@/components/common/AppIcon.vue'
 
 const nav = useNavigationStore()
 const sidebar = useSidebarStore()
@@ -76,8 +77,8 @@ const panelWidth = computed(() => {
 
 function getItemRoute(item) {
   if (item.route) return item.route
-  if (item.doctype) return `/app/${slugify(item.doctype)}`
-  if (item.report) return `/app/report/${slugify(item.report)}`
+  if (item.doctype) return `/app/${encodeURIComponent(item.doctype)}`
+  if (item.report) return `/app/report/${encodeURIComponent(item.report)}`
   return '#'
 }
 

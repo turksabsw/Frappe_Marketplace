@@ -36,15 +36,19 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { CHART_PALETTE, MONTHS_TR } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const treemapOption = computed(() => ({
   tooltip: { formatter: '{b}: {c} ürün' },
   series: [{
     type: 'treemap', roam: false, leafDepth: 2,
-    breadcrumb: { show: true },
+    breadcrumb: { show: true, itemStyle: { color: isDark.value ? '#2a2a38' : '#f3f4f6', borderColor: isDark.value ? '#3a3a4a' : '#e5e7eb', textStyle: { color: isDark.value ? '#9ca3af' : '#6b7280' } } },
     levels: [
-      { itemStyle: { borderWidth: 2, borderColor: 'var(--th-surface-border)', gapWidth: 2 } },
-      { itemStyle: { borderWidth: 1, gapWidth: 1 }, upperLabel: { show: true } },
+      { itemStyle: { borderWidth: 2, borderColor: isDark.value ? '#2d2d3d' : '#e5e7eb', gapWidth: 2 } },
+      { itemStyle: { borderWidth: 1, borderColor: isDark.value ? '#2d2d3d' : '#e5e7eb', gapWidth: 1 }, upperLabel: { show: true, color: isDark.value ? '#e5e7eb' : '#374151' } },
     ],
     data: [
       { name: 'Kimyasallar', value: 3200, children: [
@@ -94,10 +98,10 @@ const listingStatusOption = computed(() => ({
   legend: { bottom: 0, itemWidth: 10, itemHeight: 10 },
   series: [{
     type: 'pie', radius: ['52%', '78%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 6, borderWidth: 3 },
+    itemStyle: { borderRadius: 6, borderWidth: 3, borderColor: isDark.value ? '#1a1a28' : '#ffffff' },
     label: { show: true, position: 'center',
       formatter: '{total|12,847}\n{sub|Toplam Ürün}',
-      rich: { total: { fontSize: 20, fontWeight: 800, lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
+      rich: { total: { fontSize: 20, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
     },
     data: [
       { value: 9245, name: 'Aktif', itemStyle: { color: '#10b981' } },

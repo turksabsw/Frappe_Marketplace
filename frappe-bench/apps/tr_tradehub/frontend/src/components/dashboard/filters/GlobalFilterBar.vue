@@ -1,7 +1,7 @@
 <template>
   <div class="th-filter-bar-wrapper">
     <!-- Module Navigation Tabs -->
-    <div class="th-module-tabs">
+    <div v-if="!hideModuleTabs" class="th-module-tabs">
       <router-link
         v-for="mod in modules"
         :key="mod.route"
@@ -67,6 +67,10 @@
 import { useRoute } from 'vue-router'
 import { useFilterStore } from '@/stores/dashboard/useFilterStore'
 import { useCrossFilterStore } from '@/stores/dashboard/useCrossFilterStore'
+
+const props = defineProps({
+  hideModuleTabs: { type: Boolean, default: false },
+})
 
 const route = useRoute()
 const filterStore = useFilterStore()

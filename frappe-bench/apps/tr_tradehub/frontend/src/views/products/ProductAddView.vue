@@ -52,7 +52,7 @@
           >
             <input ref="fileInput" type="file" class="hidden" multiple accept="image/*" @change="handleFiles">
             <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-50 flex items-center justify-center">
-              <i class="fas fa-cloud-arrow-up text-xl text-gray-300"></i>
+              <i class="fas fa-cloud-arrow-up text-xl text-gray-500 dark:text-gray-300"></i>
             </div>
             <p class="text-sm font-medium text-gray-600 mb-1">Görselleri sürükleyin veya tıklayın</p>
             <p class="text-xs text-gray-400">PNG, JPG, WEBP · Maks 10MB</p>

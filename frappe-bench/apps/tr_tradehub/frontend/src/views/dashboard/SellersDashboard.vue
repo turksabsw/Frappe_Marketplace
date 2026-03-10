@@ -42,6 +42,10 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { CHART_PALETTE, MONTHS_TR } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const onboardingFunnel = computed(() => ({
   tooltip: { trigger: 'item', formatter: '{b}: {c}' },
@@ -108,10 +112,10 @@ const tierDonutOption = computed(() => ({
   legend: { bottom: 0, itemWidth: 10, itemHeight: 10 },
   series: [{
     type: 'pie', radius: ['52%', '78%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 6, borderWidth: 3 },
+    itemStyle: { borderRadius: 6, borderWidth: 3, borderColor: isDark.value ? '#1e1e2e' : '#ffffff' },
     label: { show: true, position: 'center',
       formatter: '{total|847}\n{sub|Toplam Satıcı}',
-      rich: { total: { fontSize: 22, fontWeight: 800, lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
+      rich: { total: { fontSize: 22, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
     },
     data: [
       { value: 42, name: 'Platin', itemStyle: { color: '#8B5CF6' } },

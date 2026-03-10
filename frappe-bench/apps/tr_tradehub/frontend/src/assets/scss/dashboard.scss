@@ -60,6 +60,90 @@
   --th-grid-gap: 20px;
   --th-widget-radius: 12px;
   --th-widget-padding: 20px;
+
+  // ── Score Type Badge Colors (Light) ───────────────────────
+  --th-type-weekly-bg: #ede9fe;
+  --th-type-weekly-fg: #6d28d9;
+  --th-type-monthly-bg: #dbeafe;
+  --th-type-monthly-fg: #1d4ed8;
+  --th-type-annual-bg: #d1fae5;
+  --th-type-annual-fg: #047857;
+  --th-type-daily-bg: #fef3c7;
+  --th-type-daily-fg: #92400e;
+  --th-type-periodic-bg: #e0e7ff;
+  --th-type-periodic-fg: #3730a3;
+  --th-type-lifetime-bg: #fce7f3;
+  --th-type-lifetime-fg: #9d174d;
+  --th-type-manual-bg: #f3f4f6;
+  --th-type-manual-fg: #374151;
+
+  // ── Status Badge Colors (Light) ───────────────────────────
+  --th-st-draft-bg: #f3f4f6;
+  --th-st-draft-fg: #4b5563;
+  --th-st-draft-dot: #9ca3af;
+  --th-st-calculating-bg: #dbeafe;
+  --th-st-calculating-fg: #1e40af;
+  --th-st-calculating-dot: #3b82f6;
+  --th-st-pending-review-bg: #fef3c7;
+  --th-st-pending-review-fg: #92400e;
+  --th-st-pending-review-dot: #f59e0b;
+  --th-st-finalized-bg: #d1fae5;
+  --th-st-finalized-fg: #065f46;
+  --th-st-finalized-dot: #22c55e;
+  --th-st-revised-bg: #ede9fe;
+  --th-st-revised-fg: #5b21b6;
+  --th-st-revised-dot: #8b5cf6;
+  --th-st-appealed-bg: #fee2e2;
+  --th-st-appealed-fg: #991b1b;
+  --th-st-appealed-dot: #ef4444;
+
+  // ── KPI Status Badge Colors (Light) ──────────────────────
+  --th-kpi-draft-bg: #f3f4f6;
+  --th-kpi-draft-fg: #4b5563;
+  --th-kpi-draft-dot: #9ca3af;
+  --th-kpi-active-bg: #dbeafe;
+  --th-kpi-active-fg: #1e40af;
+  --th-kpi-active-dot: #3b82f6;
+  --th-kpi-ontrack-bg: #d1fae5;
+  --th-kpi-ontrack-fg: #065f46;
+  --th-kpi-ontrack-dot: #22c55e;
+  --th-kpi-atrisk-bg: #fef3c7;
+  --th-kpi-atrisk-fg: #92400e;
+  --th-kpi-atrisk-dot: #f59e0b;
+  --th-kpi-below-bg: #ffedd5;
+  --th-kpi-below-fg: #9a3412;
+  --th-kpi-below-dot: #f97316;
+  --th-kpi-critical-bg: #fee2e2;
+  --th-kpi-critical-fg: #991b1b;
+  --th-kpi-critical-dot: #ef4444;
+  --th-kpi-exceeding-bg: #d1fae5;
+  --th-kpi-exceeding-fg: #065f46;
+  --th-kpi-exceeding-dot: #10b981;
+  --th-kpi-paused-bg: #f3f4f6;
+  --th-kpi-paused-fg: #6b7280;
+  --th-kpi-paused-dot: #9ca3af;
+  --th-kpi-expired-bg: #f3f4f6;
+  --th-kpi-expired-fg: #6b7280;
+  --th-kpi-expired-dot: #6b7280;
+  --th-kpi-calculated-bg: #ede9fe;
+  --th-kpi-calculated-fg: #5b21b6;
+  --th-kpi-calculated-dot: #8b5cf6;
+
+  // ── KPI Category Badge Colors (Light) ────────────────────
+  --th-cat-fulfillment-bg: #dbeafe;
+  --th-cat-fulfillment-fg: #1e40af;
+  --th-cat-delivery-bg: #e0e7ff;
+  --th-cat-delivery-fg: #3730a3;
+  --th-cat-quality-bg: #d1fae5;
+  --th-cat-quality-fg: #065f46;
+  --th-cat-service-bg: #fef3c7;
+  --th-cat-service-fg: #92400e;
+  --th-cat-compliance-bg: #fee2e2;
+  --th-cat-compliance-fg: #991b1b;
+  --th-cat-engagement-bg: #ede9fe;
+  --th-cat-engagement-fg: #5b21b6;
+  --th-cat-financial-bg: #fce7f3;
+  --th-cat-financial-fg: #9d174d;
 }
 
 // ── Dark Mode Overrides ─────────────────────────────────────
@@ -71,6 +155,90 @@ html.dark {
 
   --th-brand-50: #1e1b4b;
   --th-brand-100: #24223d;
+
+  // ── Score Type Badge Colors (Dark) ────────────────────────
+  --th-type-weekly-bg: #2d1b69;
+  --th-type-weekly-fg: #c4b5fd;
+  --th-type-monthly-bg: #1e2a5e;
+  --th-type-monthly-fg: #93c5fd;
+  --th-type-annual-bg: #0c3b2e;
+  --th-type-annual-fg: #6ee7b7;
+  --th-type-daily-bg: #5c3a0e;
+  --th-type-daily-fg: #fde68a;
+  --th-type-periodic-bg: #1e1b4b;
+  --th-type-periodic-fg: #a5b4fc;
+  --th-type-lifetime-bg: #5b1a3a;
+  --th-type-lifetime-fg: #f9a8d4;
+  --th-type-manual-bg: #1f2937;
+  --th-type-manual-fg: #d1d5db;
+
+  // ── Status Badge Colors (Dark) ────────────────────────────
+  --th-st-draft-bg: #272b33;
+  --th-st-draft-fg: #9ca3af;
+  --th-st-draft-dot: #6b7280;
+  --th-st-calculating-bg: #172554;
+  --th-st-calculating-fg: #93c5fd;
+  --th-st-calculating-dot: #3b82f6;
+  --th-st-pending-review-bg: #451a03;
+  --th-st-pending-review-fg: #fbbf24;
+  --th-st-pending-review-dot: #f59e0b;
+  --th-st-finalized-bg: #052e16;
+  --th-st-finalized-fg: #4ade80;
+  --th-st-finalized-dot: #22c55e;
+  --th-st-revised-bg: #2e1065;
+  --th-st-revised-fg: #a78bfa;
+  --th-st-revised-dot: #8b5cf6;
+  --th-st-appealed-bg: #450a0a;
+  --th-st-appealed-fg: #fca5a5;
+  --th-st-appealed-dot: #ef4444;
+
+  // ── KPI Status Badge Colors (Dark) ───────────────────────
+  --th-kpi-draft-bg: #272b33;
+  --th-kpi-draft-fg: #9ca3af;
+  --th-kpi-draft-dot: #6b7280;
+  --th-kpi-active-bg: #172554;
+  --th-kpi-active-fg: #93c5fd;
+  --th-kpi-active-dot: #3b82f6;
+  --th-kpi-ontrack-bg: #052e16;
+  --th-kpi-ontrack-fg: #4ade80;
+  --th-kpi-ontrack-dot: #22c55e;
+  --th-kpi-atrisk-bg: #451a03;
+  --th-kpi-atrisk-fg: #fbbf24;
+  --th-kpi-atrisk-dot: #f59e0b;
+  --th-kpi-below-bg: #431407;
+  --th-kpi-below-fg: #fdba74;
+  --th-kpi-below-dot: #f97316;
+  --th-kpi-critical-bg: #450a0a;
+  --th-kpi-critical-fg: #fca5a5;
+  --th-kpi-critical-dot: #ef4444;
+  --th-kpi-exceeding-bg: #052e16;
+  --th-kpi-exceeding-fg: #6ee7b7;
+  --th-kpi-exceeding-dot: #10b981;
+  --th-kpi-paused-bg: #272b33;
+  --th-kpi-paused-fg: #9ca3af;
+  --th-kpi-paused-dot: #6b7280;
+  --th-kpi-expired-bg: #1f2937;
+  --th-kpi-expired-fg: #6b7280;
+  --th-kpi-expired-dot: #4b5563;
+  --th-kpi-calculated-bg: #2e1065;
+  --th-kpi-calculated-fg: #a78bfa;
+  --th-kpi-calculated-dot: #8b5cf6;
+
+  // ── KPI Category Badge Colors (Dark) ─────────────────────
+  --th-cat-fulfillment-bg: #1e2a5e;
+  --th-cat-fulfillment-fg: #93c5fd;
+  --th-cat-delivery-bg: #1e1b4b;
+  --th-cat-delivery-fg: #a5b4fc;
+  --th-cat-quality-bg: #0c3b2e;
+  --th-cat-quality-fg: #6ee7b7;
+  --th-cat-service-bg: #5c3a0e;
+  --th-cat-service-fg: #fde68a;
+  --th-cat-compliance-bg: #450a0a;
+  --th-cat-compliance-fg: #fca5a5;
+  --th-cat-engagement-bg: #2d1b69;
+  --th-cat-engagement-fg: #c4b5fd;
+  --th-cat-financial-bg: #5b1a3a;
+  --th-cat-financial-fg: #f9a8d4;
 }
 
 // ── Dashboard Grid ──────────────────────────────────────────
@@ -81,31 +249,78 @@ html.dark {
   width: 100%;
 }
 
-.th-widget-sm   { grid-column: span 12; }
-.th-widget-md   { grid-column: span 12; }
-.th-widget-lg   { grid-column: span 12; }
-.th-widget-xl   { grid-column: span 12; }
-.th-widget-full { grid-column: span 12; }
+.th-widget-sm {
+  grid-column: span 12;
+}
+
+.th-widget-md {
+  grid-column: span 12;
+}
+
+.th-widget-lg {
+  grid-column: span 12;
+}
+
+.th-widget-xl {
+  grid-column: span 12;
+}
+
+.th-widget-full {
+  grid-column: span 12;
+}
 
 @media (min-width: 768px) {
-  .th-widget-sm { grid-column: span 6; }
-  .th-widget-md { grid-column: span 6; }
-  .th-widget-lg { grid-column: span 6; }
-  .th-widget-xl { grid-column: span 8; }
+  .th-widget-sm {
+    grid-column: span 6;
+  }
+
+  .th-widget-md {
+    grid-column: span 6;
+  }
+
+  .th-widget-lg {
+    grid-column: span 6;
+  }
+
+  .th-widget-xl {
+    grid-column: span 8;
+  }
 }
 
 @media (min-width: 1024px) {
-  .th-widget-sm { grid-column: span 3; }
-  .th-widget-md { grid-column: span 4; }
-  .th-widget-lg { grid-column: span 6; }
-  .th-widget-xl { grid-column: span 8; }
+  .th-widget-sm {
+    grid-column: span 3;
+  }
+
+  .th-widget-md {
+    grid-column: span 4;
+  }
+
+  .th-widget-lg {
+    grid-column: span 6;
+  }
+
+  .th-widget-xl {
+    grid-column: span 8;
+  }
 }
 
 @media (min-width: 1280px) {
-  .th-widget-sm { grid-column: span 3; }
-  .th-widget-md { grid-column: span 4; }
-  .th-widget-lg { grid-column: span 6; }
-  .th-widget-xl { grid-column: span 8; }
+  .th-widget-sm {
+    grid-column: span 3;
+  }
+
+  .th-widget-md {
+    grid-column: span 4;
+  }
+
+  .th-widget-lg {
+    grid-column: span 6;
+  }
+
+  .th-widget-xl {
+    grid-column: span 8;
+  }
 }
 
 // ── Widget Wrapper ──────────────────────────────────────────
@@ -177,7 +392,7 @@ html.dark {
   align-items: center;
   gap: 4px;
   font-size: var(--th-text-xs);
-  font-weight: 600;
+  font-weight: 500;
   padding: 2px 8px;
   border-radius: 100px;
 
@@ -236,7 +451,7 @@ html.dark {
 
   .th-retry-btn {
     font-size: var(--th-text-sm);
-    font-weight: 600;
+    font-weight: 500;
     padding: 6px 16px;
     border-radius: 8px;
     background: rgba($c-error, 0.1);
@@ -300,7 +515,7 @@ html.dark {
   &.active {
     background: var(--th-surface-card);
     color: var(--th-brand-500);
-    font-weight: 600;
+    font-weight: 500;
     box-shadow: 0 1px 3px rgba(#000, 0.06);
   }
 

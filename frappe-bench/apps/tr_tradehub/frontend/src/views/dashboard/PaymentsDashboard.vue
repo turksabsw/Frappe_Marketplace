@@ -42,6 +42,10 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { MONTHS_TR } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const stackedAreaOption = computed(() => ({
   tooltip: { trigger: 'axis' },
@@ -62,10 +66,10 @@ const paymentStatusDonut = computed(() => ({
   legend: { bottom: 0, itemWidth: 10, itemHeight: 10 },
   series: [{
     type: 'pie', radius: ['52%', '78%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 6, borderWidth: 3 },
+    itemStyle: { borderRadius: 6, borderWidth: 3, borderColor: isDark.value ? '#1e1e2e' : '#ffffff' },
     label: { show: true, position: 'center',
       formatter: '{total|₺12.8M}\n{sub|Toplam}',
-      rich: { total: { fontSize: 22, fontWeight: 800, lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
+      rich: { total: { fontSize: 22, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } },
     },
     data: [
       { value: 10240, name: 'Başarılı', itemStyle: { color: '#10b981' } },
@@ -100,7 +104,7 @@ const paymentGaugeOption = computed(() => ({
       pointer: { length: '60%', width: 4, itemStyle: { color: '#6c5dd3' } },
       anchor: { show: true, size: 8, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
       title: { show: true, offsetCenter: [0, '72%'], fontSize: 11, fontWeight: 600 },
-      detail: { valueAnimation: true, fontSize: 22, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}%' },
+      detail: { valueAnimation: true, fontSize: 22, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', offsetCenter: [0, '45%'], formatter: '{value}%' },
       data: [{ value: 96.8, name: 'Başarı Oranı' }],
     },
     {
@@ -112,7 +116,7 @@ const paymentGaugeOption = computed(() => ({
       pointer: { length: '60%', width: 4, itemStyle: { color: '#6c5dd3' } },
       anchor: { show: true, size: 8, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
       title: { show: true, offsetCenter: [0, '72%'], fontSize: 11, fontWeight: 600 },
-      detail: { valueAnimation: true, fontSize: 22, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}%' },
+      detail: { valueAnimation: true, fontSize: 22, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', offsetCenter: [0, '45%'], formatter: '{value}%' },
       data: [{ value: 88.5, name: '3DS Oranı' }],
     },
   ],

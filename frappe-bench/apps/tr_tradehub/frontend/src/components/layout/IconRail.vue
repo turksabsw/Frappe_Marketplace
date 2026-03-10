@@ -11,21 +11,21 @@
         :data-section="section.id"
         @click="nav.switchSection(section.id)"
       >
-        <i :class="section.icon"></i>
+        <AppIcon :name="section.icon" :size="18" />
         <span class="rail-label">{{ section.label }}</span>
       </button>
     </div>
 
     <div class="w-full flex flex-col items-center gap-1 py-3 border-t sidebar-rail-border">
       <button class="rail-icon" @click="toast.info('Yardım merkezi açılıyor...')">
-        <i class="fas fa-circle-question"></i>
+        <AppIcon name="circle-question-mark" :size="18" />
         <span class="rail-label">Yardım</span>
       </button>
       <button
         class="rail-icon"
         @click.stop="toggleOverlay('railQuickLinks')"
       >
-        <i class="fas fa-grip"></i>
+        <AppIcon name="grid-3x3" :size="18" />
         <span class="rail-label">Linkler</span>
       </button>
       <button
@@ -67,6 +67,7 @@ import { useOverlay } from '@/composables/useOverlay'
 import TenantSwitcher from '@/components/navigation/TenantSwitcher.vue'
 import UserMenuDropdown from '@/components/navigation/UserMenuDropdown.vue'
 import QuickLinksDropdown from '@/components/navigation/QuickLinksDropdown.vue'
+import AppIcon from '@/components/common/AppIcon.vue'
 
 const nav = useNavigationStore()
 const tenant = useTenantStore()

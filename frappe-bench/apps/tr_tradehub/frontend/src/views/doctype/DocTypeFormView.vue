@@ -62,8 +62,9 @@ const loading = ref(false)
 const docData = ref({})
 
 const doctype = computed(() => {
-  const slug = route.params.doctype || ''
-  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  // Preserve original DocType name from URL (e.g. 'Seller KPI' or 'Seller%20KPI')
+  const raw = route.params.doctype || ''
+  return decodeURIComponent(raw)
 })
 
 const doctypeLabel = computed(() => doctype.value)
@@ -74,8 +75,11 @@ function formatFieldLabel(key) {
 }
 
 function goBack() {
-  const slug = doctype.value.toLowerCase().replace(/\s+/g, '-')
-  router.push(`/app/${slug}`)
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push(`/app/${encodeURIComponent(doctype.value)}`)
+  }
 }
 
 async function loadDoc() {

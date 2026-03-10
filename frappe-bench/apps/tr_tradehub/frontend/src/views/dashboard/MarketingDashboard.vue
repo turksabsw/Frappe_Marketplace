@@ -26,6 +26,10 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { CHART_PALETTE, MONTHS_TR } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const campaignOption = computed(() => ({
   tooltip: { trigger: 'axis' },
@@ -45,9 +49,9 @@ const couponOption = computed(() => ({
   legend: { bottom: 0 },
   series: [{
     type: 'pie', radius: ['52%', '78%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 6, borderWidth: 3 },
+    itemStyle: { borderRadius: 6, borderWidth: 3, borderColor: isDark.value ? '#1e1e2e' : '#ffffff' },
     label: { show: true, position: 'center', formatter: '{total|8,420}\n{sub|Kullanım}',
-      rich: { total: { fontSize: 20, fontWeight: 800, lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } } },
+      rich: { total: { fontSize: 20, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } } },
     data: [
       { value: 3890, name: 'Yüzde İndirim', itemStyle: { color: CHART_PALETTE[0] } },
       { value: 2340, name: 'Sabit Tutar', itemStyle: { color: CHART_PALETTE[1] } },

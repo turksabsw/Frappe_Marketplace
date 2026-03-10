@@ -1,5 +1,188 @@
 @use 'variables' as *;
 
+// ── App Header Layout ───────────────────────────────────────
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 16px;
+    background: $l-bg;
+    border-bottom: 1px solid $l-border-alt;
+
+    @media (min-width: 1280px) {
+        padding: 0 20px;
+    }
+
+    @include dark {
+        background: $d-bg-card !important;
+        border-color: $d-border !important;
+    }
+}
+
+.hdr-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.hdr-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.hdr-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all $t-fast;
+    flex-shrink: 0;
+    color: $l-text-400;
+
+    &:hover {
+        background: $l-bg-muted;
+        color: $l-text-700;
+    }
+
+    @include dark {
+        color: $d-text-muted !important;
+
+        &:hover {
+            background: $d-bg-hover !important;
+            color: $d-text !important;
+        }
+    }
+}
+
+// ── Breadcrumb ──────────────────────────────────────────────
+.hdr-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.hdr-crumb-link {
+    color: $l-text-400;
+    text-decoration: none;
+    transition: color $t-fast;
+    flex-shrink: 0;
+
+    &:hover {
+        color: $brand;
+    }
+
+    @include dark {
+        color: $d-text-muted !important;
+
+        &:hover {
+            color: $brand !important;
+        }
+    }
+}
+
+.hdr-crumb-text {
+    color: $l-text-400;
+    flex-shrink: 0;
+
+    @include dark {
+        color: $d-text-muted !important;
+    }
+}
+
+.hdr-crumb-sep {
+    color: $l-text-300;
+    flex-shrink: 0;
+
+    @include dark {
+        color: rgba(#fff, 0.15) !important;
+    }
+}
+
+.hdr-crumb-current {
+    color: $l-text-700;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @include dark {
+        color: $d-text-hi !important;
+    }
+}
+
+// ── Header Search ───────────────────────────────────────────
+.hdr-search-wrap {
+    position: relative;
+}
+
+.hdr-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $l-text-400;
+    pointer-events: none;
+
+    @include dark {
+        color: $d-text-muted !important;
+    }
+}
+
+.hdr-search-input {
+    width: 180px;
+    height: 36px;
+    padding: 0 12px 0 34px;
+    font-size: 12px;
+    background: $l-bg-muted;
+    border: 1px solid $l-border;
+    border-radius: 8px;
+    outline: none;
+    transition: all $t-fast;
+    color: $l-text-700;
+
+    &::placeholder {
+        color: $l-text-400;
+    }
+
+    &:focus {
+        border-color: $brand;
+        background: $l-bg;
+        box-shadow: 0 0 0 3px rgba($brand, 0.08);
+    }
+
+    @include dark {
+        background: $d-bg !important;
+        border-color: $d-border !important;
+        color: $d-text !important;
+
+        &::placeholder {
+            color: $d-text-muted !important;
+        }
+
+        &:focus {
+            border-color: $brand !important;
+            background: $d-bg-card !important;
+            box-shadow: 0 0 0 3px rgba($brand, 0.15) !important;
+        }
+    }
+}
+
 // ── Icon Button ──────────────────────────────────────────────
 .hdr-icon-btn {
     display: flex;
@@ -126,7 +309,7 @@
     gap: 4px;
     padding: 7px 14px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     background: $l-bg;
     border: 1px solid $l-border;
     border-radius: 8px;
@@ -160,7 +343,7 @@
     gap: 4px;
     padding: 7px 16px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     color: #fff;
     background: #1b1c22;
     border: none;
@@ -179,7 +362,7 @@
 .tab-btn {
     padding: 4px 12px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
     transition: all $t-fast;

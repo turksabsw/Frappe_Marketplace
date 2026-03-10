@@ -36,15 +36,19 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { CHART_PALETTE } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const kycDonutOption = computed(() => ({
   tooltip: { trigger: 'item' },
   legend: { bottom: 0 },
   series: [{
     type: 'pie', radius: ['52%', '78%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 6, borderWidth: 3 },
+    itemStyle: { borderRadius: 6, borderWidth: 3, borderColor: isDark.value ? '#1a1a28' : '#ffffff' },
     label: { show: true, position: 'center', formatter: '{total|847}\n{sub|Toplam}',
-      rich: { total: { fontSize: 22, fontWeight: 800, lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } } },
+      rich: { total: { fontSize: 22, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 32 }, sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 } } },
     data: [
       { value: 798, name: 'Onaylı', itemStyle: { color: '#10b981' } },
       { value: 18, name: 'Beklemede', itemStyle: { color: '#f59e0b' } },
@@ -92,7 +96,7 @@ const complianceGaugeOption = computed(() => ({
     pointer: { length: '60%', width: 5, itemStyle: { color: '#6c5dd3' } },
     anchor: { show: true, size: 10, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
     title: { show: true, offsetCenter: [0, '72%'], fontSize: 12, fontWeight: 600 },
-    detail: { valueAnimation: true, fontSize: 28, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}%' },
+    detail: { valueAnimation: true, fontSize: 28, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', offsetCenter: [0, '45%'], formatter: '{value}%' },
     data: [{ value: 94.2, name: 'Uyum Skoru' }],
   }],
 }))

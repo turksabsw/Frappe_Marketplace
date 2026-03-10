@@ -251,6 +251,10 @@ import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
 import { MONTHS_TR, CHART_PALETTE } from '@/constants/dashboard'
+import { useTheme } from '@/composables/useTheme'
+
+const { currentTheme } = useTheme()
+const isDark = computed(() => currentTheme.value === 'dark')
 
 const activeRevenueTab = ref('Aylık')
 
@@ -262,10 +266,10 @@ const ordersDonutOption = computed(() => ({
   legend: { bottom: 0, itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 10 } },
   series: [{
     type: 'pie', radius: ['50%', '75%'], center: ['50%', '42%'],
-    itemStyle: { borderRadius: 4, borderWidth: 2 },
+    itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: isDark.value ? '#1e1e2e' : '#ffffff' },
     label: { show: true, position: 'center',
       formatter: '{total|5,248}\n{sub|Sipariş}',
-      rich: { total: { fontSize: 20, fontWeight: 800, lineHeight: 28 }, sub: { fontSize: 10, color: '#9ca3af', lineHeight: 16 } },
+      rich: { total: { fontSize: 20, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 28 }, sub: { fontSize: 10, color: '#9ca3af', lineHeight: 16 } },
     },
     data: [
       { value: 4691, name: 'Tamamlanan', itemStyle: { color: '#10b981' } },
@@ -341,7 +345,7 @@ const logisticsGaugeOption = computed(() => ({
     pointer: { length: '55%', width: 4, itemStyle: { color: '#6c5dd3' } },
     anchor: { show: true, size: 6, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
     title: { show: true, offsetCenter: [0, '72%'], fontSize: 10, fontWeight: 600 },
-    detail: { valueAnimation: true, fontSize: 20, fontWeight: 800, offsetCenter: [0, '42%'], formatter: '{value}%' },
+    detail: { valueAnimation: true, fontSize: 20, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', offsetCenter: [0, '42%'], formatter: '{value}%' },
     data: [{ value: 94.2, name: 'SLA Uyumu' }],
   }],
 }))
@@ -372,10 +376,10 @@ const complianceDonutOption = computed(() => ({
   legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 9 } },
   series: [{
     type: 'pie', radius: ['48%', '72%'], center: ['50%', '40%'],
-    itemStyle: { borderRadius: 4, borderWidth: 2 },
+    itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: isDark.value ? '#1e1e2e' : '#ffffff' },
     label: { show: true, position: 'center',
       formatter: '{total|847}\n{sub|Satıcı}',
-      rich: { total: { fontSize: 18, fontWeight: 800, lineHeight: 24 }, sub: { fontSize: 9, color: '#9ca3af', lineHeight: 14 } },
+      rich: { total: { fontSize: 18, fontWeight: 700, color: isDark.value ? '#e5e7eb' : '#1f2937', lineHeight: 24 }, sub: { fontSize: 9, color: '#9ca3af', lineHeight: 14 } },
     },
     data: [
       { value: 798, name: 'KYC Onaylı', itemStyle: { color: '#10b981' } },
