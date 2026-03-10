@@ -15,13 +15,15 @@ Key Features:
 - SEO metadata for brand pages
 - URL slug generation for SEO-friendly URLs
 - Product count tracking
+- Brand ownership management (owner_seller linkage)
+- Brand profile and catalog APIs for marketplace pages
 """
 
 import re
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, today, getdate
+from frappe.utils import cint, flt, today, getdate
 
 
 class Brand(Document):
@@ -41,6 +43,8 @@ class Brand(Document):
     def validate(self):
         """Validate brand data before saving."""
         self.validate_brand_name()
+        self.validate_brand_values()
+        self.validate_owner_seller()
         self.validate_verification_status()
         self.validate_tenant_consistency()
         self.validate_seo_fields()
@@ -92,6 +96,46 @@ class Brand(Document):
 
         # Trim whitespace
         self.brand_name = self.brand_name.strip()
+
+    def validate_brand_values(self):
+        """Validate brand_values field does not exceed maximum length."""
+        if self.brand_values and len(self.brand_values) > 500:
+            frappe.throw(
+                _("Brand Values cannot exceed 500 characters")
+            )
+
+    def validate_owner_seller(self):
+        """Validate owner_seller link is a valid and active Seller Profile."""
+        if not self.owner_seller:
+            return
+
+        seller_data = frappe.db.get_value(
+            "Seller Profile",
+            self.owner_seller,
+            ["status", "verification_status"],
+            as_dict=True
+        )
+
+        if not seller_data:
+            frappe.throw(_("Owner Seller Profile not found"))
+
+        if seller_data.status == "Deactivated":
+            frappe.throw(
+                _("Cannot assign deactivated seller as brand owner")
+            )
+
+        if seller_data.verification_status != "Verified":
+            frappe.msgprint(
+                _("Warning: Owner Seller {0} is not verified").format(
+                    self.owner_seller
+                ),
+                indicator="orange",
+                alert=True
+            )
+
+        # Set ownership date if not already set
+        if not self.ownership_date:
+            self.ownership_date = today()
 
     def validate_verification_status(self):
         """Validate verification status transitions."""
@@ -466,3 +510,426 @@ def update_product_counts():
     frappe.db.commit()
 
     return {"updated_count": updated, "total_brands": len(brands)}
+
+
+# =============================================================================
+# BRAND OWNERSHIP & PROFILE API FUNCTIONS
+# =============================================================================
+
+
+@frappe.whitelist(allow_guest=True)
+def get_brand_page(brand_name):
+    """
+    Get full brand page data for public-facing brand pages.
+
+    Returns brand profile information including branding, social media links,
+    ownership details, and product summary for rendering brand pages.
+
+    Args:
+        brand_name: Name of the brand
+
+    Returns:
+        dict: Brand page data including profile, social links, and product summary
+    """
+    if not frappe.db.exists("Brand", brand_name):
+        frappe.throw(_("Brand {0} not found").format(brand_name))
+
+    brand = frappe.get_doc("Brand", brand_name)
+
+    if not brand.enabled:
+        frappe.throw(_("Brand {0} is not available").format(brand_name))
+
+    # Build brand page data
+    page_data = {
+        "name": brand.name,
+        "brand_name": brand.brand_name,
+        "description": brand.description,
+        "logo": brand.logo,
+        "cover_image": brand.cover_image,
+        "founding_story": brand.founding_story,
+        "brand_values": brand.brand_values,
+        "website": brand.website,
+        "country_of_origin": brand.country_of_origin,
+        "year_established": brand.year_established,
+        "verification_status": brand.verification_status,
+        "url_slug": brand.url_slug,
+        "product_count": brand.product_count or 0,
+        "seo_title": brand.seo_title,
+        "seo_description": brand.seo_description,
+        "seo_keywords": brand.seo_keywords,
+        "owner_seller": brand.owner_seller,
+        "owner_seller_name": brand.owner_seller_name,
+    }
+
+    # Include social media links
+    social_links = []
+    if brand.social_media_links:
+        for link in brand.social_media_links:
+            if link.is_active:
+                social_links.append({
+                    "platform": link.platform,
+                    "url": link.url
+                })
+    page_data["social_media_links"] = social_links
+
+    return page_data
+
+
+@frappe.whitelist()
+def get_brand_authorized_sellers(brand_name, include_pending=False):
+    """
+    Get all authorized sellers for a brand.
+
+    Args:
+        brand_name: Name of the brand
+        include_pending: Whether to include pending authorizations
+
+    Returns:
+        list: List of authorized sellers with authorization details
+    """
+    if not frappe.db.exists("Brand", brand_name):
+        frappe.throw(_("Brand {0} not found").format(brand_name))
+
+    filters = {"brand": brand_name}
+
+    if not cint(include_pending):
+        filters["authorization_status"] = "Approved"
+        filters["is_active"] = 1
+
+    authorizations = frappe.get_all(
+        "Brand Gating",
+        filters=filters,
+        fields=[
+            "name", "seller", "seller_name", "seller_company",
+            "authorization_type", "authorization_status", "is_exclusive",
+            "priority_level", "valid_from", "valid_to",
+            "authorized_by_name", "authorization_date"
+        ],
+        order_by="priority_level desc, authorization_date asc"
+    )
+
+    return authorizations
+
+
+@frappe.whitelist()
+def update_brand_profile(brand_name, **kwargs):
+    """
+    Update brand profile fields. Only the brand owner or System Manager
+    can update profile fields.
+
+    Allowed fields: cover_image, founding_story, brand_values, website,
+    description, seo_title, seo_description, seo_keywords.
+
+    Args:
+        brand_name: Name of the brand to update
+        **kwargs: Field values to update
+
+    Returns:
+        dict: Updated brand data
+    """
+    brand = frappe.get_doc("Brand", brand_name)
+
+    # Permission check: only brand owner or System Manager
+    is_system_manager = "System Manager" in frappe.get_roles()
+    is_owner = (
+        brand.owner_seller
+        and frappe.db.get_value(
+            "Seller Profile", brand.owner_seller, "user"
+        ) == frappe.session.user
+    )
+
+    if not is_system_manager and not is_owner:
+        frappe.throw(_("Only the brand owner or System Manager can update brand profile"))
+
+    # Allowed fields for profile update
+    allowed_fields = [
+        "cover_image", "founding_story", "brand_values", "website",
+        "description", "seo_title", "seo_description", "seo_keywords"
+    ]
+
+    updated_fields = []
+    for field in allowed_fields:
+        if field in kwargs:
+            setattr(brand, field, kwargs[field])
+            updated_fields.append(field)
+
+    if not updated_fields:
+        frappe.throw(_("No valid fields provided for update"))
+
+    brand.save()
+
+    return {
+        "name": brand.name,
+        "brand_name": brand.brand_name,
+        "updated_fields": updated_fields,
+        "message": _("Brand profile updated successfully")
+    }
+
+
+@frappe.whitelist()
+def revoke_brand_ownership(brand_name, reason=None):
+    """
+    Revoke brand ownership, clearing the owner_seller and ownership_date fields.
+
+    Only System Manager can revoke brand ownership.
+
+    Args:
+        brand_name: Name of the brand
+        reason: Optional reason for revocation
+
+    Returns:
+        dict: Updated brand data
+    """
+    # Only System Manager can revoke ownership
+    if "System Manager" not in frappe.get_roles():
+        frappe.throw(_("Only System Manager can revoke brand ownership"))
+
+    brand = frappe.get_doc("Brand", brand_name)
+
+    if not brand.owner_seller:
+        frappe.throw(_("Brand {0} does not have an owner").format(brand_name))
+
+    previous_owner = brand.owner_seller
+    previous_owner_name = brand.owner_seller_name
+
+    # Clear ownership fields
+    brand.owner_seller = None
+    brand.owner_seller_name = None
+    brand.ownership_date = None
+    brand.save(ignore_permissions=True)
+
+    return {
+        "name": brand.name,
+        "brand_name": brand.brand_name,
+        "previous_owner": previous_owner,
+        "previous_owner_name": previous_owner_name,
+        "reason": reason,
+        "message": _("Brand ownership revoked successfully")
+    }
+
+
+@frappe.whitelist()
+def report_brand_misuse(brand_name, report_type, description, evidence=None):
+    """
+    Report brand misuse or unauthorized use.
+
+    Creates a log entry for brand misuse reports that can be reviewed
+    by administrators.
+
+    Args:
+        brand_name: Name of the brand being misused
+        report_type: Type of misuse (e.g., "Counterfeit", "Unauthorized Use",
+                     "Trademark Violation", "Other")
+        description: Detailed description of the misuse
+        evidence: Optional attachment or URL as evidence
+
+    Returns:
+        dict: Report confirmation
+    """
+    if not frappe.db.exists("Brand", brand_name):
+        frappe.throw(_("Brand {0} not found").format(brand_name))
+
+    if not report_type:
+        frappe.throw(_("Report type is required"))
+
+    if not description:
+        frappe.throw(_("Description is required"))
+
+    valid_report_types = [
+        "Counterfeit", "Unauthorized Use", "Trademark Violation", "Other"
+    ]
+    if report_type not in valid_report_types:
+        frappe.throw(
+            _("Report type must be one of: {0}").format(
+                ", ".join(valid_report_types)
+            )
+        )
+
+    # Log the report using frappe's Comment system
+    brand = frappe.get_doc("Brand", brand_name)
+    comment_text = (
+        f"Brand Misuse Report\n"
+        f"Type: {report_type}\n"
+        f"Description: {description}"
+    )
+    if evidence:
+        comment_text += f"\nEvidence: {evidence}"
+
+    brand.add_comment("Comment", comment_text)
+
+    # Also log for admin review
+    frappe.log_error(
+        title=_("Brand Misuse Report: {0}").format(brand_name),
+        message=(
+            f"Brand: {brand_name}\n"
+            f"Report Type: {report_type}\n"
+            f"Description: {description}\n"
+            f"Evidence: {evidence or 'N/A'}\n"
+            f"Reported By: {frappe.session.user}\n"
+            f"Date: {today()}"
+        )
+    )
+
+    return {
+        "brand_name": brand_name,
+        "report_type": report_type,
+        "reported_by": frappe.session.user,
+        "message": _("Brand misuse report submitted successfully")
+    }
+
+
+@frappe.whitelist()
+def get_brand_owner_dashboard(brand_name):
+    """
+    Get dashboard data for brand owner, including authorization statistics,
+    product counts, and recent activity.
+
+    Args:
+        brand_name: Name of the brand
+
+    Returns:
+        dict: Dashboard data including stats and recent activity
+    """
+    brand = frappe.get_doc("Brand", brand_name)
+
+    # Permission check: only brand owner or System Manager
+    is_system_manager = "System Manager" in frappe.get_roles()
+    is_owner = (
+        brand.owner_seller
+        and frappe.db.get_value(
+            "Seller Profile", brand.owner_seller, "user"
+        ) == frappe.session.user
+    )
+
+    if not is_system_manager and not is_owner:
+        frappe.throw(_("Only the brand owner or System Manager can access the dashboard"))
+
+    # Product statistics
+    active_products = frappe.db.count(
+        "SKU Product",
+        filters={"brand": brand_name, "status": "Active"}
+    )
+    total_products = frappe.db.count(
+        "SKU Product",
+        filters={"brand": brand_name}
+    )
+
+    # Authorization statistics
+    authorizations = frappe.get_all(
+        "Brand Gating",
+        filters={"brand": brand_name},
+        fields=["authorization_status", "is_exclusive"]
+    )
+
+    auth_status_counts = {}
+    exclusive_count = 0
+    for auth in authorizations:
+        status = auth.authorization_status
+        auth_status_counts[status] = auth_status_counts.get(status, 0) + 1
+        if auth.is_exclusive:
+            exclusive_count += 1
+
+    # Ownership claim statistics
+    pending_claims = frappe.db.count(
+        "Brand Ownership Claim",
+        filters={
+            "brand": brand_name,
+            "status": ("in", ["Pending", "Under Review"])
+        }
+    )
+
+    return {
+        "brand_name": brand.brand_name,
+        "verification_status": brand.verification_status,
+        "owner_seller": brand.owner_seller,
+        "owner_seller_name": brand.owner_seller_name,
+        "ownership_date": brand.ownership_date,
+        "products": {
+            "active": active_products,
+            "total": total_products
+        },
+        "authorizations": {
+            "total": len(authorizations),
+            "by_status": auth_status_counts,
+            "approved": auth_status_counts.get("Approved", 0),
+            "pending": (
+                auth_status_counts.get("Pending", 0)
+                + auth_status_counts.get("Under Review", 0)
+            ),
+            "exclusive_count": exclusive_count
+        },
+        "pending_ownership_claims": pending_claims
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_brand_catalog(brand_name, limit=20, offset=0, category=None,
+                      sort_by="modified", sort_order="desc"):
+    """
+    Get product catalog for a brand with filtering and sorting.
+
+    Public-facing API for brand catalog pages with pagination,
+    category filtering, and flexible sorting.
+
+    Args:
+        brand_name: Name of the brand
+        limit: Number of products per page (default 20)
+        offset: Pagination offset
+        category: Optional category filter
+        sort_by: Sort field (default "modified")
+        sort_order: Sort direction - "asc" or "desc" (default "desc")
+
+    Returns:
+        dict: Catalog data with products, total count, and pagination info
+    """
+    if not frappe.db.exists("Brand", brand_name):
+        frappe.throw(_("Brand {0} not found").format(brand_name))
+
+    brand = frappe.db.get_value(
+        "Brand", brand_name,
+        ["brand_name", "enabled", "logo", "url_slug"],
+        as_dict=True
+    )
+
+    if not brand.enabled:
+        frappe.throw(_("Brand {0} is not available").format(brand_name))
+
+    filters = {"brand": brand_name, "status": "Active"}
+
+    if category:
+        filters["category"] = category
+
+    # Validate sort parameters
+    allowed_sort_fields = ["modified", "product_name", "base_price", "creation"]
+    if sort_by not in allowed_sort_fields:
+        sort_by = "modified"
+
+    if sort_order not in ["asc", "desc"]:
+        sort_order = "desc"
+
+    total = frappe.db.count("SKU Product", filters=filters)
+    products = frappe.get_all(
+        "SKU Product",
+        filters=filters,
+        fields=[
+            "name", "sku_code", "product_name", "base_price", "currency",
+            "thumbnail", "url_slug", "seller_name", "category"
+        ],
+        limit_page_length=cint(limit),
+        limit_start=cint(offset),
+        order_by=f"{sort_by} {sort_order}"
+    )
+
+    return {
+        "brand": {
+            "name": brand_name,
+            "brand_name": brand.brand_name,
+            "logo": brand.logo,
+            "url_slug": brand.url_slug
+        },
+        "products": products,
+        "total": total,
+        "limit": cint(limit),
+        "offset": cint(offset),
+        "has_more": (cint(offset) + cint(limit)) < total
+    }
