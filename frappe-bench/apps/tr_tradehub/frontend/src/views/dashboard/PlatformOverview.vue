@@ -13,410 +13,450 @@
       </template>
     </GlobalFilterBar>
 
-    <!-- KPI Row -->
+    <!-- Top KPI Row — Platform Aggregate -->
     <DashboardGrid>
-      <KpiCard
-        v-for="kpi in kpis"
-        :key="kpi.title"
-        v-bind="kpi"
-        size="sm"
-      />
+      <KpiCard title="Toplam Gelir" value="₺12,847,390" icon="fas fa-turkish-lira-sign" iconBg="bg-violet-50" iconColor="text-violet-500" change="18.4" :changePositive="true" />
+      <KpiCard title="Toplam Sipariş" value="5,248" icon="fas fa-bag-shopping" iconBg="bg-blue-50" iconColor="text-blue-500" change="12.1" :changePositive="true" />
+      <KpiCard title="Aktif Satıcılar" value="847" icon="fas fa-store" iconBg="bg-emerald-50" iconColor="text-emerald-500" change="14.2" :changePositive="true" />
+      <KpiCard title="Aktif Ürünler" value="12,847" icon="fas fa-cube" iconBg="bg-amber-50" iconColor="text-amber-500" change="8.3" :changePositive="true" />
     </DashboardGrid>
 
-    <!-- Charts Row 1: Revenue Line + Order Status Donut -->
+    <!-- ═══════════════════════════════════════════════════════
+         MODULE SUMMARY CARDS — Her modülden özet veri
+         ═══════════════════════════════════════════════════════ -->
+
+    <!-- Row 1: Siparişler + Ödemeler -->
     <DashboardGrid class="mt-5">
-      <WidgetWrapper title="Satış Performansı" subtitle="Son 12 aylık gelir trendi" size="xl">
+      <!-- ── SİPARİŞLER ──────────────────────────────────── -->
+      <WidgetWrapper title="Siparişler" subtitle="Sipariş akışı ve durum dağılımı" size="lg">
         <template #actions>
-          <div class="th-tab-group">
-            <button
-              v-for="tab in ['Aylık', 'Haftalık', 'Günlük']"
-              :key="tab"
-              class="th-tab-btn"
-              :class="{ active: activeRevenueTab === tab }"
-              @click="activeRevenueTab = tab"
-            >
-              {{ tab }}
-            </button>
-          </div>
-        </template>
-        <BaseChart :option="revenueOption" height="300px" @chart-click="onRevenueClick" />
-      </WidgetWrapper>
-
-      <WidgetWrapper title="Sipariş Dağılımı" subtitle="Bu ayki durum dağılımı" size="md">
-        <BaseChart :option="donutOption" height="300px" @chart-click="onDonutClick" />
-      </WidgetWrapper>
-    </DashboardGrid>
-
-    <!-- Charts Row 2: Category Bar + Heatmap -->
-    <DashboardGrid class="mt-5">
-      <WidgetWrapper title="Kategori Bazlı Satış" subtitle="En çok satan kategoriler" size="lg">
-        <BaseChart :option="categoryOption" height="300px" />
-      </WidgetWrapper>
-
-      <WidgetWrapper title="Sipariş Yoğunluk Haritası" subtitle="Gün/saat bazlı sipariş yoğunluğu" size="lg">
-        <BaseChart :option="heatmapOption" height="300px" />
-      </WidgetWrapper>
-    </DashboardGrid>
-
-    <!-- Bottom Row: Table + RFQ + Activity -->
-    <DashboardGrid class="mt-5">
-      <!-- Orders Table -->
-      <WidgetWrapper title="Son Siparişler" subtitle="Son 10 sipariş" size="xl" class="p-0 overflow-hidden">
-        <template #actions>
-          <router-link to="/app/Order" class="text-[11px] font-medium hover:opacity-80 transition-opacity" style="color: var(--th-brand-500)">
-            Tümünü Gör <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          <router-link to="/dashboard/orders" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
           </router-link>
         </template>
 
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead><tr class="border-b" style="border-color: var(--th-surface-border)">
-              <th class="tbl-th">Sipariş No</th>
-              <th class="tbl-th">Müşteri</th>
-              <th class="tbl-th">Tutar</th>
-              <th class="tbl-th">Durum</th>
-              <th class="tbl-th">Tarih</th>
-            </tr></thead>
-            <tbody>
-              <tr v-for="order in recentOrders" :key="order.id" class="tbl-row border-b" style="border-color: var(--th-surface-border)">
-                <td class="tbl-td font-semibold" style="color: var(--th-brand-500)">{{ order.id }}</td>
-                <td class="tbl-td">{{ order.customer }}</td>
-                <td class="tbl-td font-semibold" style="font-variant-numeric: tabular-nums">{{ order.amount }}</td>
-                <td class="tbl-td">
-                  <span class="badge" :class="getStatusClass(order.status)">{{ order.status }}</span>
-                </td>
-                <td class="tbl-td" style="color: var(--th-neutral)">{{ order.date }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">4,691</span>
+            <span class="th-mini-stat-label">Tamamlanan</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-blue-500">384</span>
+            <span class="th-mini-stat-label">İşlemde</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-red-500">73</span>
+            <span class="th-mini-stat-label">İptal</span>
+          </div>
         </div>
+
+        <BaseChart :option="ordersDonutOption" height="200px" />
       </WidgetWrapper>
 
-      <!-- RFQ Alerts + Activity -->
-      <div class="th-widget-md space-y-5">
-        <!-- RFQ Alerts -->
-        <WidgetWrapper title="Bekleyen RFQ'lar">
-          <template #actions>
-            <span class="badge bg-red-50 text-red-600">{{ rfqAlerts.length }} Aktif</span>
-          </template>
-          <div class="space-y-2">
-            <div
-              v-for="rfq in rfqAlerts"
-              :key="rfq.id"
-              class="flex items-center gap-3 p-2.5 rounded-lg border transition-colors cursor-pointer hover:border-violet-200"
-              style="background: var(--th-surface-elevated); border-color: var(--th-surface-border)"
-              @click="openSlideOver(rfq)"
-            >
-              <div class="w-8 h-8 rounded flex items-center justify-center" :class="rfq.iconBg">
-                <i class="fas fa-file-invoice text-xs" :class="rfq.iconColor"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold">{{ rfq.id }}</p>
-                <p class="text-[10px] truncate" style="color: var(--th-neutral)">{{ rfq.detail }}</p>
-              </div>
-              <span class="text-[10px] font-bold whitespace-nowrap" :class="rfq.urgencyColor">{{ rfq.timeLeft }}</span>
-            </div>
-          </div>
-        </WidgetWrapper>
+      <!-- ── ÖDEMELER ────────────────────────────────────── -->
+      <WidgetWrapper title="Ödemeler" subtitle="Ödeme yöntemleri ve başarı oranı" size="lg">
+        <template #actions>
+          <router-link to="/dashboard/payments" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
 
-        <!-- Activity Feed -->
-        <WidgetWrapper title="Son Aktiviteler">
-          <div class="relative">
-            <div class="absolute left-[11px] top-2 bottom-2 w-px" style="background: var(--th-surface-border)"></div>
-            <div class="space-y-4">
-              <div v-for="act in activities" :key="act.text" class="flex gap-3 relative">
-                <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10" :class="act.dotBg">
-                  <i :class="[act.dotIcon, act.dotColor, 'text-[9px]']"></i>
-                </div>
-                <div>
-                  <p class="text-xs" v-html="act.text"></p>
-                  <p class="text-[10px] mt-0.5" style="color: var(--th-neutral)">{{ act.time }}</p>
-                </div>
-              </div>
-            </div>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">₺10.2M</span>
+            <span class="th-mini-stat-label">Başarılı</span>
           </div>
-        </WidgetWrapper>
-      </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-amber-500">₺1.8M</span>
+            <span class="th-mini-stat-label">Beklemede</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-violet-500">%96.8</span>
+            <span class="th-mini-stat-label">Başarı Oranı</span>
+          </div>
+        </div>
+
+        <BaseChart :option="paymentsBarOption" height="200px" />
+      </WidgetWrapper>
     </DashboardGrid>
 
-    <!-- Charts Row 3: Scatter + Gauge -->
+    <!-- Row 2: Satıcılar + Katalog -->
     <DashboardGrid class="mt-5">
-      <WidgetWrapper title="Fiyat vs Satış Hacmi" subtitle="Ürün fiyat-hacim korelasyonu" size="lg">
-        <BaseChart :option="scatterOption" height="300px" @chart-click="onScatterClick" />
+      <!-- ── SATICILAR ──────────────────────────────────── -->
+      <WidgetWrapper title="Satıcılar" subtitle="Satıcı performansı ve seviye dağılımı" size="lg">
+        <template #actions>
+          <router-link to="/dashboard/sellers" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
+
+        <div class="grid grid-cols-4 gap-2 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-violet-500">42</span>
+            <span class="th-mini-stat-label">Platin</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-amber-500">156</span>
+            <span class="th-mini-stat-label">Altın</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-gray-400">312</span>
+            <span class="th-mini-stat-label">Gümüş</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value" style="color:#92400e">337</span>
+            <span class="th-mini-stat-label">Bronz</span>
+          </div>
+        </div>
+
+        <BaseChart :option="sellersRadarOption" height="200px" />
       </WidgetWrapper>
 
-      <WidgetWrapper title="Performans Göstergeleri" subtitle="Anlık KPI durumu" size="lg">
-        <BaseChart :option="gaugeOption" height="300px" />
+      <!-- ── KATALOG ─────────────────────────────────────── -->
+      <WidgetWrapper title="Katalog" subtitle="Ürün ve kategori dağılımı" size="lg">
+        <template #actions>
+          <router-link to="/dashboard/catalog" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
+
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">9,245</span>
+            <span class="th-mini-stat-label">Aktif</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-gray-400">2,100</span>
+            <span class="th-mini-stat-label">Pasif</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-amber-500">1,502</span>
+            <span class="th-mini-stat-label">Draft</span>
+          </div>
+        </div>
+
+        <BaseChart :option="catalogBarOption" height="200px" />
       </WidgetWrapper>
     </DashboardGrid>
 
-    <!-- Slide-Over Panel -->
-    <SlideOverPanel
-      :visible="slideOverVisible"
-      :title="slideOverTitle"
-      :subtitle="slideOverSubtitle"
-      @close="slideOverVisible = false"
-    >
-      <div v-if="slideOverData" class="space-y-4">
-        <div v-for="(value, key) in slideOverData" :key="key" class="flex justify-between items-center py-2 border-b" style="border-color: var(--th-surface-border)">
-          <span class="text-xs font-medium" style="color: var(--th-neutral)">{{ key }}</span>
-          <span class="text-xs font-semibold">{{ value }}</span>
+    <!-- Row 3: Lojistik + Pazarlama + Uyumluluk -->
+    <DashboardGrid class="mt-5">
+      <!-- ── LOJİSTİK ────────────────────────────────────── -->
+      <WidgetWrapper title="Lojistik" subtitle="Teslimat ve SLA performansı" size="md">
+        <template #actions>
+          <router-link to="/dashboard/logistics" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-blue-500">1,247</span>
+            <span class="th-mini-stat-label">Aktif Gönderi</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">2.8 gün</span>
+            <span class="th-mini-stat-label">Ort. Teslimat</span>
+          </div>
         </div>
-      </div>
-    </SlideOverPanel>
+
+        <BaseChart :option="logisticsGaugeOption" height="180px" />
+      </WidgetWrapper>
+
+      <!-- ── PAZARLAMA ───────────────────────────────────── -->
+      <WidgetWrapper title="Pazarlama" subtitle="Kampanya ROI ve kupon kullanımı" size="md">
+        <template #actions>
+          <router-link to="/dashboard/marketing" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-violet-500">12</span>
+            <span class="th-mini-stat-label">Aktif Kampanya</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">%342</span>
+            <span class="th-mini-stat-label">ROI</span>
+          </div>
+        </div>
+
+        <BaseChart :option="marketingBarOption" height="180px" />
+      </WidgetWrapper>
+
+      <!-- ── UYUMLULUK ───────────────────────────────────── -->
+      <WidgetWrapper title="Uyumluluk" subtitle="KYC ve risk durumu" size="md">
+        <template #actions>
+          <router-link to="/dashboard/compliance" class="th-module-link">
+            Detay <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+          </router-link>
+        </template>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-emerald-500">%94.2</span>
+            <span class="th-mini-stat-label">KYC Tamamlama</span>
+          </div>
+          <div class="th-mini-stat">
+            <span class="th-mini-stat-value text-blue-500">28/100</span>
+            <span class="th-mini-stat-label">Risk Skoru</span>
+          </div>
+        </div>
+
+        <BaseChart :option="complianceDonutOption" height="180px" />
+      </WidgetWrapper>
+    </DashboardGrid>
+
+    <!-- ═══════════════════════════════════════════════════════
+         BOTTOM: Gelir Trendi + Son Siparişler + Aktiviteler
+         ═══════════════════════════════════════════════════════ -->
+    <DashboardGrid class="mt-5">
+      <!-- Gelir Trendi (Platform Geneli) -->
+      <WidgetWrapper title="Platform Gelir Trendi" subtitle="Son 12 aylık toplam gelir" size="xl">
+        <template #actions>
+          <div class="th-tab-group">
+            <button v-for="tab in ['Aylık', 'Haftalık']" :key="tab" class="th-tab-btn" :class="{ active: activeRevenueTab === tab }" @click="activeRevenueTab = tab">{{ tab }}</button>
+          </div>
+        </template>
+        <BaseChart :option="revenueOption" height="280px" />
+      </WidgetWrapper>
+
+      <!-- Son Aktiviteler -->
+      <WidgetWrapper title="Son Aktiviteler" subtitle="Platform geneli" size="md">
+        <div class="relative">
+          <div class="absolute left-[11px] top-2 bottom-2 w-px" style="background: var(--th-surface-border)"></div>
+          <div class="space-y-4">
+            <div v-for="act in activities" :key="act.text" class="flex gap-3 relative">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10" :class="act.dotBg">
+                <i :class="[act.dotIcon, act.dotColor, 'text-[9px]']"></i>
+              </div>
+              <div>
+                <p class="text-xs" v-html="act.text"></p>
+                <p class="text-[10px] mt-0.5" style="color: var(--th-neutral)">{{ act.time }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </WidgetWrapper>
+    </DashboardGrid>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, shallowRef } from 'vue'
+import { ref, computed } from 'vue'
 import DashboardGrid from '@/components/dashboard/layout/DashboardGrid.vue'
 import WidgetWrapper from '@/components/dashboard/layout/WidgetWrapper.vue'
 import KpiCard from '@/components/dashboard/widgets/KpiCard.vue'
 import BaseChart from '@/components/dashboard/charts/BaseChart.vue'
 import GlobalFilterBar from '@/components/dashboard/filters/GlobalFilterBar.vue'
-import SlideOverPanel from '@/components/dashboard/layout/SlideOverPanel.vue'
-import { STATUS_COLORS, MONTHS_TR, DAYS_TR, HOURS, CHART_PALETTE } from '@/constants/dashboard'
+import { MONTHS_TR, CHART_PALETTE } from '@/constants/dashboard'
 
-// ── Tab State ───────────────────────────────────────────────
 const activeRevenueTab = ref('Aylık')
 
-// ── Slide Over State ────────────────────────────────────────
-const slideOverVisible = ref(false)
-const slideOverTitle = ref('')
-const slideOverSubtitle = ref('')
-const slideOverData = ref(null)
-
-function openSlideOver(item) {
-  slideOverTitle.value = item.id || item.name || 'Detay'
-  slideOverSubtitle.value = item.detail || ''
-  slideOverData.value = {
-    'Müşteri': item.detail?.split('·')[0]?.trim() || '-',
-    'Kalem Sayısı': item.detail?.split('·')[1]?.trim() || '-',
-    'Tahmini Tutar': item.detail?.split('·')[2]?.trim() || '-',
-    'Kalan Süre': item.timeLeft || '-',
-    'Durum': 'Beklemede',
-    'Oluşturulma': '23.02.2026',
-  }
-  slideOverVisible.value = true
-}
-
-// ── KPI Data ────────────────────────────────────────────────
-const kpis = [
-  { title: 'Toplam Gelir', value: '₺2,847,390', icon: 'fas fa-turkish-lira-sign', iconBg: 'bg-violet-50', iconColor: 'text-violet-500', change: '18.4', changePositive: true },
-  { title: 'Toplam Sipariş', value: '5,248', icon: 'fas fa-bag-shopping', iconBg: 'bg-blue-50', iconColor: 'text-blue-500', change: '12.1', changePositive: true },
-  { title: 'Aktif Ürünler', value: '1,847', icon: 'fas fa-cube', iconBg: 'bg-amber-50', iconColor: 'text-amber-500', change: '5.7', changePositive: true },
-  { title: 'Satıcı Puanı', value: '4.92 / 5.0', icon: 'fas fa-star', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500', change: '2.3', changePositive: true },
-]
-
-// ── Orders Table Data ───────────────────────────────────────
-const recentOrders = [
-  { id: '#ORD-7291', customer: 'Mega Yapı A.Ş.', amount: '₺124,500', status: 'Tamamlandı', date: '23.02.2026' },
-  { id: '#ORD-7290', customer: 'Delta Kimya Ltd.', amount: '₺89,200', status: 'İşlemde', date: '23.02.2026' },
-  { id: '#ORD-7289', customer: 'Atlas Metal San.', amount: '₺245,000', status: 'Tamamlandı', date: '22.02.2026' },
-  { id: '#ORD-7288', customer: 'Yıldız Plastik', amount: '₺56,800', status: 'Beklemede', date: '22.02.2026' },
-  { id: '#ORD-7287', customer: 'Ege Boya A.Ş.', amount: '₺178,300', status: 'Tamamlandı', date: '21.02.2026' },
-]
-
-function getStatusClass(status) {
-  const s = STATUS_COLORS[status]
-  return s ? `${s.bg} ${s.text}` : 'bg-gray-50 text-gray-600'
-}
-
-// ── RFQ Alerts ──────────────────────────────────────────────
-const rfqAlerts = [
-  { id: 'RFQ-2026-1204', detail: 'Mega Yapı A.Ş. · 12 kalem · ₺450K', timeLeft: '2 saat', urgencyColor: 'text-red-500', iconBg: 'bg-red-50', iconColor: 'text-red-500' },
-  { id: 'RFQ-2026-1203', detail: 'Delta Kimya · 8 kalem · ₺180K', timeLeft: '1 gün', urgencyColor: 'text-amber-500', iconBg: 'bg-amber-50', iconColor: 'text-amber-500' },
-  { id: 'RFQ-2026-1202', detail: 'Atlas Metal · 15 kalem · ₺290K', timeLeft: '3 gün', urgencyColor: 'text-gray-400', iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
-]
-
-// ── Activities ──────────────────────────────────────────────
-const activities = [
-  { text: 'Sipariş <b>#ORD-7291</b> tamamlandı', time: '5 dakika önce', dotBg: 'bg-emerald-100', dotIcon: 'fas fa-check', dotColor: 'text-emerald-500' },
-  { text: 'Gönderi <b>#SHP-2891</b> yola çıktı', time: '23 dakika önce', dotBg: 'bg-blue-100', dotIcon: 'fas fa-truck', dotColor: 'text-blue-500' },
-  { text: 'Yeni <b>5 yıldız</b> değerlendirme alındı', time: '1 saat önce', dotBg: 'bg-purple-100', dotIcon: 'fas fa-star', dotColor: 'text-purple-500' },
-  { text: '<b>12 yeni ürün</b> onaylandı', time: '2 saat önce', dotBg: 'bg-amber-100', dotIcon: 'fas fa-box', dotColor: 'text-amber-500' },
-]
-
-// ── Chart Options (computed + shallowRef for performance) ──
-
-const revenueOption = computed(() => ({
-  tooltip: { trigger: 'axis' },
-  grid: { top: 20, right: 16, bottom: 24, left: 48 },
-  xAxis: { type: 'category', data: MONTHS_TR },
-  yAxis: { type: 'value', axisLabel: { formatter: '₺{value}K' } },
-  series: [{
-    type: 'line',
-    data: [180, 210, 195, 245, 230, 280, 260, 310, 340, 290, 365, 420],
-    smooth: true,
-    symbol: 'circle',
-    symbolSize: 6,
-    lineStyle: { width: 2.5 },
-    areaStyle: {
-      color: {
-        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-        colorStops: [
-          { offset: 0, color: 'rgba(108,93,211,0.15)' },
-          { offset: 1, color: 'rgba(108,93,211,0)' },
-        ],
-      },
-    },
-  }],
-  animationDuration: 1000,
-  animationEasing: 'cubicOut',
-}))
-
-const donutOption = computed(() => ({
+// ═══════════════════════════════════════════════════════════════
+// SİPARİŞ MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const ordersDonutOption = computed(() => ({
   tooltip: { trigger: 'item' },
-  legend: { bottom: 0, itemWidth: 10, itemHeight: 10 },
+  legend: { bottom: 0, itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 10 } },
   series: [{
-    type: 'pie',
-    radius: ['52%', '78%'],
-    center: ['50%', '42%'],
-    avoidLabelOverlap: false,
-    itemStyle: { borderRadius: 6, borderColor: 'var(--th-surface-card)', borderWidth: 3 },
-    label: {
-      show: true, position: 'center',
-      formatter: '{total|1,833}\n{sub|Toplam Sipariş}',
-      rich: {
-        total: { fontSize: 26, fontWeight: 800, lineHeight: 32 },
-        sub: { fontSize: 11, color: '#9ca3af', lineHeight: 18 },
-      },
+    type: 'pie', radius: ['50%', '75%'], center: ['50%', '42%'],
+    itemStyle: { borderRadius: 4, borderWidth: 2 },
+    label: { show: true, position: 'center',
+      formatter: '{total|5,248}\n{sub|Sipariş}',
+      rich: { total: { fontSize: 20, fontWeight: 800, lineHeight: 28 }, sub: { fontSize: 10, color: '#9ca3af', lineHeight: 16 } },
     },
-    emphasis: { label: { show: true }, scaleSize: 6 },
     data: [
-      { value: 1248, name: 'Tamamlanan', itemStyle: { color: '#10b981' } },
+      { value: 4691, name: 'Tamamlanan', itemStyle: { color: '#10b981' } },
       { value: 384, name: 'İşlemde', itemStyle: { color: '#3b82f6' } },
-      { value: 128, name: 'Beklemede', itemStyle: { color: '#f59e0b' } },
+      { value: 100, name: 'Beklemede', itemStyle: { color: '#f59e0b' } },
       { value: 73, name: 'İptal', itemStyle: { color: '#ef4444' } },
     ],
   }],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// ÖDEME MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const paymentsBarOption = computed(() => ({
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { top: 8, right: 8, bottom: 20, left: 8, containLabel: true },
+  xAxis: { type: 'category', data: MONTHS_TR.slice(-6), axisLabel: { fontSize: 9 } },
+  yAxis: { type: 'value', axisLabel: { fontSize: 9, formatter: '{value}K' } },
+  series: [
+    { name: 'Kredi Kartı', type: 'bar', stack: 'total', data: [530, 560, 580, 610, 640, 680], itemStyle: { color: CHART_PALETTE[3], borderRadius: [0, 0, 0, 0] } },
+    { name: 'Havale', type: 'bar', stack: 'total', data: [360, 380, 400, 420, 450, 470], itemStyle: { color: CHART_PALETTE[1] } },
+    { name: 'Escrow', type: 'bar', stack: 'total', data: [190, 210, 230, 245, 260, 280], itemStyle: { color: CHART_PALETTE[5], borderRadius: [3, 3, 0, 0] } },
+  ],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// SATICI MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const sellersRadarOption = computed(() => ({
+  tooltip: {},
+  radar: {
+    indicator: [
+      { name: 'Teslimat', max: 100 }, { name: 'Kalite', max: 100 },
+      { name: 'Hizmet', max: 100 }, { name: 'Uyum', max: 100 },
+      { name: 'Tedarik', max: 100 }, { name: 'İletişim', max: 100 },
+    ],
+    radius: '60%',
+    axisName: { fontSize: 9 },
+  },
+  series: [{
+    type: 'radar',
+    data: [
+      { value: [92, 88, 95, 78, 85, 90], name: 'Top Satıcı', areaStyle: { opacity: 0.3 } },
+      { value: [75, 72, 70, 68, 71, 74], name: 'Platform Ort.', lineStyle: { type: 'dashed' }, areaStyle: { opacity: 0.1 } },
+    ],
+  }],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// KATALOG MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const catalogBarOption = computed(() => ({
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { top: 8, right: 30, bottom: 8, left: 8, containLabel: true },
+  xAxis: { type: 'value', axisLabel: { fontSize: 9 } },
+  yAxis: { type: 'category', data: ['Kimyasallar', 'Yapı Malz.', 'Hammadde', 'Ambalaj'], inverse: true, axisLabel: { fontSize: 9 } },
+  series: [{
+    type: 'bar', data: [3200, 2800, 2100, 1500], barWidth: 12,
+    itemStyle: { borderRadius: [0, 5, 5, 0], color: (p) => CHART_PALETTE[p.dataIndex] },
+    label: { show: true, position: 'right', fontSize: 9, fontWeight: 600 },
+  }],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// LOJİSTİK MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const logisticsGaugeOption = computed(() => ({
+  series: [{
+    type: 'gauge', startAngle: 200, endAngle: -20, min: 0, max: 100, radius: '85%',
+    axisLine: { lineStyle: { width: 10, color: [[0.7, '#ef4444'], [0.9, '#f59e0b'], [1, '#10b981']] } },
+    axisTick: { show: false }, splitLine: { show: false },
+    axisLabel: { distance: 10, fontSize: 8 },
+    pointer: { length: '55%', width: 4, itemStyle: { color: '#6c5dd3' } },
+    anchor: { show: true, size: 6, itemStyle: { color: '#6c5dd3', borderWidth: 2 } },
+    title: { show: true, offsetCenter: [0, '72%'], fontSize: 10, fontWeight: 600 },
+    detail: { valueAnimation: true, fontSize: 20, fontWeight: 800, offsetCenter: [0, '42%'], formatter: '{value}%' },
+    data: [{ value: 94.2, name: 'SLA Uyumu' }],
+  }],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// PAZARLAMA MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const marketingBarOption = computed(() => ({
+  tooltip: { trigger: 'axis' },
+  legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 9 } },
+  grid: { top: 10, right: 8, bottom: 28, left: 8, containLabel: true },
+  xAxis: { type: 'category', data: MONTHS_TR.slice(-6), axisLabel: { fontSize: 8 } },
+  yAxis: [
+    { type: 'value', axisLabel: { fontSize: 8, formatter: '{value}K' } },
+    { type: 'value', axisLabel: { fontSize: 8, formatter: '{value}%' } },
+  ],
+  series: [
+    { name: 'Harcama', type: 'bar', data: [45, 52, 48, 62, 58, 72], itemStyle: { borderRadius: [3, 3, 0, 0], color: CHART_PALETTE[0] }, barWidth: 8 },
+    { name: 'ROI', type: 'line', yAxisIndex: 1, data: [267, 279, 288, 298, 307, 342], smooth: true, lineStyle: { width: 2 }, symbol: 'circle', symbolSize: 4 },
+  ],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// UYUMLULUK MODÜLÜnden özet data
+// ═══════════════════════════════════════════════════════════════
+const complianceDonutOption = computed(() => ({
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 9 } },
+  series: [{
+    type: 'pie', radius: ['48%', '72%'], center: ['50%', '40%'],
+    itemStyle: { borderRadius: 4, borderWidth: 2 },
+    label: { show: true, position: 'center',
+      formatter: '{total|847}\n{sub|Satıcı}',
+      rich: { total: { fontSize: 18, fontWeight: 800, lineHeight: 24 }, sub: { fontSize: 9, color: '#9ca3af', lineHeight: 14 } },
+    },
+    data: [
+      { value: 798, name: 'KYC Onaylı', itemStyle: { color: '#10b981' } },
+      { value: 18, name: 'Beklemede', itemStyle: { color: '#f59e0b' } },
+      { value: 31, name: 'Eksik/Red', itemStyle: { color: '#ef4444' } },
+    ],
+  }],
+}))
+
+// ═══════════════════════════════════════════════════════════════
+// PLATFORM GELİR TRENDİ (tüm modüller)
+// ═══════════════════════════════════════════════════════════════
+const revenueOption = computed(() => ({
+  tooltip: { trigger: 'axis' },
+  legend: { bottom: 0, itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 10 } },
+  grid: { top: 20, right: 16, bottom: 36, left: 48 },
+  xAxis: { type: 'category', data: MONTHS_TR },
+  yAxis: { type: 'value', axisLabel: { formatter: '₺{value}K' } },
+  series: [
+    {
+      name: 'Sipariş Geliri', type: 'line', smooth: true,
+      data: [580, 620, 610, 680, 720, 760, 740, 810, 850, 890, 940, 1020],
+      lineStyle: { width: 2.5 },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.15)' }, { offset: 1, color: 'rgba(99,102,241,0)' }] } },
+    },
+    {
+      name: 'Komisyon', type: 'line', smooth: true,
+      data: [42, 48, 45, 52, 56, 58, 55, 62, 68, 72, 78, 85],
+      lineStyle: { width: 2, type: 'dashed' },
+    },
+  ],
   animationDuration: 1000,
 }))
 
-const categoryOption = computed(() => {
-  const cats = ['Solventler', 'Reçineler', 'Yapıştırıcılar', 'Boyalar', 'Hammadde', 'Ambalaj']
-  const vals = [486, 342, 278, 224, 198, 156]
-  return {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: (p) => p[0].name + '<br/><b>₺' + p[0].value + 'K</b>',
-    },
-    grid: { top: 10, right: 30, bottom: 10, left: 8, containLabel: true },
-    xAxis: { type: 'value', axisLabel: { formatter: '{value}K' } },
-    yAxis: { type: 'category', data: cats, inverse: true },
-    series: [{
-      type: 'bar',
-      data: vals,
-      barWidth: 16,
-      itemStyle: {
-        borderRadius: [0, 6, 6, 0],
-        color: (p) => CHART_PALETTE[p.dataIndex % CHART_PALETTE.length],
-      },
-      label: { show: true, position: 'right', formatter: '₺{c}K', fontSize: 10, fontWeight: 600 },
-    }],
-    animationDuration: 800,
-  }
-})
+// ═══════════════════════════════════════════════════════════════
+// AKTİVİTELER (7 modülden karışık)
+// ═══════════════════════════════════════════════════════════════
+const activities = [
+  { text: '<b>Sipariş</b> — #ORD-7291 tamamlandı · Mega Yapı A.Ş.', time: '5 dk önce', dotBg: 'bg-emerald-100', dotIcon: 'fas fa-check', dotColor: 'text-emerald-500' },
+  { text: '<b>Ödeme</b> — ₺245,000 escrow serbest bırakıldı', time: '12 dk önce', dotBg: 'bg-violet-100', dotIcon: 'fas fa-lock-open', dotColor: 'text-violet-500' },
+  { text: '<b>Lojistik</b> — #SHP-2891 İstanbul deposundan yola çıktı', time: '23 dk önce', dotBg: 'bg-blue-100', dotIcon: 'fas fa-truck', dotColor: 'text-blue-500' },
+  { text: '<b>Satıcı</b> — Delta Kimya Ltd. "Altın" seviyeye yükseldi', time: '1 saat önce', dotBg: 'bg-amber-100', dotIcon: 'fas fa-medal', dotColor: 'text-amber-500' },
+  { text: '<b>Katalog</b> — 12 yeni ürün onaylandı', time: '2 saat önce', dotBg: 'bg-purple-100', dotIcon: 'fas fa-box', dotColor: 'text-purple-500' },
+  { text: '<b>Pazarlama</b> — "Bahar Kampanyası" aktif edildi', time: '3 saat önce', dotBg: 'bg-pink-100', dotIcon: 'fas fa-rocket', dotColor: 'text-pink-500' },
+  { text: '<b>Uyumluluk</b> — 3 satıcının KYC belgesi yenilendi', time: '4 saat önce', dotBg: 'bg-green-100', dotIcon: 'fas fa-shield-halved', dotColor: 'text-green-500' },
+]
 
-const heatmapOption = computed(() => {
-  const data = []
-  for (let i = 0; i < DAYS_TR.length; i++) {
-    for (let j = 0; j < HOURS.length; j++) {
-      const base = (i < 5) ? 20 : 8
-      const peak = (j >= 2 && j <= 5) ? 30 : 10
-      data.push([j, i, Math.floor(Math.random() * (base + peak) + 5)])
-    }
-  }
-  return {
-    tooltip: {
-      position: 'top',
-      formatter: (p) => DAYS_TR[p.data[1]] + ' ' + HOURS[p.data[0]] + '<br/><b>' + p.data[2] + ' sipariş</b>',
-    },
-    grid: { top: 10, right: 16, bottom: 36, left: 40 },
-    xAxis: { type: 'category', data: HOURS, splitArea: { show: false } },
-    yAxis: { type: 'category', data: DAYS_TR, splitArea: { show: false } },
-    visualMap: {
-      min: 0, max: 55, calculable: false, orient: 'horizontal', left: 'center', bottom: 0,
-      itemWidth: 12, itemHeight: 100,
-      inRange: { color: ['#f0edff', '#c4b5fd', '#8b7fe8', '#6c5dd3', '#4c3db3'] },
-    },
-    series: [{
-      type: 'heatmap', data,
-      label: { show: false },
-      itemStyle: { borderRadius: 3, borderColor: 'var(--th-surface-card)', borderWidth: 2 },
-      emphasis: { itemStyle: { shadowBlur: 6, shadowColor: 'rgba(108,93,211,0.3)' } },
-    }],
-    animationDuration: 600,
-  }
-})
-
-const scatterOption = computed(() => {
-  const genData = (count) => Array.from({ length: count }, () => [
-    Math.random() * 900 + 50,
-    Math.random() * 300 + 20,
-    Math.random() * 40 + 10,
-  ])
-  return {
-    tooltip: {
-      formatter: (p) => 'Fiyat: ₺' + p.data[0].toFixed(0) + '<br/>Hacim: ' + p.data[1].toFixed(0) + ' adet',
-    },
-    legend: { top: 0, right: 0, itemWidth: 10, itemHeight: 10 },
-    grid: { top: 32, right: 16, bottom: 24, left: 48 },
-    xAxis: { name: 'Fiyat (₺)', nameTextStyle: { fontSize: 10 } },
-    yAxis: { name: 'Satış Hacmi', nameTextStyle: { fontSize: 10 } },
-    series: [
-      { name: 'Solventler', type: 'scatter', data: genData(18), symbolSize: (d) => d[2], itemStyle: { color: 'rgba(108,93,211,0.6)', borderColor: '#6c5dd3', borderWidth: 1 } },
-      { name: 'Reçineler', type: 'scatter', data: genData(14), symbolSize: (d) => d[2], itemStyle: { color: 'rgba(59,130,246,0.6)', borderColor: '#3b82f6', borderWidth: 1 } },
-      { name: 'Yapıştırıcılar', type: 'scatter', data: genData(12), symbolSize: (d) => d[2], itemStyle: { color: 'rgba(16,185,129,0.6)', borderColor: '#10b981', borderWidth: 1 } },
-    ],
-    animationDuration: 800,
-  }
-})
-
-const gaugeOption = computed(() => ({
-  series: [
-    {
-      type: 'gauge', center: ['25%', '55%'], radius: '70%',
-      startAngle: 200, endAngle: -20, min: 0, max: 100,
-      axisLine: { lineStyle: { width: 12, color: [[0.3, '#ef4444'], [0.7, '#f59e0b'], [1, '#10b981']] } },
-      axisTick: { show: false }, splitLine: { show: false },
-      axisLabel: { distance: 12, fontSize: 9 },
-      pointer: { length: '60%', width: 4, itemStyle: { color: '#6c5dd3' } },
-      anchor: { show: true, size: 8, itemStyle: { color: '#6c5dd3', borderColor: 'var(--th-surface-card)', borderWidth: 2 } },
-      title: { show: true, offsetCenter: [0, '72%'], fontSize: 11, fontWeight: 600 },
-      detail: { valueAnimation: true, fontSize: 22, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}%' },
-      data: [{ value: 78, name: 'Teslimat Oranı' }],
-    },
-    {
-      type: 'gauge', center: ['75%', '55%'], radius: '70%',
-      startAngle: 200, endAngle: -20, min: 0, max: 5,
-      axisLine: { lineStyle: { width: 12, color: [[0.4, '#ef4444'], [0.7, '#f59e0b'], [1, '#10b981']] } },
-      axisTick: { show: false }, splitLine: { show: false },
-      axisLabel: { distance: 12, fontSize: 9 },
-      pointer: { length: '60%', width: 4, itemStyle: { color: '#6c5dd3' } },
-      anchor: { show: true, size: 8, itemStyle: { color: '#6c5dd3', borderColor: 'var(--th-surface-card)', borderWidth: 2 } },
-      title: { show: true, offsetCenter: [0, '72%'], fontSize: 11, fontWeight: 600 },
-      detail: { valueAnimation: true, fontSize: 22, fontWeight: 800, offsetCenter: [0, '45%'], formatter: '{value}' },
-      data: [{ value: 4.92, name: 'Müşteri Puanı' }],
-    },
-  ],
-  animationDuration: 1200,
-  animationEasing: 'elasticOut',
-}))
-
-// ── Chart Event Handlers ────────────────────────────────────
-function onRevenueClick(params) {
-  console.log('[Revenue Click]', params)
-}
-function onDonutClick(params) {
-  console.log('[Donut Click]', params.name, params.value)
-}
-function onScatterClick(params) {
-  console.log('[Scatter Click]', params)
-}
 function refreshAll() {
-  // Will be connected to useDashboardData.refresh() when API is live
-  console.log('[Dashboard] Refresh all widgets')
+  console.log('[Dashboard] Refresh all module widgets')
 }
 </script>
+
+<style scoped>
+.th-module-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--th-brand-500);
+  transition: opacity 0.15s;
+}
+.th-module-link:hover {
+  opacity: 0.7;
+}
+
+.th-mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: var(--th-surface-elevated);
+}
+.th-mini-stat-value {
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.th-mini-stat-label {
+  font-size: 10px;
+  color: var(--th-neutral);
+  white-space: nowrap;
+}
+</style>

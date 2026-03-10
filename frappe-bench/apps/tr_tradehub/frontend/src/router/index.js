@@ -4,9 +4,8 @@ import { useAuthStore } from '@/stores/auth'
 // Layout — YENİ KONUM
 import AppLayout from '@/layouts/AppLayout.vue'
 
-// Views (lazy-loaded) — YENİ KONUMLAR
+// Views (lazy-loaded)
 const LoginView = () => import('@/views/auth/LoginView.vue')
-const DashboardView = () => import('@/views/dashboard/DashboardView.vue')
 const ProductAddView = () => import('@/views/products/ProductAddView.vue')
 const DocTypeListView = () => import('@/views/doctype/DocTypeListView.vue')
 
@@ -108,7 +107,7 @@ const routes = [
       {
         path: 'messaging/:tab?',
         name: 'Messaging',
-        component: DashboardView,
+        component: PlatformOverview,
         meta: { title: 'Mesajlar', breadcrumb: 'Mesajlar' },
       },
     ],
