@@ -65,7 +65,8 @@ class SKUProduct(Document):
         # 3. REFETCH - override client values with authoritative DB data
         self.refetch_denormalized_fields()
 
-        # 4. STATUS VALIDATION
+        # 4. AUTHORIZATION & STATUS VALIDATION
+        self.validate_brand_authorization()
         self.validate_tenant_isolation()
         self.validate_status_transition()
 
@@ -159,6 +160,78 @@ class SKUProduct(Document):
             )
             if brand_name:
                 self.brand_name = brand_name
+
+    # =========================================================================
+    # BRAND AUTHORIZATION
+    # =========================================================================
+
+    def validate_brand_authorization(self):
+        """
+        Validate that the seller is authorized to list products for this brand.
+
+        Enforces brand gating rules:
+        - Skips if no brand is set
+        - Skips if brand is not gated (no Brand Gating records exist)
+        - Skips if seller is the brand owner
+        - Skips if user is System Manager
+        - Throws if seller has no active+approved Brand Gating for this brand
+        - Throws if product limit on Brand Gating.max_products is exceeded
+        """
+        if not self.brand:
+            return
+
+        # Check if brand is gated (any Brand Gating records exist for this brand)
+        gating_exists = frappe.db.exists("Brand Gating", {"brand": self.brand})
+        if not gating_exists:
+            return
+
+        # Brand owner bypasses gating check
+        owner_seller = frappe.db.get_value("Brand", self.brand, "owner_seller")
+        if owner_seller and self.seller and owner_seller == self.seller:
+            return
+
+        # System Manager bypasses gating check
+        if "System Manager" in frappe.get_roles():
+            return
+
+        # Check for active+approved Brand Gating for this seller+brand
+        authorization = frappe.db.get_value(
+            "Brand Gating",
+            {
+                "brand": self.brand,
+                "seller": self.seller,
+                "authorization_status": "Approved",
+                "is_active": 1
+            },
+            ["name", "max_products"],
+            as_dict=True
+        )
+
+        if not authorization:
+            frappe.throw(
+                _("You are not authorized to list products for brand {0}").format(self.brand)
+            )
+
+        # Check product limit if max_products is set
+        max_products = cint(authorization.max_products)
+        if max_products > 0:
+            # Count existing products for this seller+brand (exclude current doc)
+            filters = {
+                "brand": self.brand,
+                "seller": self.seller,
+                "status": ("in", ["Draft", "Active", "Passive"])
+            }
+            if not self.is_new():
+                filters["name"] = ("!=", self.name)
+
+            current_count = frappe.db.count("SKU Product", filters)
+
+            if current_count >= max_products:
+                frappe.throw(
+                    _("Product limit reached for brand {0}. Maximum {1} products allowed, currently {2}.").format(
+                        self.brand, max_products, current_count
+                    )
+                )
 
     # =========================================================================
     # TENANT ISOLATION
