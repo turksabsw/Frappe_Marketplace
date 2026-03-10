@@ -10,8 +10,12 @@ class LocationItem(Document):
     """Child table for managing multiple warehouse/store locations.
 
     This child table supports:
-    - Multiple location types (Warehouse, Store, Distribution Center, etc.)
+    - Multiple location types (Warehouse, Store, Branch, Showroom, Distribution Center, etc.)
     - Full Turkish address hierarchy (City -> District -> Neighborhood)
+    - Country-level location support (default: Turkey)
+    - ERPNext Warehouse integration for inventory management
+    - Order fulfillment and return acceptance flags
+    - Geolocation coordinates (latitude/longitude)
     - Default location marking per type
     - Active/inactive status tracking
     - Operating hours and capacity information
@@ -21,6 +25,8 @@ class LocationItem(Document):
     def validate(self):
         """Validate location item data."""
         self.validate_address_hierarchy()
+        self.validate_coordinates()
+        self.validate_erpnext_warehouse()
 
     def validate_address_hierarchy(self):
         """Ensure district belongs to selected city and neighborhood belongs to selected district."""
@@ -39,6 +45,35 @@ class LocationItem(Document):
                 frappe.throw(
                     _("Neighborhood {0} does not belong to District {1}").format(
                         self.neighborhood, self.district
+                    )
+                )
+
+    def validate_coordinates(self):
+        """Validate latitude and longitude values are within valid ranges."""
+        if self.latitude is not None and self.latitude != 0:
+            if self.latitude < -90 or self.latitude > 90:
+                frappe.throw(
+                    _("Latitude must be between -90 and 90 degrees. Got {0}").format(
+                        self.latitude
+                    )
+                )
+
+        if self.longitude is not None and self.longitude != 0:
+            if self.longitude < -180 or self.longitude > 180:
+                frappe.throw(
+                    _("Longitude must be between -180 and 180 degrees. Got {0}").format(
+                        self.longitude
+                    )
+                )
+
+    def validate_erpnext_warehouse(self):
+        """Validate ERPNext warehouse link if provided."""
+        if self.erpnext_warehouse:
+            is_active = frappe.db.get_value("Warehouse", self.erpnext_warehouse, "disabled")
+            if is_active:
+                frappe.throw(
+                    _("ERPNext Warehouse {0} is disabled. Please select an active warehouse.").format(
+                        self.erpnext_warehouse
                     )
                 )
 
