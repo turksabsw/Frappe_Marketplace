@@ -11,6 +11,7 @@
   "is_default",
   "is_active",
   "column_break_1",
+  "country",
   "city",
   "city_name",
   "district",
@@ -21,6 +22,12 @@
   "street_address",
   "building_info",
   "postal_code",
+  "latitude",
+  "longitude",
+  "fulfillment_section",
+  "erpnext_warehouse",
+  "can_fulfill_orders",
+  "can_accept_returns",
   "operations_section",
   "operating_hours",
   "storage_capacity",
@@ -33,12 +40,12 @@
  "fields": [
   {
    "default": "Warehouse",
-   "description": "Type of location (Warehouse, Store, Distribution Center)",
+   "description": "Type of location (Warehouse, Store, Branch, Showroom, Distribution Center, etc.)",
    "fieldname": "location_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Location Type",
-   "options": "Warehouse\nStore\nDistribution Center\nPickup Point\nReturn Center",
+   "options": "Warehouse\nStore\nBranch\nShowroom\nDistribution Center\nPickup Point\nReturn Center",
    "reqd": 1
   },
   {
@@ -75,6 +82,15 @@
   {
    "fieldname": "column_break_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Turkey",
+   "description": "Country for this location",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
   },
   {
    "description": "Select the city (Il)",
@@ -147,6 +163,44 @@
    "label": "Postal Code"
   },
   {
+   "description": "Latitude coordinate for geolocation (-90 to 90)",
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude"
+  },
+  {
+   "description": "Longitude coordinate for geolocation (-180 to 180)",
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "fulfillment_section",
+   "fieldtype": "Section Break",
+   "label": "Fulfillment & Integration"
+  },
+  {
+   "description": "Link to ERPNext Warehouse for inventory integration",
+   "fieldname": "erpnext_warehouse",
+   "fieldtype": "Link",
+   "label": "ERPNext Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "1",
+   "description": "Whether this location can fulfill orders",
+   "fieldname": "can_fulfill_orders",
+   "fieldtype": "Check",
+   "label": "Can Fulfill Orders"
+  },
+  {
+   "default": "0",
+   "description": "Whether this location can accept returns",
+   "fieldname": "can_accept_returns",
+   "fieldtype": "Check",
+   "label": "Can Accept Returns"
+  },
+  {
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations & Contact"
@@ -197,7 +251,7 @@
  "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-03-10 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Core",
  "name": "Location Item",

@@ -13,6 +13,12 @@
   "column_break_basic",
   "status",
   "tag_type",
+  "tag_category",
+  "classification_section",
+  "tenant",
+  "tenant_name",
+  "column_break_classification",
+  "is_global",
   "description_section",
   "description",
   "badge_tab",
@@ -85,7 +91,49 @@
    "label": "Tag Type",
    "options": "Achievement\nBadge\nCertification\nWarning\nSpecial",
    "reqd": 1,
-   "description": "Category of tag"
+   "description": "Legacy tag type (mapped to Tag Category automatically)"
+  },
+  {
+   "default": "Performance",
+   "fieldname": "tag_category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tag Category",
+   "options": "Verification\nPerformance\nProgram\nPromotional\nIdentity",
+   "reqd": 1,
+   "description": "Classification category for this tag"
+  },
+  {
+   "fieldname": "classification_section",
+   "fieldtype": "Section Break",
+   "label": "Classification"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "description": "Tenant this tag belongs to. Leave empty for global tags."
+  },
+  {
+   "fetch_from": "tenant.tenant_name",
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Tenant Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_classification",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_global",
+   "fieldtype": "Check",
+   "label": "Is Global",
+   "description": "If checked, this tag is available across all tenants"
   },
   {
    "fieldname": "description_section",
@@ -244,7 +292,7 @@
   }
  ],
  "quick_entry": 0,
- "search_fields": "tag_name, tag_code, tag_type, status",
+ "search_fields": "tag_name, tag_code, tag_type, tag_category, status",
  "show_name_in_global_search": 1,
  "sort_field": "display_priority",
  "sort_order": "ASC",

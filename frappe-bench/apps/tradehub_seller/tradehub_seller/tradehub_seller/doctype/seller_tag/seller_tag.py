@@ -13,6 +13,16 @@ from frappe.model.document import Document
 from frappe.utils import now_datetime
 
 
+# Mapping from legacy tag_type values to new tag_category values
+TAG_TYPE_TO_CATEGORY_MAP = {
+    "Achievement": "Performance",
+    "Badge": "Performance",
+    "Certification": "Identity",
+    "Warning": "Performance",
+    "Special": "Promotional",
+}
+
+
 class SellerTag(Document):
     """
     Controller for Seller Tag DocType.
@@ -31,6 +41,8 @@ class SellerTag(Document):
     def validate(self):
         """Validate tag data."""
         self.validate_tag_code()
+        self.map_tag_type_to_category()
+        self.validate_tenant_global()
 
     def validate_tag_code(self):
         """Ensure tag code is uppercase and valid."""
@@ -44,6 +56,24 @@ class SellerTag(Document):
                     _("Tag Code must start with a letter and contain only "
                       "uppercase letters, numbers, and underscores.")
                 )
+
+    def map_tag_type_to_category(self):
+        """Map legacy tag_type to tag_category if tag_category is not explicitly set."""
+        if self.tag_type and not self.tag_category:
+            mapped_category = TAG_TYPE_TO_CATEGORY_MAP.get(self.tag_type)
+            if mapped_category:
+                self.tag_category = mapped_category
+            else:
+                self.tag_category = "Performance"
+
+    def validate_tenant_global(self):
+        """Validate tenant and is_global consistency."""
+        if self.is_global and self.tenant:
+            frappe.msgprint(
+                _("Global tags should not be assigned to a specific tenant. "
+                  "Tenant will be ignored for global tags."),
+                alert=True
+            )
 
     def on_trash(self):
         """Prevent deletion if tag has assignments."""
@@ -68,13 +98,53 @@ class SellerTag(Document):
             )
 
 
+def get_permission_query_conditions(user=None):
+    """
+    Return SQL conditions for Seller Tag list queries.
+
+    System Managers see all records. Other users see global tags (is_global=1)
+    and tags belonging to their current tenant. Enforces tenant isolation for
+    non-global tags.
+
+    Args:
+        user (str, optional): The user to check permissions for.
+            Defaults to current session user.
+
+    Returns:
+        str: SQL WHERE clause fragment (without WHERE keyword).
+    """
+    user = user or frappe.session.user
+
+    # System Manager sees all
+    if "System Manager" in frappe.get_roles(user):
+        return ""
+
+    # Tenant isolation: show global tags + tags for current tenant
+    try:
+        from tradehub_core.tradehub_core.utils.tenant import get_current_tenant
+        current_tenant = get_current_tenant()
+    except ImportError:
+        current_tenant = None
+
+    if current_tenant:
+        escaped_tenant = frappe.db.escape(current_tenant)
+        return (
+            "(`tabSeller Tag`.`is_global` = 1"
+            " OR `tabSeller Tag`.`tenant` = {tenant}"
+            " OR `tabSeller Tag`.`tenant` IS NULL"
+            " OR `tabSeller Tag`.`tenant` = '')"
+        ).format(tenant=escaped_tenant)
+
+    return ""
+
+
 def get_active_tags():
     """Get all active tags for display."""
     return frappe.get_all(
         "Seller Tag",
         filters={"status": "Active"},
-        fields=["name", "tag_name", "tag_code", "tag_type", "badge_icon",
-                "badge_color", "badge_image", "display_priority"],
+        fields=["name", "tag_name", "tag_code", "tag_type", "tag_category",
+                "badge_icon", "badge_color", "badge_image", "display_priority"],
         order_by="display_priority asc"
     )
 
@@ -103,7 +173,7 @@ def get_seller_tags(seller_id):
     return frappe.get_all(
         "Seller Tag",
         filters={"name": ["in", tag_names], "status": "Active"},
-        fields=["name", "tag_name", "tag_code", "tag_type", "badge_icon",
-                "badge_color", "badge_image", "description"],
+        fields=["name", "tag_name", "tag_code", "tag_type", "tag_category",
+                "badge_icon", "badge_color", "badge_image", "description"],
         order_by="display_priority asc"
     )

@@ -66,6 +66,9 @@
   "items_delivered",
   "items_returned",
   "fully_fulfilled",
+  "fulfillment_location_section",
+  "fulfillment_location_idx",
+  "fulfillment_location_name",
   "shipping_address_section",
   "shipping_address_name",
   "shipping_address_line1",
@@ -527,6 +530,26 @@
    "fieldname": "fully_fulfilled",
    "fieldtype": "Check",
    "label": "Fully Fulfilled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fulfillment_location_section",
+   "fieldtype": "Section Break",
+   "label": "Fulfillment Location"
+  },
+  {
+   "default": "0",
+   "description": "Index of the seller's fulfillment location in Seller Profile locations table",
+   "fieldname": "fulfillment_location_idx",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Fulfillment Location Idx"
+  },
+  {
+   "description": "Name of the fulfillment location assigned to this sub order",
+   "fieldname": "fulfillment_location_name",
+   "fieldtype": "Data",
+   "label": "Fulfillment Location",
    "read_only": 1
   },
   {

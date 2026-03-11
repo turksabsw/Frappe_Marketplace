@@ -4,13 +4,18 @@
 """
 Seller Tag Assignment DocType Controller
 
-Manages seller-tag relationships with manual override support.
+Manages seller-tag relationships with manual override support,
+status lifecycle, scoring, and grace period tracking.
 """
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import now_datetime, getdate
+
+
+VALID_STATUSES = ["Active", "Warning", "Grace Period", "Expired", "Revoked", "Pending"]
+VALID_SOURCES = ["Manual", "Rule", "Application", "Program"]
 
 
 class SellerTagAssignment(Document):
@@ -18,6 +23,8 @@ class SellerTagAssignment(Document):
     Controller for Seller Tag Assignment DocType.
 
     Links sellers to tags, tracks assignment source and overrides.
+    Supports 6-state status lifecycle: Active, Warning, Grace Period,
+    Expired, Revoked, Pending.
     Priority: Manual > Rule
     """
 
@@ -29,10 +36,16 @@ class SellerTagAssignment(Document):
         if self.source == "Manual" and not self.assigned_by:
             self.assigned_by = frappe.session.user
 
+        if not self.status:
+            self.status = "Active"
+
     def validate(self):
         """Validate assignment data."""
         self.check_duplicate()
         self.validate_override()
+        self.validate_status()
+        self.validate_grace_period()
+        self.validate_revocation()
 
     def check_duplicate(self):
         """Check for duplicate assignments."""
@@ -60,6 +73,38 @@ class SellerTagAssignment(Document):
         if self.override_state == "ForcedOn" and self.source == "Rule":
             # This is valid - keeps the tag even if rule no longer matches
             pass
+
+    def validate_status(self):
+        """Validate status field and transitions."""
+        if self.status and self.status not in VALID_STATUSES:
+            frappe.throw(
+                _("Invalid status '{0}'. Must be one of: {1}").format(
+                    self.status, ", ".join(VALID_STATUSES)
+                )
+            )
+
+    def validate_grace_period(self):
+        """Validate grace period date consistency."""
+        if self.grace_period_start and self.grace_period_end:
+            if getdate(self.grace_period_end) < getdate(self.grace_period_start):
+                frappe.throw(
+                    _("Grace Period End cannot be before Grace Period Start")
+                )
+
+        if self.status == "Grace Period":
+            if not self.grace_period_start or not self.grace_period_end:
+                frappe.throw(
+                    _("Grace Period Start and End dates are required "
+                      "when status is 'Grace Period'")
+                )
+
+    def validate_revocation(self):
+        """Validate revocation fields when status is Revoked."""
+        if self.status == "Revoked":
+            if not self.revoked_at:
+                self.revoked_at = now_datetime()
+            if not self.revoked_by:
+                self.revoked_by = frappe.session.user
 
     def on_update(self):
         """Handle assignment updates."""
@@ -101,16 +146,42 @@ class SellerTagAssignment(Document):
 
         return {"success": True, "override_state": self.override_state}
 
+    @frappe.whitelist()
+    def set_status(self, status, reason=None):
+        """
+        Set the status for this assignment.
 
-def assign_tag_to_seller(seller, tag, source="Manual", notes=None):
+        Args:
+            status: One of Active, Warning, Grace Period, Expired, Revoked, Pending
+            reason: Optional reason (used for revocation)
+        """
+        if status not in VALID_STATUSES:
+            frappe.throw(
+                _("Invalid status '{0}'. Must be one of: {1}").format(
+                    status, ", ".join(VALID_STATUSES)
+                )
+            )
+
+        self.status = status
+
+        if status == "Revoked" and reason:
+            self.revocation_reason = reason
+
+        self.save(ignore_permissions=True)
+
+        return {"success": True, "status": self.status}
+
+
+def assign_tag_to_seller(seller, tag, source="Manual", notes=None, status="Active"):
     """
     Helper function to assign a tag to a seller.
 
     Args:
         seller: Seller Profile name
         tag: Seller Tag name
-        source: "Manual" or "Rule"
+        source: "Manual", "Rule", "Application", or "Program"
         notes: Optional notes
+        status: Initial status (default: "Active")
 
     Returns:
         Seller Tag Assignment document
@@ -130,6 +201,7 @@ def assign_tag_to_seller(seller, tag, source="Manual", notes=None):
         "seller": seller,
         "tag": tag,
         "source": source,
+        "status": status,
         "notes": notes
     })
     doc.insert(ignore_permissions=True)
@@ -179,7 +251,11 @@ def get_seller_tags_with_details(seller):
     assignments = frappe.get_all(
         "Seller Tag Assignment",
         filters={"seller": seller},
-        fields=["name", "tag", "source", "override_state", "assigned_at", "expires_at"]
+        fields=[
+            "name", "tag", "source", "status", "override_state",
+            "assigned_at", "expires_at", "expiry_date",
+            "composite_score", "consecutive_failures"
+        ]
     )
 
     result = []
@@ -198,9 +274,13 @@ def get_seller_tags_with_details(seller):
             "badge_image": tag.badge_image,
             "description": tag.description,
             "source": assignment.source,
+            "status": assignment.status,
             "override_state": assignment.override_state,
             "assigned_at": assignment.assigned_at,
-            "expires_at": assignment.expires_at
+            "expires_at": assignment.expires_at,
+            "expiry_date": assignment.expiry_date,
+            "composite_score": assignment.composite_score,
+            "consecutive_failures": assignment.consecutive_failures
         })
 
     # Sort by tag display priority

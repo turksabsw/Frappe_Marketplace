@@ -398,6 +398,20 @@ frappe.ui.form.on('Address Item', {
 // =====================================================
 
 frappe.ui.form.on('Location Item', {
+    is_default: function(frm, cdt, cdn) {
+        // Radio-button behavior: only one location can be default at a time
+        // When user checks is_default on a row, uncheck all other rows
+        let row = locals[cdt][cdn];
+        if (row.is_default) {
+            (frm.doc.locations || []).forEach(function(loc) {
+                if (loc.name !== row.name && loc.is_default) {
+                    frappe.model.set_value(loc.doctype, loc.name, 'is_default', 0);
+                }
+            });
+            frm.refresh_field('locations');
+        }
+    },
+
     city: function(frm, cdt, cdn) {
         // When city changes, clear district and neighborhood
         // because they may not belong to the new city

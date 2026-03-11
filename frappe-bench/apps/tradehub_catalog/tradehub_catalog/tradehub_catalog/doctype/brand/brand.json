@@ -16,6 +16,11 @@
   "branding_section",
   "logo",
   "description",
+  "cover_image",
+  "founding_story",
+  "brand_values",
+  "social_media_section",
+  "social_media_links",
   "tenant_section",
   "tenant",
   "tenant_name",
@@ -27,6 +32,9 @@
   "registered_by_name",
   "column_break_ownership",
   "registration_date",
+  "owner_seller",
+  "owner_seller_name",
+  "ownership_date",
   "verification_section",
   "verified_by",
   "verified_by_name",
@@ -124,6 +132,37 @@
    "description": "Brand description and information"
   },
   {
+   "fieldname": "cover_image",
+   "fieldtype": "Attach Image",
+   "label": "Cover Image",
+   "description": "Brand cover/banner image (recommended size: 1200x400 pixels)"
+  },
+  {
+   "fieldname": "founding_story",
+   "fieldtype": "Text Editor",
+   "label": "Founding Story",
+   "description": "The story behind the brand's founding"
+  },
+  {
+   "fieldname": "brand_values",
+   "fieldtype": "Small Text",
+   "label": "Brand Values",
+   "description": "Core brand values and principles (max 500 characters)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "social_media_section",
+   "fieldtype": "Section Break",
+   "label": "Social Media"
+  },
+  {
+   "fieldname": "social_media_links",
+   "fieldtype": "Table",
+   "label": "Social Media Links",
+   "options": "Brand Social Media Link",
+   "description": "Brand social media profiles and links"
+  },
+  {
    "fieldname": "tenant_section",
    "fieldtype": "Section Break",
    "label": "Tenant Information"
@@ -194,6 +233,28 @@
    "label": "Registration Date",
    "read_only": 1,
    "description": "Date when brand was registered"
+  },
+  {
+   "fieldname": "owner_seller",
+   "fieldtype": "Link",
+   "label": "Owner Seller",
+   "options": "Seller Profile",
+   "description": "Seller who owns this brand"
+  },
+  {
+   "fetch_from": "owner_seller.seller_name",
+   "fieldname": "owner_seller_name",
+   "fieldtype": "Data",
+   "label": "Owner Seller Name",
+   "read_only": 1,
+   "description": "Auto-filled from Owner Seller"
+  },
+  {
+   "fieldname": "ownership_date",
+   "fieldtype": "Date",
+   "label": "Ownership Date",
+   "read_only": 1,
+   "description": "Date when brand ownership was assigned"
   },
   {
    "fieldname": "verification_section",
@@ -374,9 +435,14 @@
    "group": "Brand Management",
    "link_doctype": "Brand Gating",
    "link_fieldname": "brand"
+  },
+  {
+   "group": "Brand Management",
+   "link_doctype": "Brand Ownership Claim",
+   "link_fieldname": "brand"
   }
  ],
- "modified": "2026-03-04 12:00:00.000000",
+ "modified": "2026-03-10 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Catalog",
  "name": "Brand",

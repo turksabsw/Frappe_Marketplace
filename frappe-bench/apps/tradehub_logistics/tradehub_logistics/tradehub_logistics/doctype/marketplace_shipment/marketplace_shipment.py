@@ -95,7 +95,17 @@ class MarketplaceShipment(Document):
         return f"SHP-{frappe.generate_hash(length=10).upper()}"
 
     def copy_addresses_from_sub_order(self):
-        """Copy addresses from the linked Sub Order."""
+        """
+        Copy addresses from the linked Sub Order.
+
+        Origin address priority:
+        1) Sub Order fulfillment_location_idx → seller's specific location
+        2) Seller's default location (get_default_location)
+        3) Fallback: seller profile flat address fields (backward compat)
+
+        Includes cross-tenant spoofing prevention: validates that the
+        fulfillment_location_idx actually belongs to the seller.
+        """
         if not self.sub_order:
             return
 
@@ -123,20 +133,138 @@ class MarketplaceShipment(Document):
         if not self.destination_country:
             self.destination_country = sub_order.shipping_country or "Turkey"
 
-        # Get sender info from seller profile
-        if self.seller and not self.sender_name:
-            seller_profile = frappe.get_doc("Seller Profile", self.seller)
+        # Get sender info and origin address from seller profile
+        if not self.seller:
+            return
+
+        seller_profile = frappe.get_doc("Seller Profile", self.seller)
+
+        if not self.sender_name:
             self.sender_name = seller_profile.seller_name
+
+        # Resolve origin address using location priority chain
+        location = self._resolve_fulfillment_location(sub_order, seller_profile)
+
+        if location:
+            self._set_origin_from_location(location)
+        else:
+            # Fallback: use seller profile flat address fields (backward compat)
+            self._set_origin_from_seller_profile(seller_profile)
+
+    def _resolve_fulfillment_location(self, sub_order, seller_profile):
+        """
+        Resolve the fulfillment location using priority chain.
+
+        Priority:
+        1) Sub Order fulfillment_location_idx → specific location from seller
+        2) Seller's default location
+
+        Args:
+            sub_order: Sub Order document
+            seller_profile: Seller Profile document
+
+        Returns:
+            Location Item row or None
+        """
+        # Priority 1: Sub Order's explicit fulfillment_location_idx
+        fulfillment_idx = cint(getattr(sub_order, 'fulfillment_location_idx', 0))
+        if fulfillment_idx:
+            location = self._get_location_by_idx(seller_profile, fulfillment_idx)
+            if location:
+                self.fulfillment_location_idx = fulfillment_idx
+                self.fulfillment_location_name = location.location_name
+                return location
+
+            # Cross-tenant spoofing prevention: idx was set but doesn't match
+            # any location in this seller's profile — log and fall through
+            frappe.log_error(
+                _("Fulfillment location idx {0} not found for seller {1} on Sub Order {2}").format(
+                    fulfillment_idx, self.seller, self.sub_order
+                ),
+                "Shipment Location Mismatch"
+            )
+
+        # Priority 2: Seller's default location
+        if hasattr(seller_profile, 'get_default_location'):
+            default_location = seller_profile.get_default_location()
+            if default_location:
+                self.fulfillment_location_idx = default_location.idx
+                self.fulfillment_location_name = default_location.location_name
+                return default_location
+
+        return None
+
+    def _get_location_by_idx(self, seller_profile, location_idx):
+        """
+        Get a specific location from seller's locations child table by idx.
+
+        This also serves as cross-tenant spoofing prevention: the location
+        must belong to this seller's profile (not another seller's).
+
+        Args:
+            seller_profile: Seller Profile document
+            location_idx: The idx (row number) in the locations child table
+
+        Returns:
+            Location Item row or None if not found or inactive
+        """
+        if not seller_profile.locations:
+            return None
+
+        for loc in seller_profile.locations:
+            if cint(loc.idx) == cint(location_idx) and cint(loc.is_active):
+                return loc
+
+        return None
+
+    def _set_origin_from_location(self, location):
+        """
+        Set origin address fields from a Location Item row.
+
+        Field mapping:
+            street_address   → origin_address_line1
+            building_info    → origin_address_line2
+            city_name        → origin_city
+            postal_code      → origin_postal_code
+            country          → origin_country
+            phone            → sender_phone
+
+        Args:
+            location: Location Item child table row
+        """
+        if not self.origin_address_line1 and location.street_address:
+            self.origin_address_line1 = location.street_address
+        if not self.origin_address_line2 and location.building_info:
+            self.origin_address_line2 = location.building_info
+        if not self.origin_city and location.city_name:
+            self.origin_city = location.city_name
+        if not self.origin_postal_code and location.postal_code:
+            self.origin_postal_code = location.postal_code
+        if not self.origin_country:
+            self.origin_country = location.country or "Turkey"
+        if not self.sender_phone and location.phone:
+            self.sender_phone = location.phone
+
+    def _set_origin_from_seller_profile(self, seller_profile):
+        """
+        Fallback: set origin address from seller profile flat address fields.
+
+        This maintains backward compatibility for sellers who haven't
+        configured fulfillment locations yet.
+
+        Args:
+            seller_profile: Seller Profile document
+        """
+        if not self.sender_phone and seller_profile.phone:
             self.sender_phone = seller_profile.phone
 
-            # Get seller address if available
-            if hasattr(seller_profile, 'address_line1') and seller_profile.address_line1:
-                if not self.origin_address_line1:
-                    self.origin_address_line1 = seller_profile.address_line1
-                if not self.origin_city and hasattr(seller_profile, 'city'):
-                    self.origin_city = seller_profile.city
-                if not self.origin_country:
-                    self.origin_country = "Turkey"
+        if hasattr(seller_profile, 'address_line1') and seller_profile.address_line1:
+            if not self.origin_address_line1:
+                self.origin_address_line1 = seller_profile.address_line1
+            if not self.origin_city and hasattr(seller_profile, 'city'):
+                self.origin_city = seller_profile.city
+            if not self.origin_country:
+                self.origin_country = "Turkey"
 
     # =================================================================
     # Validation Methods

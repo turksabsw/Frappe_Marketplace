@@ -44,6 +44,9 @@ class SubOrder(Document):
         if self.marketplace_order and not self.buyer_name:
             self.copy_buyer_details()
 
+        # Auto-assign fulfillment location from seller's locations
+        self.auto_assign_fulfillment_location()
+
     def validate(self):
         """Validate sub order data before saving."""
         self._guard_system_fields()
@@ -52,6 +55,7 @@ class SubOrder(Document):
         self.validate_tenant_boundary()
         self.validate_items()
         self.validate_addresses()
+        self.validate_fulfillment_location()
         self.validate_status_transitions()
         self.calculate_totals()
 
@@ -200,6 +204,50 @@ class SubOrder(Document):
         self.invoice_type = parent.invoice_type
         self.e_invoice_enabled = parent.e_invoice_enabled
 
+    def auto_assign_fulfillment_location(self):
+        """
+        Auto-assign fulfillment location from seller's locations.
+
+        Logic:
+        - Single active fulfillment location: auto-selects it.
+        - Multiple active locations: pre-selects the default location.
+        - No active locations: leaves unassigned.
+
+        Seller can change the assignment before shipment creation.
+        """
+        if not self.seller:
+            return
+
+        # Skip if already assigned
+        if cint(self.fulfillment_location_idx) > 0:
+            return
+
+        try:
+            seller_profile = frappe.get_doc("Seller Profile", self.seller)
+            fulfillment_locations = seller_profile.get_fulfillment_locations()
+
+            if not fulfillment_locations:
+                return
+
+            if len(fulfillment_locations) == 1:
+                # Single active location — auto-select
+                loc = fulfillment_locations[0]
+                self.fulfillment_location_idx = cint(loc.idx)
+                self.fulfillment_location_name = loc.location_name
+            else:
+                # Multiple locations — pre-select default
+                default_loc = seller_profile.get_default_location()
+                if default_loc and cint(default_loc.can_fulfill_orders):
+                    self.fulfillment_location_idx = cint(default_loc.idx)
+                    self.fulfillment_location_name = default_loc.location_name
+
+        except Exception:
+            # Non-critical: log and continue without assignment
+            frappe.log_error(
+                f"Failed to auto-assign fulfillment location for seller {self.seller}",
+                "Sub Order Fulfillment Location Error"
+            )
+
     # =================================================================
     # Validation Methods
     # =================================================================
@@ -256,6 +304,60 @@ class SubOrder(Document):
 
         if not self.shipping_country:
             self.shipping_country = "Turkey"
+
+    def validate_fulfillment_location(self):
+        """
+        Validate and re-fetch fulfillment location details.
+
+        Ensures the assigned location exists, is active, and can fulfill orders.
+        Re-fetches location_name from source to maintain data consistency.
+        Seller can change fulfillment location before shipment is created.
+        """
+        if not cint(self.fulfillment_location_idx) or not self.seller:
+            return
+
+        # Prevent changes after shipment is created
+        if not self.is_new() and self.has_value_changed("fulfillment_location_idx"):
+            if self.status in ("Shipped", "In Transit", "Out for Delivery", "Delivered", "Completed"):
+                frappe.throw(
+                    _("Fulfillment location cannot be changed after shipment creation")
+                )
+
+        # Validate location exists and is active
+        try:
+            seller_profile = frappe.get_doc("Seller Profile", self.seller)
+            location = seller_profile.get_location_by_idx(
+                cint(self.fulfillment_location_idx)
+            )
+
+            if not location:
+                frappe.throw(
+                    _("Fulfillment location with index {0} not found in seller's locations").format(
+                        self.fulfillment_location_idx
+                    )
+                )
+
+            if not cint(location.is_active):
+                frappe.throw(
+                    _("Fulfillment location '{0}' is not active").format(
+                        location.location_name
+                    )
+                )
+
+            if not cint(location.can_fulfill_orders):
+                frappe.throw(
+                    _("Location '{0}' is not enabled for order fulfillment").format(
+                        location.location_name
+                    )
+                )
+
+            # Re-fetch location name from source for consistency
+            self.fulfillment_location_name = location.location_name
+
+        except frappe.DoesNotExistError:
+            frappe.throw(
+                _("Seller Profile {0} does not exist").format(self.seller)
+            )
 
     def validate_status_transitions(self):
         """Validate sub order status transitions."""

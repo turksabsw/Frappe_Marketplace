@@ -86,11 +86,18 @@ app_include_js = "/assets/tradehub_catalog/js/category_icon.js"
 permission_query_conditions = {
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.get_permission_query_conditions",
 	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.get_permission_query_conditions",
+	"Brand Gating": "tradehub_catalog.tradehub_catalog.permissions.brand_gating_conditions",
+	"Brand Ownership Claim": "tradehub_catalog.tradehub_catalog.permissions.brand_ownership_claim_conditions",
+	"Brand Authorization Request": "tradehub_catalog.tradehub_catalog.permissions.brand_authorization_request_conditions",
+	"Variant Request": "tradehub_catalog.tradehub_catalog.permissions.variant_request_conditions",
 }
 
 has_permission = {
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.has_permission",
 	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.has_permission",
+	"Brand": "tradehub_catalog.tradehub_catalog.permissions.brand_has_permission",
+	"Brand Gating": "tradehub_catalog.tradehub_catalog.permissions.brand_gating_has_permission",
+	"Variant Request": "tradehub_catalog.tradehub_catalog.permissions.variant_request_has_permission",
 }
 
 # DocType Class
@@ -124,7 +131,8 @@ scheduler_events = {
 	],
 	"daily": [
 		"tradehub_catalog.tasks.ranking",
-		"tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.remind_pending_proposals"
+		"tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.remind_pending_proposals",
+		"tradehub_catalog.variant_request.tasks.recalculate_demand_aggregations"
 	]
 }
 

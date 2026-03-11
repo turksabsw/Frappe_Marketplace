@@ -44,6 +44,24 @@ frappe.ui.form.on('SKU Product', {
             return {};
         });
 
+        // Brand - filter by seller authorization (authorized or open/ungated brands)
+        frm.set_query('brand', function() {
+            if (!frm.doc.seller) {
+                return {};
+            }
+            if (frm._excluded_brands && frm._excluded_brands.length) {
+                return {
+                    filters: {
+                        'name': ['not in', frm._excluded_brands]
+                    }
+                };
+            }
+            return {};
+        });
+
+        // Fetch authorized brands for brand field filter
+        frm.events.fetch_authorized_brands(frm);
+
         // Make tenant field read-only when seller is selected
         // (since tenant is auto-populated from seller via fetch_from)
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
@@ -87,6 +105,9 @@ frappe.ui.form.on('SKU Product', {
     seller: function(frm) {
         // Update read-only state of tenant field
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
+
+        // Re-fetch authorized brands when seller changes
+        frm.events.fetch_authorized_brands(frm);
 
         if (frm.doc.seller) {
             // Auto-populate tenant from seller
@@ -372,6 +393,61 @@ frappe.ui.form.on('SKU Product', {
         }
 
         frm.dashboard.add_indicator(message, indicator);
+    },
+
+    /**
+     * Fetch authorized brands for the current seller to filter brand field.
+     * Computes excluded brands (gated but not authorized) so the brand dropdown
+     * shows only authorized brands and open/ungated brands.
+     */
+    fetch_authorized_brands: function(frm) {
+        // Reset cached data
+        frm._excluded_brands = [];
+
+        if (!frm.doc.seller) {
+            return;
+        }
+
+        // System Manager bypasses brand authorization
+        if (frappe.user_roles.includes('System Manager')) {
+            return;
+        }
+
+        frappe.call({
+            method: 'tradehub_catalog.tradehub_catalog.doctype.brand_authorization_request.brand_authorization_request.get_authorized_brands_for_seller',
+            args: { requesting_seller: frm.doc.seller },
+            async: true,
+            callback: function(r) {
+                var authorized_brands = (r.message || []).map(function(b) { return b.brand; });
+
+                // Get all gated brands to compute excluded list
+                frappe.call({
+                    method: 'frappe.client.get_list',
+                    args: {
+                        doctype: 'Brand Gating',
+                        fields: ['brand'],
+                        limit_page_length: 0
+                    },
+                    async: true,
+                    callback: function(r2) {
+                        var gated_brands_raw = (r2.message || []).map(function(b) { return b.brand; });
+
+                        // Deduplicate gated brand names
+                        var gated_brands = [];
+                        gated_brands_raw.forEach(function(b) {
+                            if (gated_brands.indexOf(b) === -1) {
+                                gated_brands.push(b);
+                            }
+                        });
+
+                        // Excluded = gated but NOT authorized for this seller
+                        frm._excluded_brands = gated_brands.filter(function(b) {
+                            return authorized_brands.indexOf(b) === -1;
+                        });
+                    }
+                });
+            }
+        });
     },
 
     /**
