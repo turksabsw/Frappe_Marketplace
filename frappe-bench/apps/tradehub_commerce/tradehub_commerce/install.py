@@ -1,4 +1,5 @@
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
 DEFAULT_PAYMENT_TERMS = [
@@ -100,4 +101,264 @@ def create_default_payment_terms():
 		})
 		doc.insert(ignore_if_duplicate=True)
 
+	frappe.db.commit()
+
+
+def after_install():
+	"""Run after app installation."""
+	create_default_payment_terms()
+	setup_custom_fields()
+
+
+def setup_custom_fields():
+	"""Create Custom Fields on ERPNext DocTypes for TradeHub Commerce integration.
+
+	Adds marketplace back-link fields to Sales Invoice, Delivery Note,
+	Delivery Note Item, Payment Entry, Payment Request, and Shipment.
+	"""
+	custom_fields = {
+		"Sales Invoice": [
+			{
+				"fieldname": "custom_marketplace_order",
+				"label": "Marketplace Order",
+				"fieldtype": "Link",
+				"options": "Marketplace Order",
+				"insert_after": "customer_name",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Marketplace Order",
+			},
+			{
+				"fieldname": "custom_marketplace_order_id",
+				"label": "Marketplace Order ID",
+				"fieldtype": "Data",
+				"insert_after": "custom_marketplace_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Marketplace Order identifier",
+			},
+			{
+				"fieldname": "custom_sub_order",
+				"label": "Sub Order",
+				"fieldtype": "Link",
+				"options": "Sub Order",
+				"insert_after": "custom_marketplace_order_id",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Sub Order",
+			},
+		],
+		"Delivery Note": [
+			{
+				"fieldname": "custom_marketplace_order",
+				"label": "Marketplace Order",
+				"fieldtype": "Link",
+				"options": "Marketplace Order",
+				"insert_after": "customer_name",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Marketplace Order",
+			},
+			{
+				"fieldname": "custom_marketplace_order_id",
+				"label": "Marketplace Order ID",
+				"fieldtype": "Data",
+				"insert_after": "custom_marketplace_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Marketplace Order identifier",
+			},
+			{
+				"fieldname": "custom_sub_order",
+				"label": "Sub Order",
+				"fieldtype": "Link",
+				"options": "Sub Order",
+				"insert_after": "custom_marketplace_order_id",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Sub Order",
+			},
+			{
+				"fieldname": "custom_shipment_number",
+				"label": "Shipment Number",
+				"fieldtype": "Int",
+				"insert_after": "custom_sub_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Shipment sequence number for partial shipments",
+			},
+			{
+				"fieldname": "custom_is_partial_shipment",
+				"label": "Is Partial Shipment",
+				"fieldtype": "Check",
+				"insert_after": "custom_shipment_number",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Indicates this is a partial shipment",
+			},
+			{
+				"fieldname": "custom_total_shipments",
+				"label": "Total Shipments",
+				"fieldtype": "Int",
+				"insert_after": "custom_is_partial_shipment",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Total number of shipments for this order",
+			},
+			{
+				"fieldname": "custom_partial_shipment_note",
+				"label": "Partial Shipment Note",
+				"fieldtype": "Small Text",
+				"insert_after": "custom_total_shipments",
+				"reqd": 0,
+				"read_only": 0,
+				"module": "TradeHub Commerce",
+				"description": "Notes about partial shipment",
+			},
+		],
+		"Delivery Note Item": [
+			{
+				"fieldname": "custom_marketplace_order_item",
+				"label": "Marketplace Order Item",
+				"fieldtype": "Data",
+				"insert_after": "description",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Marketplace Order Item reference",
+			},
+			{
+				"fieldname": "custom_listing",
+				"label": "Listing",
+				"fieldtype": "Data",
+				"insert_after": "custom_marketplace_order_item",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Marketplace listing reference",
+			},
+			{
+				"fieldname": "custom_sku",
+				"label": "SKU",
+				"fieldtype": "Data",
+				"insert_after": "custom_listing",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Product SKU",
+			},
+			{
+				"fieldname": "custom_ordered_qty",
+				"label": "Ordered Qty",
+				"fieldtype": "Float",
+				"insert_after": "custom_sku",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Total quantity ordered",
+			},
+			{
+				"fieldname": "custom_previously_shipped_qty",
+				"label": "Previously Shipped Qty",
+				"fieldtype": "Float",
+				"insert_after": "custom_ordered_qty",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Quantity shipped in previous shipments",
+			},
+			{
+				"fieldname": "custom_remaining_after_this",
+				"label": "Remaining After This",
+				"fieldtype": "Float",
+				"insert_after": "custom_previously_shipped_qty",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Remaining quantity after this shipment",
+			},
+		],
+		"Payment Entry": [
+			{
+				"fieldname": "custom_marketplace_order",
+				"label": "Marketplace Order",
+				"fieldtype": "Link",
+				"options": "Marketplace Order",
+				"insert_after": "party_name",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Marketplace Order",
+			},
+			{
+				"fieldname": "custom_marketplace_order_id",
+				"label": "Marketplace Order ID",
+				"fieldtype": "Data",
+				"insert_after": "custom_marketplace_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Marketplace Order identifier",
+			},
+		],
+		"Payment Request": [
+			{
+				"fieldname": "custom_marketplace_order",
+				"label": "Marketplace Order",
+				"fieldtype": "Link",
+				"options": "Marketplace Order",
+				"insert_after": "party",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Marketplace Order",
+			},
+			{
+				"fieldname": "custom_sub_order",
+				"label": "Sub Order",
+				"fieldtype": "Link",
+				"options": "Sub Order",
+				"insert_after": "custom_marketplace_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Sub Order",
+			},
+		],
+		"Shipment": [
+			{
+				"fieldname": "custom_marketplace_order",
+				"label": "Marketplace Order",
+				"fieldtype": "Link",
+				"options": "Marketplace Order",
+				"insert_after": "pickup_company",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Marketplace Order",
+			},
+			{
+				"fieldname": "custom_sub_order",
+				"label": "Sub Order",
+				"fieldtype": "Link",
+				"options": "Sub Order",
+				"insert_after": "custom_marketplace_order",
+				"reqd": 0,
+				"read_only": 1,
+				"module": "TradeHub Commerce",
+				"description": "Linked Sub Order",
+			},
+		],
+	}
+
+	create_custom_fields(custom_fields, ignore_validate=True)
 	frappe.db.commit()
