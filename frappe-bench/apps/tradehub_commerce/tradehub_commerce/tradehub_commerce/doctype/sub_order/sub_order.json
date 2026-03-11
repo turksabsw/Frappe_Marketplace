@@ -53,6 +53,7 @@
   "payment_section",
   "payment_status",
   "paid_at",
+  "payment_terms_template",
   "column_break_payment",
   "escrow_status",
   "escrow_release_date",
@@ -66,6 +67,7 @@
   "items_delivered",
   "items_returned",
   "fully_fulfilled",
+  "delivery_note_count",
   "fulfillment_location_section",
   "fulfillment_location_idx",
   "fulfillment_location_name",
@@ -89,6 +91,7 @@
   "estimated_delivery_date",
   "actual_delivery_date",
   "invoice_tab",
+  "proforma_invoice",
   "invoice_section",
   "requires_invoice",
   "invoice_type",
@@ -118,6 +121,7 @@
   "refund_requested",
   "refund_amount",
   "refund_reason",
+  "credit_note_amount",
   "column_break_refund",
   "refund_status",
   "refund_reference",
@@ -126,6 +130,7 @@
   "return_requested",
   "return_reason",
   "return_requested_at",
+  "return_window_expires_at",
   "column_break_return",
   "return_status",
   "return_tracking_number",
@@ -1040,6 +1045,39 @@
    "fieldtype": "Data",
    "label": "Tenant Name",
    "fetch_from": "tenant.tenant_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "proforma_invoice",
+   "fieldtype": "Link",
+   "label": "Proforma Invoice",
+   "options": "Proforma Invoice"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Marketplace Payment Terms Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_note_count",
+   "fieldtype": "Int",
+   "label": "Delivery Note Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "return_window_expires_at",
+   "fieldtype": "Datetime",
+   "label": "Return Window Expires At",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Note Amount",
+   "options": "currency",
    "read_only": 1
   }
  ],
