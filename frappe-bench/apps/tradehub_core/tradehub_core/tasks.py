@@ -10,6 +10,7 @@ This module contains scheduled task functions for buyer-side operations:
 - calculate_buyer_scores: Weekly task to run buyer scoring pipeline
 - buyer_level_tasks: Weekly task to evaluate and update buyer levels
 - update_buyer_kpi_template_stats: Weekly task to update Buyer KPI Template statistics
+- refresh_user_segments: Hourly task to evaluate and sync User Segment membership
 
 All scheduled jobs use Redis lock pattern to prevent concurrent execution.
 """
@@ -659,3 +660,145 @@ def _update_template_stats(template_name):
         "average_score": average_score,
         "last_evaluated_at": now_datetime(),
     }, update_modified=False)
+
+
+def refresh_user_segments():
+    """
+    Hourly task to evaluate and refresh User Segment membership.
+
+    Scheduled: Hourly (via hooks.py).
+
+    Steps:
+    1. Acquire Redis lock to prevent concurrent execution
+    2. Get all active User Segments with auto_refresh enabled
+    3. For each segment:
+       - Evaluate segment rules against all candidates
+       - Sync membership (add new, deactivate removed, reactivate returned)
+       - Update segment statistics (member_count, last_refreshed, duration)
+    4. Commit per 100 members (handled inside sync_segment_members)
+
+    Uses per-segment try/except to ensure a single failure doesn't block others.
+    """
+    lock_key = "refresh_user_segments_lock"
+    if frappe.cache().get_value(lock_key):
+        frappe.log_error(
+            "refresh_user_segments already running",
+            "Scheduler Lock"
+        )
+        return
+
+    frappe.cache().set_value(lock_key, 1, expires_in_sec=3600)
+    try:
+        _run_user_segment_refresh()
+    finally:
+        frappe.cache().delete_value(lock_key)
+
+
+def _run_user_segment_refresh():
+    """Internal function to evaluate and refresh all active User Segments."""
+    if not frappe.db.exists("DocType", "User Segment"):
+        return
+
+    if not frappe.db.exists("DocType", "Segment Member"):
+        return
+
+    # Get all active segments with auto_refresh enabled
+    segments = frappe.get_all(
+        "User Segment",
+        filters={
+            "status": "Active",
+            "auto_refresh": 1,
+        },
+        fields=["name", "segment_name", "target_type"],
+        order_by="priority desc"
+    )
+
+    if not segments:
+        frappe.logger().info("No active auto-refresh segments found")
+        return
+
+    frappe.logger().info(
+        f"Starting user segment refresh for {len(segments)} segments..."
+    )
+
+    processed = 0
+    errors = 0
+
+    for segment in segments:
+        try:
+            _refresh_single_segment(segment)
+            processed += 1
+
+        except Exception as e:
+            errors += 1
+            frappe.log_error(
+                message=f"Segment refresh failed for {segment.name} "
+                        f"({segment.segment_name}): {str(e)}",
+                title="User Segment Refresh Error"
+            )
+
+    frappe.db.commit()
+
+    frappe.logger().info(
+        f"User segment refresh complete. Processed: {processed}, Errors: {errors}"
+    )
+
+
+def _refresh_single_segment(segment):
+    """Evaluate rules and sync membership for a single User Segment.
+
+    Evaluates the segment's rule groups and conditions against all
+    candidate members (buyers or sellers based on target_type),
+    then synchronizes the Segment Member records accordingly.
+    Updates segment statistics (member_count, last_refreshed, duration).
+
+    Args:
+        segment: Dict with name, segment_name, and target_type fields.
+    """
+    from frappe.utils import now_datetime, time_diff_in_seconds
+
+    start_time = now_datetime()
+
+    # Load the full segment document for evaluation
+    segment_doc = frappe.get_doc("User Segment", segment.name)
+
+    # Evaluate segment rules to get matching member IDs
+    matching_ids = segment_doc.evaluate_segment()
+
+    # Determine member_type from target_type
+    member_type = segment_doc.target_type  # "Buyer" or "Seller"
+
+    # Sync membership: add new, deactivate removed, reactivate returned
+    from tradehub_core.tradehub_core.doctype.segment_member.segment_member import (
+        sync_segment_members,
+    )
+
+    stats = sync_segment_members(
+        segment=segment_doc.name,
+        member_type=member_type,
+        matching_ids=matching_ids,
+        source="Rule",
+    )
+
+    end_time = now_datetime()
+    duration = time_diff_in_seconds(end_time, start_time)
+
+    # Update segment statistics using set_value to avoid triggering full validate
+    active_count = frappe.db.count(
+        "Segment Member",
+        {"segment": segment_doc.name, "is_active": 1}
+    )
+
+    frappe.db.set_value("User Segment", segment_doc.name, {
+        "member_count": active_count,
+        "last_refreshed": end_time,
+        "last_refresh_duration": round(duration, 2),
+    }, update_modified=False)
+
+    frappe.logger().info(
+        f"Segment '{segment.segment_name}' refreshed: "
+        f"{len(matching_ids)} matching, "
+        f"added={stats['added']}, removed={stats['removed']}, "
+        f"reactivated={stats['reactivated']}, "
+        f"duration={round(duration, 2)}s"
+    )
