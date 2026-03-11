@@ -10,7 +10,20 @@
   "seller_name",
   "item_count",
   "totals_section",
-  "subtotal"
+  "subtotal",
+  "shipping_amount",
+  "tax_amount",
+  "discount_amount",
+  "column_break_totals",
+  "grand_total",
+  "payment_section",
+  "payment_status",
+  "payment_method",
+  "payment_terms_template",
+  "column_break_payment",
+  "marketplace_order",
+  "shipping_rule",
+  "estimated_delivery_days"
  ],
  "fields": [
   {
@@ -52,12 +65,90 @@
    "in_list_view": 1,
    "label": "Subtotal",
    "description": "Subtotal for items from this seller"
+  },
+  {
+   "default": "0",
+   "fieldname": "shipping_amount",
+   "fieldtype": "Currency",
+   "label": "Shipping Amount",
+   "description": "Shipping cost for items from this seller"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount",
+   "description": "Tax amount for items from this seller"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount",
+   "description": "Discount applied for items from this seller"
+  },
+  {
+   "fieldname": "column_break_totals",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "description": "Grand total for items from this seller"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment & Fulfillment"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Pending\nProcessing\nPaid\nFailed"
+  },
+  {
+   "fieldname": "payment_method",
+   "fieldtype": "Link",
+   "label": "Payment Method",
+   "options": "Payment Method"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Marketplace Payment Terms Template"
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "marketplace_order",
+   "fieldtype": "Link",
+   "label": "Marketplace Order",
+   "options": "Marketplace Order"
+  },
+  {
+   "fieldname": "shipping_rule",
+   "fieldtype": "Data",
+   "label": "Shipping Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "estimated_delivery_days",
+   "fieldtype": "Int",
+   "label": "Estimated Delivery Days"
   }
  ],
  "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2026-02-12 12:00:00.000000",
+ "modified": "2026-03-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "Cart Seller Summary",

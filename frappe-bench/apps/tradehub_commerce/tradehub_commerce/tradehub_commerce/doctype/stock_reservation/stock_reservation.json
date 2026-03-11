@@ -76,11 +76,12 @@
    "label": "Session & Cart"
   },
   {
-   "description": "Will be updated to Link: Checkout Session after Phase 2",
+   "description": "Associated checkout session",
    "fieldname": "checkout_session",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Checkout Session"
+   "label": "Checkout Session",
+   "options": "Checkout Session"
   },
   {
    "fieldname": "cart_line",
@@ -116,7 +117,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-03-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "Stock Reservation",
