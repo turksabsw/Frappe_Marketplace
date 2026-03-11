@@ -104,10 +104,54 @@ def create_default_payment_terms():
 	frappe.db.commit()
 
 
+def create_default_checkout_settings():
+	"""Create default Cart Protection Settings singleton with sensible defaults.
+
+	Called during app installation via after_install hook.
+	Sets defaults for checkout reservation, payment deadlines,
+	and abuse detection thresholds.
+	"""
+	from tradehub_commerce.setup.install import create_default_checkout_settings as _create
+	_create()
+
+
+def create_performance_indexes():
+	"""Create performance indexes on Delivery Note tables for marketplace queries.
+
+	These indexes speed up lookups when filtering Delivery Notes and
+	Delivery Note Items by marketplace order references.
+	"""
+	indexes = [
+		(
+			"idx_dn_custom_marketplace_order",
+			"`tabDelivery Note`",
+			"(custom_marketplace_order, docstatus)",
+		),
+		(
+			"idx_dni_custom_marketplace_order_item",
+			"`tabDelivery Note Item`",
+			"(custom_marketplace_order_item)",
+		),
+	]
+
+	for idx_name, table, columns in indexes:
+		try:
+			frappe.db.sql(
+				f"CREATE INDEX IF NOT EXISTS {idx_name} ON {table} {columns}"
+			)
+		except Exception:
+			# Index may already exist or column not yet created
+			pass
+
+	frappe.db.commit()
+
+
 def after_install():
 	"""Run after app installation."""
 	create_default_payment_terms()
 	setup_custom_fields()
+	create_default_checkout_settings()
+	create_performance_indexes()
 
 
 def setup_custom_fields():
