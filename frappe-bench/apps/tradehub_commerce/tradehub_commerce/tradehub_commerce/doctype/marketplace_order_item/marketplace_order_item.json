@@ -19,6 +19,8 @@
   "qty",
   "delivered_qty",
   "returned_qty",
+  "shipped_qty",
+  "remaining_qty",
   "column_break_qty",
   "stock_uom",
   "fulfillment_status",
@@ -156,6 +158,24 @@
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty",
+   "precision": 3,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Cached UI hint — authoritative data from _get_delivered_qty() SQL",
+   "fieldname": "shipped_qty",
+   "fieldtype": "Float",
+   "label": "Shipped Qty",
+   "precision": 3,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Cached UI hint — authoritative data from _get_delivered_qty() SQL",
+   "fieldname": "remaining_qty",
+   "fieldtype": "Float",
+   "label": "Remaining Qty",
    "precision": 3,
    "read_only": 1
   },
@@ -465,7 +485,7 @@
  "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2026-03-04 12:55:54.321726",
+ "modified": "2026-03-11 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "Marketplace Order Item",
