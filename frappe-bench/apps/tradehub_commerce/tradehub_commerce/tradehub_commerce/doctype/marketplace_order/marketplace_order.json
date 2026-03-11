@@ -25,6 +25,10 @@
   "column_break_buyer_details",
   "buyer_tax_id",
   "buyer_company_name",
+  "checkout_section",
+  "checkout_session_id",
+  "column_break_checkout",
+  "payment_terms_template",
   "items_tab",
   "items_section",
   "items",
@@ -70,6 +74,12 @@
   "column_break_escrow",
   "escrow_release_date",
   "escrow_released_at",
+  "payment_deadline_section",
+  "payment_deadline",
+  "payment_deadline_notified_at",
+  "column_break_payment_deadline",
+  "auto_cancel_scheduled_at",
+  "is_payment_overdue",
   "address_tab",
   "shipping_address_section",
   "shipping_address_name",
@@ -100,6 +110,13 @@
   "items_delivered",
   "items_returned",
   "fully_fulfilled",
+  "fulfillment_tracking_section",
+  "fulfillment_percentage",
+  "delivery_note_count",
+  "shipment_count",
+  "column_break_fulfillment_tracking",
+  "last_shipment_date",
+  "invoiced_at",
   "order_settings_section",
   "is_b2b_order",
   "is_wholesale_order",
@@ -147,6 +164,12 @@
   "refund_status",
   "refund_reference",
   "refunded_at",
+  "disputes_returns_section",
+  "dispute_count",
+  "has_active_dispute",
+  "column_break_disputes_returns",
+  "credit_note_amount",
+  "return_window_expires_at",
   "system_tab",
   "notes_section",
   "order_notes",
@@ -206,7 +229,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Order Status",
-   "options": "Pending\nAwait Payment\nPayment Received\nConfirmed\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nDelivered\nCompleted\nCancelled\nRefunded\nOn Hold\nDisputed",
+   "options": "Pending\nAwait Payment\nPayment Received\nConfirmed\nInvoiced\nProcessing\nPacked\nShipped\nIn Transit\nOut for Delivery\nDelivered\nCompleted\nCancelled\nRefunded\nOn Hold\nDisputed",
    "reqd": 1,
    "permlevel": 1
   },
@@ -1198,6 +1221,144 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "fieldname": "checkout_section",
+   "fieldtype": "Section Break",
+   "label": "Checkout"
+  },
+  {
+   "fieldname": "checkout_session_id",
+   "fieldtype": "Link",
+   "label": "Checkout Session",
+   "options": "Checkout Session"
+  },
+  {
+   "fieldname": "column_break_checkout",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Marketplace Payment Terms Template"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fulfillment_tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Fulfillment Tracking"
+  },
+  {
+   "default": "0",
+   "fieldname": "fulfillment_percentage",
+   "fieldtype": "Percent",
+   "label": "Fulfillment Percentage",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_note_count",
+   "fieldtype": "Int",
+   "label": "Delivery Note Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "shipment_count",
+   "fieldtype": "Int",
+   "label": "Shipment Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fulfillment_tracking",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_shipment_date",
+   "fieldtype": "Date",
+   "label": "Last Shipment Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoiced_at",
+   "fieldtype": "Datetime",
+   "label": "Invoiced At",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payment_deadline_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Deadline"
+  },
+  {
+   "fieldname": "payment_deadline",
+   "fieldtype": "Datetime",
+   "label": "Payment Deadline",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_deadline_notified_at",
+   "fieldtype": "Datetime",
+   "label": "Payment Deadline Notified At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_payment_deadline",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_cancel_scheduled_at",
+   "fieldtype": "Datetime",
+   "label": "Auto Cancel Scheduled At",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_payment_overdue",
+   "fieldtype": "Check",
+   "label": "Payment Overdue",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "disputes_returns_section",
+   "fieldtype": "Section Break",
+   "label": "Disputes & Returns"
+  },
+  {
+   "default": "0",
+   "fieldname": "dispute_count",
+   "fieldtype": "Int",
+   "label": "Dispute Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_active_dispute",
+   "fieldtype": "Check",
+   "label": "Has Active Dispute",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_disputes_returns",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Note Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "return_window_expires_at",
+   "fieldtype": "Datetime",
+   "label": "Return Window Expires At",
+   "read_only": 1
+  },
+  {
    "fieldname": "item_count",
    "fieldtype": "Int",
    "label": "Item Count",
@@ -1290,7 +1451,7 @@
    "link_fieldname": "marketplace_order"
   }
  ],
- "modified": "2026-03-04 12:55:54.321726",
+ "modified": "2026-03-11 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "Marketplace Order",
@@ -1349,6 +1510,10 @@
   {
    "color": "blue",
    "title": "Confirmed"
+  },
+  {
+   "color": "cyan",
+   "title": "Invoiced"
   },
   {
    "color": "yellow",
