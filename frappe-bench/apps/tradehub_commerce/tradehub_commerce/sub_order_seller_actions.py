@@ -93,13 +93,13 @@ def check_seller_ownership(sub_order_name):
     """Check if the current user is the seller for a Sub Order.
 
     Returns:
-        dict: {is_owner: bool, seller_profile: str or None}
+        dict: {is_seller: bool, seller_profile: str or None}
     """
     try:
         seller_profile = _validate_seller_ownership(sub_order_name)
-        return {"is_owner": True, "seller_profile": seller_profile}
+        return {"is_seller": True, "seller_profile": seller_profile}
     except Exception:
-        return {"is_owner": False, "seller_profile": None}
+        return {"is_seller": False, "seller_profile": None}
 
 
 # ---------------------------------------------------------------------------
@@ -271,11 +271,9 @@ def seller_make_delivery_note(source_name, target_doc=None):
 # ---------------------------------------------------------------------------
 
 @frappe.whitelist()
-def seller_make_payment_request(**kwargs):
+def seller_make_payment_request(sub_order_name, **kwargs):
     """Create a Payment Request using ERPNext's standard utility."""
-    dn = kwargs.get("dn") or kwargs.get("name")
-    if dn:
-        _validate_seller_ownership(dn)
+    _validate_seller_ownership(sub_order_name)
 
     from erpnext.accounts.doctype.payment_request.payment_request import (
         make_payment_request as _make_payment_request,
