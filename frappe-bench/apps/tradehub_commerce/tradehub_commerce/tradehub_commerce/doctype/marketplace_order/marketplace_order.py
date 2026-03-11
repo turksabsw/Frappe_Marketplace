@@ -138,6 +138,19 @@ class MarketplaceOrder(Document):
             'cart',
             'ip_address',
             'user_agent',
+            'invoiced_at',
+            'shipment_count',
+            'delivery_note_count',
+            'last_shipment_date',
+            'fulfillment_percentage',
+            'return_window_expires_at',
+            'dispute_count',
+            'has_active_dispute',
+            'credit_note_amount',
+            'payment_deadline',
+            'payment_deadline_notified_at',
+            'auto_cancel_scheduled_at',
+            'is_payment_overdue',
         ]
         for field in system_fields:
             if self.has_value_changed(field):
@@ -283,7 +296,8 @@ class MarketplaceOrder(Document):
             "Pending": ["Await Payment", "Confirmed", "Cancelled", "On Hold"],
             "Await Payment": ["Payment Received", "Cancelled", "On Hold"],
             "Payment Received": ["Confirmed", "Cancelled", "On Hold"],
-            "Confirmed": ["Processing", "Cancelled", "On Hold"],
+            "Confirmed": ["Invoiced", "Processing", "Cancelled", "On Hold"],
+            "Invoiced": ["Processing", "Cancelled", "On Hold"],
             "Processing": ["Packed", "Shipped", "Cancelled", "On Hold"],
             "Packed": ["Shipped", "Cancelled", "On Hold"],
             "Shipped": ["In Transit", "Delivered", "On Hold"],
@@ -293,7 +307,7 @@ class MarketplaceOrder(Document):
             "Completed": ["Refunded", "Disputed"],
             "Cancelled": ["Refunded"],
             "Refunded": [],
-            "On Hold": ["Pending", "Confirmed", "Processing", "Cancelled"],
+            "On Hold": ["Pending", "Confirmed", "Invoiced", "Processing", "Cancelled"],
             "Disputed": ["Refunded", "Completed"]
         }
 

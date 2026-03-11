@@ -39,13 +39,26 @@ frappe.ui.form.on('Sub Order', {
         frm.set_df_property('tenant', 'read_only', frm.doc.seller ? 1 : 0);
 
         // Add custom buttons for saved records
-        if (!frm.is_new() && frm.doc.docstatus === 0) {
+        if (!frm.is_new()) {
             // Add button to view parent order
             if (frm.doc.marketplace_order) {
                 frm.add_custom_button(__('View Parent Order'), function() {
                     frappe.set_route('Form', 'Marketplace Order', frm.doc.marketplace_order);
                 }, __('Actions'));
             }
+
+            // =====================================================
+            // P2: Seller Ownership Check
+            // =====================================================
+            frappe.call({
+                method: 'tradehub_commerce.sub_order_seller_actions.check_seller_ownership',
+                args: { sub_order_name: frm.doc.name },
+                callback: function(r) {
+                    if (r.message && r.message.is_seller) {
+                        add_seller_create_buttons(frm);
+                    }
+                }
+            });
         }
 
         // Show parent order info in dashboard
@@ -212,6 +225,126 @@ frappe.ui.form.on('Sub Order Item', {
         calculate_totals(frm);
     }
 });
+
+/**
+ * Add seller-specific Create buttons based on Sub Order status
+ * @param {object} frm - Form object
+ */
+function add_seller_create_buttons(frm) {
+    let status = frm.doc.status;
+
+    // Accept Order - Pending
+    if (status === 'Pending') {
+        frm.add_custom_button(__('Accept Order'), function() {
+            frappe.call({
+                method: 'tradehub_commerce.sub_order_seller_actions.accept_sub_order',
+                args: { sub_order_name: frm.doc.name },
+                callback: function(r) {
+                    if (r.message) {
+                        frm.reload_doc();
+                    }
+                }
+            });
+        }, __('Create'));
+    }
+
+    // Cancel - Pending/Accepted
+    if (['Pending', 'Accepted'].includes(status)) {
+        frm.add_custom_button(__('Cancel'), function() {
+            frappe.confirm(
+                __('Are you sure you want to cancel this Sub Order?'),
+                function() {
+                    frappe.call({
+                        method: 'tradehub_commerce.sub_order_seller_actions.cancel_sub_order',
+                        args: { sub_order_name: frm.doc.name },
+                        callback: function(r) {
+                            if (r.message) {
+                                frm.reload_doc();
+                            }
+                        }
+                    });
+                }
+            );
+        }, __('Create'));
+    }
+
+    // Proforma Invoice - Accepted/Processing, no existing PI
+    if (['Accepted', 'Processing'].includes(status)) {
+        frappe.db.count('Proforma Invoice', {
+            'custom_sub_order': frm.doc.name,
+            'docstatus': ['!=', 2]
+        }).then(count => {
+            if (!count) {
+                frm.add_custom_button(__('Proforma Invoice'), function() {
+                    frappe.new_doc('Proforma Invoice', {
+                        'custom_sub_order': frm.doc.name,
+                        'seller': frm.doc.seller,
+                        'tenant': frm.doc.tenant
+                    });
+                }, __('Create'));
+            }
+        });
+    }
+
+    // Sales Invoice - Accepted/Processing/Packed, no existing SI
+    if (['Accepted', 'Processing', 'Packed'].includes(status)) {
+        frappe.db.count('Sales Invoice', {
+            'custom_sub_order': frm.doc.name,
+            'docstatus': ['!=', 2]
+        }).then(count => {
+            if (!count) {
+                frm.add_custom_button(__('Sales Invoice'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: 'tradehub_commerce.sub_order_seller_actions.make_sales_invoice',
+                        frm: frm
+                    });
+                }, __('Create'));
+            }
+        });
+    }
+
+    // Delivery Note - Processing/Packed
+    if (['Processing', 'Packed'].includes(status)) {
+        frm.add_custom_button(__('Delivery Note'), function() {
+            frappe.model.open_mapped_doc({
+                method: 'tradehub_commerce.sub_order_seller_actions.make_delivery_note',
+                frm: frm
+            });
+        }, __('Create'));
+    }
+
+    // Payment Request - Accepted/Processing
+    if (['Accepted', 'Processing'].includes(status)) {
+        frm.add_custom_button(__('Payment Request'), function() {
+            frappe.new_doc('Payment Request', {
+                'reference_doctype': 'Sub Order',
+                'reference_name': frm.doc.name,
+                'grand_total': frm.doc.grand_total,
+                'currency': frm.doc.currency
+            });
+        }, __('Create'));
+    }
+
+    // Shipment - Processing/Packed
+    if (['Processing', 'Packed'].includes(status)) {
+        frm.add_custom_button(__('Shipment'), function() {
+            frappe.model.open_mapped_doc({
+                method: 'tradehub_commerce.sub_order_seller_actions.make_shipment',
+                frm: frm
+            });
+        }, __('Create'));
+    }
+
+    // Return / Credit Note - Delivered/Completed
+    if (['Delivered', 'Completed'].includes(status)) {
+        frm.add_custom_button(__('Return / Credit Note'), function() {
+            frappe.model.open_mapped_doc({
+                method: 'tradehub_commerce.sub_order_seller_actions.make_return_credit_note',
+                frm: frm
+            });
+        }, __('Create'));
+    }
+}
 
 /**
  * Calculate sub order totals from line items

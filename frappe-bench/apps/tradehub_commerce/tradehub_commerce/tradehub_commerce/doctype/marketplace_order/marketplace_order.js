@@ -85,7 +85,96 @@ frappe.ui.form.on('Marketplace Order', {
         if (frm.doc.cart) {
             show_cart_info(frm);
         }
-    
+
+        // =====================================================
+        // P3: Create Buttons (submitted orders only)
+        // =====================================================
+        if (frm.doc.docstatus === 1) {
+            let status = frm.doc.status;
+
+            // Sales Invoice - Confirmed/Invoiced/Processing/Packed, no existing SI
+            if (['Confirmed', 'Invoiced', 'Processing', 'Packed'].includes(status)) {
+                frappe.db.count('Sales Invoice', {
+                    'marketplace_order': frm.doc.name,
+                    'docstatus': ['!=', 2]
+                }).then(count => {
+                    if (!count) {
+                        frm.add_custom_button(__('Sales Invoice'), function() {
+                            frappe.model.open_mapped_doc({
+                                method: 'tradehub_commerce.tradehub_commerce.doctype.marketplace_order.marketplace_order.make_sales_invoice',
+                                frm: frm
+                            });
+                        }, __('Create'));
+                    }
+                });
+            }
+
+            // Delivery Note - Invoiced/Processing/Packed
+            if (['Invoiced', 'Processing', 'Packed'].includes(status)) {
+                frm.add_custom_button(__('Delivery Note'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: 'tradehub_commerce.tradehub_commerce.doctype.marketplace_order.marketplace_order.make_delivery_note',
+                        frm: frm
+                    });
+                }, __('Create'));
+            }
+
+            // Payment Entry - not Cancelled/Refunded/Completed
+            if (!['Cancelled', 'Refunded', 'Completed'].includes(status)) {
+                frm.add_custom_button(__('Payment Entry'), function() {
+                    frappe.new_doc('Payment Entry', {
+                        'payment_type': 'Receive',
+                        'party_type': 'Customer',
+                        'marketplace_order': frm.doc.name,
+                        'paid_amount': frm.doc.grand_total
+                    });
+                }, __('Create'));
+            }
+
+            // Payment Request - Confirmed/Invoiced/Await Payment
+            if (['Confirmed', 'Invoiced', 'Await Payment'].includes(status)) {
+                frm.add_custom_button(__('Payment Request'), function() {
+                    frappe.new_doc('Payment Request', {
+                        'reference_doctype': 'Marketplace Order',
+                        'reference_name': frm.doc.name,
+                        'grand_total': frm.doc.grand_total,
+                        'currency': frm.doc.currency
+                    });
+                }, __('Create'));
+            }
+
+            // Shipment - Processing/Packed
+            if (['Processing', 'Packed'].includes(status)) {
+                frm.add_custom_button(__('Shipment'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: 'tradehub_commerce.tradehub_commerce.doctype.marketplace_order.marketplace_order.make_shipment',
+                        frm: frm
+                    });
+                }, __('Create'));
+            }
+
+            // Return / Credit Note - Delivered/Completed
+            if (['Delivered', 'Completed'].includes(status)) {
+                frm.add_custom_button(__('Return / Credit Note'), function() {
+                    frappe.model.open_mapped_doc({
+                        method: 'tradehub_commerce.tradehub_commerce.doctype.marketplace_order.marketplace_order.make_return_credit_note',
+                        frm: frm
+                    });
+                }, __('Create'));
+            }
+
+            // Dispute - Delivered/Completed/Shipped/In Transit
+            if (['Delivered', 'Completed', 'Shipped', 'In Transit'].includes(status)) {
+                frm.add_custom_button(__('Dispute'), function() {
+                    frappe.new_doc('Dispute', {
+                        'marketplace_order': frm.doc.name,
+                        'buyer': frm.doc.buyer,
+                        'tenant': frm.doc.tenant
+                    });
+                }, __('Create'));
+            }
+        }
+
         // =====================================================
         // Role-Based Field Authorization
         // =====================================================

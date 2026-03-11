@@ -28,7 +28,9 @@ required_apps = ["tradehub_core", "tradehub_catalog"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Delivery Note": "public/js/delivery_note_packing_slip.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -63,7 +65,7 @@ required_apps = ["tradehub_core", "tradehub_catalog"]
 # ------------
 
 # before_install = "tradehub_commerce.install.before_install"
-# after_install = "tradehub_commerce.install.after_install"
+after_install = "tradehub_commerce.install.after_install"
 
 # Uninstallation
 # --------------
@@ -112,11 +114,25 @@ doc_events = {
 		"on_update": "tradehub_commerce.webhooks.erpnext_hooks.on_sales_order_update",
 		"on_submit": "tradehub_commerce.webhooks.erpnext_hooks.on_sales_order_submit"
 	},
+	"Sales Invoice": {
+		"on_submit": "tradehub_commerce.overrides.marketplace_order_actions.on_sales_invoice_submit"
+	},
 	"Stock Entry": {
 		"on_submit": "tradehub_commerce.webhooks.erpnext_hooks.on_stock_entry_submit"
 	},
 	"Delivery Note": {
-		"on_submit": "tradehub_commerce.webhooks.erpnext_hooks.on_delivery_note_submit"
+		"validate": "tradehub_commerce.overrides.partial_shipment.validate_over_shipment",
+		"on_submit": [
+			"tradehub_commerce.webhooks.erpnext_hooks.on_delivery_note_submit",
+			"tradehub_commerce.overrides.marketplace_order_actions.on_delivery_note_submit"
+		],
+		"on_cancel": "tradehub_commerce.overrides.marketplace_order_actions.on_delivery_note_cancel"
+	},
+	"Payment Entry": {
+		"on_submit": "tradehub_commerce.overrides.marketplace_order_actions.on_payment_entry_submit"
+	},
+	"Shipment": {
+		"after_insert": "tradehub_commerce.overrides.marketplace_order_actions.on_shipment_create"
 	}
 }
 
@@ -126,10 +142,33 @@ doc_events = {
 # Commerce-specific scheduled tasks: seller_payout
 # This task is moved from the monolithic tr_tradehub app during decomposition
 scheduler_events = {
+	"cron": {
+		"*/5 * * * *": [
+			"tradehub_commerce.tasks.check_expired_reservations"
+		],
+		"*/15 * * * *": [
+			"tradehub_commerce.tasks.auto_cancel_overdue_orders"
+		]
+	},
+	"hourly": [
+		"tradehub_commerce.tasks.cart_health_check"
+	],
 	"daily": [
-		"tradehub_commerce.tasks.seller_payout"
+		"tradehub_commerce.tasks.seller_payout",
+		"tradehub_commerce.tasks.daily_abuse_detection",
+		"tradehub_commerce.tasks.cleanup_expired_reservations"
 	]
 }
+
+# Fixtures
+# --------
+
+fixtures = [
+	{
+		"dt": "Custom Field",
+		"filters": [["module", "=", "TradeHub Commerce"]]
+	}
+]
 
 # Testing
 # -------

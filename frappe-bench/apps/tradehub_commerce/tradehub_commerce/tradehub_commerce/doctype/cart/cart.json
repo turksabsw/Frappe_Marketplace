@@ -58,6 +58,7 @@
   "column_break_conversion",
   "converted_at",
   "checkout_started_at",
+  "checkout_session",
   "session_section",
   "session_id",
   "ip_address",
@@ -400,6 +401,13 @@
    "label": "Checkout Started At"
   },
   {
+   "description": "Associated checkout session",
+   "fieldname": "checkout_session",
+   "fieldtype": "Link",
+   "label": "Checkout Session",
+   "options": "Checkout Session"
+  },
+  {
    "collapsible": 1,
    "fieldname": "session_section",
    "fieldtype": "Section Break",
@@ -525,7 +533,7 @@
    "link_fieldname": "cart"
   }
  ],
- "modified": "2026-03-04 12:55:54.321726",
+ "modified": "2026-03-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "Cart",
