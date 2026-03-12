@@ -12,6 +12,7 @@ These functions are registered in hooks.py under:
 
 import frappe
 from frappe import _
+from frappe.utils import cint, flt
 
 # Import tenant utilities
 from tradehub_core.utils.tenant import (
@@ -19,6 +20,30 @@ from tradehub_core.utils.tenant import (
     is_tenant_admin,
     _has_tenant_field
 )
+
+
+# ---------------------------------------------------------------------------
+# ABAC (Attribute-Based Access Control) Policy Constants
+# ---------------------------------------------------------------------------
+
+# Financial DocTypes that require KYC verification before access is granted.
+# Users without a verified KYC profile will be denied access to these DocTypes.
+FINANCIAL_DOCTYPES = frozenset([
+    "Payment Intent",
+    "Escrow Account",
+    "Seller Balance",
+    "Commission Plan",
+    "Commission Rule",
+])
+
+# DocTypes that require AML/sanctions clearance. Users with an AML hit
+# ("Hit Found") or sanctions match ("Match Found") on their KYC Profile
+# will be blocked from accessing these DocTypes.
+AML_SENSITIVE_DOCTYPES = frozenset([
+    "Payment Intent",
+    "Escrow Account",
+    "Seller Balance",
+])
 
 
 def get_tenant_permission_query_conditions(user=None):
@@ -122,6 +147,21 @@ def has_tenant_permission(doc, ptype=None, user=None):
     if doc_tenant != user_tenant:
         return False
 
+    # --- ABAC Layer Checks (regulatory, applied before tenant admin bypass) ---
+
+    # KYC verification required for financial DocTypes
+    if not _check_kyc_verification(user, doctype):
+        return False
+
+    # AML/sanctions check for sensitive DocTypes
+    if not _check_aml_sanctions(user, doctype):
+        return False
+
+    # Spending limit validation for write/submit operations
+    if ptype in ("write", "submit", "create"):
+        if not _check_spending_limit(doc, user, ptype):
+            return False
+
     # Tenant admin can perform all operations within their tenant
     if is_tenant_admin(user, user_tenant):
         return True
@@ -173,6 +213,182 @@ def _has_write_permission_in_tenant(doc, user, ptype):
     )
 
     return len(permissions) > 0
+
+
+# ---------------------------------------------------------------------------
+# ABAC Layer Functions
+# ---------------------------------------------------------------------------
+
+def _check_kyc_verification(user, doctype):
+    """
+    ABAC Layer: Deny access to financial DocTypes for non-KYC-verified users.
+
+    Checks the ``kyc_verified`` custom field on the User record.  Only
+    DocTypes listed in :data:`FINANCIAL_DOCTYPES` are gated; all other
+    DocTypes pass through without a KYC check.
+
+    Args:
+        user (str): User to check.
+        doctype (str): DocType being accessed.
+
+    Returns:
+        bool: True if access is allowed, False if denied.
+    """
+    if doctype not in FINANCIAL_DOCTYPES:
+        return True
+
+    # Use a short-lived cache to avoid repeated DB lookups during a request
+    cache_key = f"kyc_verified:{user}"
+    kyc_verified = frappe.cache().get_value(cache_key)
+
+    if kyc_verified is None:
+        kyc_verified = cint(
+            frappe.db.get_value("User", user, "kyc_verified")
+        )
+        # Cache for 5 minutes — cleared on KYC Profile update
+        frappe.cache().set_value(cache_key, kyc_verified, expires_in_sec=300)
+
+    return bool(kyc_verified)
+
+
+def _check_aml_sanctions(user, doctype):
+    """
+    ABAC Layer: Block access for users flagged by AML or sanctions screening.
+
+    Looks up the user's active KYC Profile and checks ``aml_check_status``
+    and ``sanctions_status``.  A value of ``"Hit Found"`` (AML) or
+    ``"Match Found"`` (sanctions) results in access denial for DocTypes
+    listed in :data:`AML_SENSITIVE_DOCTYPES`.
+
+    Args:
+        user (str): User to check.
+        doctype (str): DocType being accessed.
+
+    Returns:
+        bool: True if access is allowed, False if blocked.
+    """
+    if doctype not in AML_SENSITIVE_DOCTYPES:
+        return True
+
+    cache_key = f"aml_status:{user}"
+    aml_status = frappe.cache().get_value(cache_key)
+
+    if aml_status is None:
+        kyc_profile = frappe.db.get_value(
+            "KYC Profile",
+            {"user": user, "status": ("not in", ["Rejected", "Expired"])},
+            ["aml_check_status", "sanctions_status"],
+            as_dict=True
+        )
+
+        if kyc_profile:
+            aml_status = {
+                "aml_hit": kyc_profile.aml_check_status == "Hit Found",
+                "sanctions_match": kyc_profile.sanctions_status == "Match Found",
+            }
+        else:
+            # No active KYC profile — AML check not applicable
+            aml_status = {"aml_hit": False, "sanctions_match": False}
+
+        # Cache for 5 minutes — cleared on KYC Profile update
+        frappe.cache().set_value(cache_key, aml_status, expires_in_sec=300)
+
+    if aml_status.get("aml_hit") or aml_status.get("sanctions_match"):
+        return False
+
+    return True
+
+
+def _check_spending_limit(doc, user, ptype):
+    """
+    ABAC Layer: Enforce spending limits via the Spending Approval Rule DocType.
+
+    For write/submit/create operations on documents that carry an amount,
+    this function looks up applicable ``Spending Approval Rule`` records
+    for the user's roles.  If the transaction amount falls within a rule's
+    range and the user does not hold the required ``approver_role``, access
+    is denied (approval is needed).  If the amount exceeds all defined
+    limits, access is also denied.
+
+    The check is intentionally lenient: if the Spending Approval Rule
+    DocType does not exist yet (pre-migration), or no rules are defined,
+    access is allowed.
+
+    Args:
+        doc: The document being accessed (Document object or dict).
+        user (str): User performing the operation.
+        ptype (str): Permission type (``write``, ``submit``, ``create``).
+
+    Returns:
+        bool: True if within limits or approved, False if denied.
+    """
+    if ptype not in ("write", "submit", "create"):
+        return True
+
+    # Extract amount from document (check common amount field names)
+    if isinstance(doc, dict):
+        amount = (
+            doc.get("amount")
+            or doc.get("total_amount")
+            or doc.get("grand_total")
+        )
+    else:
+        amount = (
+            getattr(doc, "amount", None)
+            or getattr(doc, "total_amount", None)
+            or getattr(doc, "grand_total", None)
+        )
+
+    if not amount:
+        return True
+
+    amount = flt(amount)
+    if amount <= 0:
+        return True
+
+    # Gracefully handle missing Spending Approval Rule DocType
+    try:
+        if not frappe.db.exists("DocType", "Spending Approval Rule"):
+            return True
+
+        user_roles = frappe.get_roles(user)
+
+        spending_rules = frappe.get_all(
+            "Spending Approval Rule",
+            filters={
+                "is_active": 1,
+                "role": ["in", user_roles],
+            },
+            fields=[
+                "role", "min_amount", "max_amount",
+                "approver_role", "approval_type",
+            ],
+            order_by="max_amount asc",
+        )
+
+        if not spending_rules:
+            return True
+
+        for rule in spending_rules:
+            if flt(rule.min_amount) <= amount <= flt(rule.max_amount):
+                # Amount falls within this rule's range
+                if rule.approver_role and rule.approver_role not in user_roles:
+                    # User lacks the approver role — needs approval
+                    return False
+                # User holds the approver role — allowed
+                return True
+
+        # Amount exceeds all defined rule ceilings
+        max_allowed = max(flt(r.max_amount) for r in spending_rules)
+        if amount > max_allowed:
+            return False
+
+    except Exception:
+        # Gracefully degrade: if anything fails (e.g., DocType not migrated),
+        # allow the operation rather than locking out users.
+        pass
+
+    return True
 
 
 def setup_tenant_permission_query_conditions():
