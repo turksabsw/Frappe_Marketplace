@@ -114,26 +114,49 @@ has_permission = {
 
 # Hook on document methods and events
 
-# doc_events = {
-# 	"Product": {
-# 		"on_update": "tradehub_catalog.doctype.product.product.on_update"
-# 	}
-# }
+# Wishlist and Quick Favorite doc event handlers
+doc_events = {
+	"User Wishlist": {
+		"on_update": "tradehub_catalog.tradehub_catalog.wishlist.tasks.on_wishlist_update",
+		"on_trash": "tradehub_catalog.tradehub_catalog.wishlist.tasks.on_wishlist_trash"
+	},
+	"Quick Favorite": {
+		"after_insert": "tradehub_catalog.tradehub_catalog.wishlist.tasks.on_favorite_insert",
+		"on_trash": "tradehub_catalog.tradehub_catalog.wishlist.tasks.on_favorite_trash"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# Catalog-specific scheduled tasks: media_processor and ranking
+# Catalog-specific scheduled tasks: media_processor, ranking, and wishlist tasks
 # These tasks are moved from the monolithic tr_tradehub app during decomposition
+# Wishlist tasks: price tracking, availability checks, counter reconciliation,
+# digest notifications, and orphaned favorites cleanup
 scheduler_events = {
 	"hourly": [
-		"tradehub_catalog.tasks.media_processor"
+		"tradehub_catalog.tasks.media_processor",
+		"tradehub_catalog.tradehub_catalog.wishlist.tasks.update_wishlist_item_prices"
 	],
 	"daily": [
 		"tradehub_catalog.tasks.ranking",
 		"tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.remind_pending_proposals",
 		"tradehub_catalog.variant_request.tasks.recalculate_demand_aggregations"
-	]
+	],
+	"weekly": [
+		"tradehub_catalog.tradehub_catalog.wishlist.tasks.cleanup_orphaned_favorites"
+	],
+	"cron": {
+		"0 */6 * * *": [
+			"tradehub_catalog.tradehub_catalog.wishlist.tasks.check_wishlist_item_availability"
+		],
+		"0 3 * * *": [
+			"tradehub_catalog.tradehub_catalog.wishlist.tasks.reconcile_social_proof_counters"
+		],
+		"0 9 * * *": [
+			"tradehub_catalog.tradehub_catalog.wishlist.tasks.send_price_drop_digest"
+		]
+	}
 }
 
 # Testing
