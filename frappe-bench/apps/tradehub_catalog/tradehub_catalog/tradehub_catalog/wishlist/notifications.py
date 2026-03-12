@@ -236,7 +236,7 @@ def send_back_in_stock_notification(
     if not can_send_notification(user, product):
         return False
 
-    template_code = "WISH-BACK-IN-STOCK-EMAIL"
+    template_code = "WISH-BACK-IN-STOCK-EMAIL" if channel == "Email" else "WISH-BACK-IN-STOCK-SMS"
 
     try:
         _send_notification(
@@ -405,7 +405,7 @@ def _send_notification(template_code: str, user: str, context: Dict) -> None:
     template = frappe.db.get_value(
         "Notification Template",
         {"template_code": template_code, "enabled": 1},
-        ["name", "subject", "message", "channel"],
+        ["name", "subject", "body", "notification_channel"],
         as_dict=True
     )
 
@@ -416,11 +416,11 @@ def _send_notification(template_code: str, user: str, context: Dict) -> None:
         )
         return
 
-    # Render subject and message with context
+    # Render subject and body with context
     rendered_subject = frappe.render_template(template.subject or "", context)
-    rendered_message = frappe.render_template(template.message or "", context)
+    rendered_message = frappe.render_template(template.body or "", context)
 
-    channel = template.get("channel", "Email")
+    channel = template.get("notification_channel", "Email")
 
     if channel == "Email":
         frappe.sendmail(
