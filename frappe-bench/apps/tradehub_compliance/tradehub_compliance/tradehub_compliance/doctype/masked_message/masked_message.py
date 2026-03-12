@@ -17,6 +17,8 @@ Key features:
 - Status workflow: Draft -> Sent -> Delivered / Failed
 """
 
+import json
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -42,7 +44,7 @@ class MaskedMessage(Document):
     Features:
     - Sender can be a Seller or Platform
     - Recipients identified by Audience Segment or anonymous ID
-    - Automatic PII detection and content sanitization
+    - Automatic PII detection and content sanitization via pii_scanner
     - Message expiration support
     - Multi-tenant data isolation
     """
@@ -50,7 +52,7 @@ class MaskedMessage(Document):
     def before_insert(self):
         """Set defaults before inserting a new masked message."""
         self.set_sent_timestamp()
-        self.sanitize_message_body()
+        self.scan_and_sanitize_message_body()
 
     def validate(self):
         """Validate masked message data before saving."""
@@ -72,20 +74,40 @@ class MaskedMessage(Document):
         if not self.sent_at and self.status != "Draft":
             self.sent_at = now_datetime()
 
-    def sanitize_message_body(self):
+    def scan_and_sanitize_message_body(self):
         """
         Scan message body for PII and create a sanitized version.
 
-        This is a placeholder for actual PII detection logic.
-        In production, this would use regex patterns or an NLP-based
-        PII detection service to identify and mask sensitive data.
+        Uses the pii_scanner module to detect 6 types of PII (email, phone,
+        TCKN, VKN, IBAN, URL) and populate:
+        - message_body_sanitized: message with PII replaced by placeholders
+        - pii_detected: flag indicating if any PII was found
+        - pii_details_json: JSON details of all detected PII elements
+
+        The original message_body is preserved unchanged.
         """
         if not self.message_body:
             return
 
-        # Placeholder: copy body as-is; real implementation would scan and mask
-        if not self.message_body_sanitized:
-            self.message_body_sanitized = self.message_body
+        from tradehub_compliance.tradehub_compliance.messaging.pii_scanner import (
+            sanitize_message,
+            scan_for_pii,
+        )
+
+        # Scan for PII — returns dict with emails, phones, tckns, vkns, ibans, urls
+        pii_results = scan_for_pii(self.message_body)
+
+        # Check if any PII was detected
+        has_pii = any(
+            len(items) > 0
+            for items in pii_results.values()
+        )
+
+        self.pii_detected = 1 if has_pii else 0
+        self.pii_details_json = json.dumps(pii_results, ensure_ascii=False)
+
+        # Create sanitized version with PII replaced by placeholders
+        self.message_body_sanitized = sanitize_message(self.message_body)
 
     # =========================================================================
     # VALIDATION METHODS
@@ -101,9 +123,9 @@ class MaskedMessage(Document):
         if not self.message_body or not self.message_body.strip():
             frappe.throw(_("Message Body is required"))
 
-        # Re-sanitize if content changed
+        # Re-scan and sanitize if content changed on subsequent saves
         if self.has_value_changed("message_body"):
-            self.sanitize_message_body()
+            self.scan_and_sanitize_message_body()
 
     def validate_status_transition(self):
         """Validate status transitions are valid."""

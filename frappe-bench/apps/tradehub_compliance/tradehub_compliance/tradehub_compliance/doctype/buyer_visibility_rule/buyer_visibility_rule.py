@@ -15,11 +15,18 @@ Key features:
 - Role-based rule application (Seller, Buyer, Both)
 - Priority-based rule ordering for conflict resolution
 - Multi-tenant data isolation via Tenant link
+- Duplicate active rule detection per field_name + disclosure_stage
 """
+
+import re
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
+
+# Valid field name pattern: lowercase letters, digits, underscores (snake_case)
+FIELD_NAME_PATTERN = re.compile(r'^[a-z][a-z0-9_]*$')
 
 
 class BuyerVisibilityRule(Document):
@@ -35,6 +42,7 @@ class BuyerVisibilityRule(Document):
         """Validate Buyer Visibility Rule data before saving."""
         self.validate_rule_name()
         self.validate_field_name()
+        self.validate_is_active()
         self.validate_priority()
         self.validate_tenant_isolation()
 
@@ -48,9 +56,64 @@ class BuyerVisibilityRule(Document):
             frappe.throw(_("Rule Name is required"))
 
     def validate_field_name(self):
-        """Validate that field_name is provided and not empty."""
+        """
+        Validate that field_name is provided, not empty, and follows
+        the expected snake_case naming convention for DocType field names.
+        """
         if not self.field_name or not self.field_name.strip():
             frappe.throw(_("Field Name is required"))
+
+        field_name = self.field_name.strip()
+        self.field_name = field_name
+
+        if not FIELD_NAME_PATTERN.match(field_name):
+            frappe.throw(
+                _("Field Name '{0}' is invalid. Use lowercase letters, digits, and "
+                  "underscores only (e.g., 'company_name', 'email')").format(field_name)
+            )
+
+    def validate_is_active(self):
+        """
+        Validate is_active flag and warn about duplicate active rules.
+
+        If this rule is active, check for existing active rules that target
+        the same field_name and disclosure_stage combination within the
+        same tenant. Multiple active rules are allowed (resolved by priority)
+        but a warning helps administrators avoid unintended conflicts.
+        """
+        if not self.is_active:
+            return
+
+        filters = {
+            "field_name": self.field_name,
+            "disclosure_stage": self.disclosure_stage,
+            "is_active": 1,
+            "name": ("!=", self.name or ""),
+        }
+
+        if self.tenant:
+            filters["tenant"] = self.tenant
+
+        existing = frappe.db.get_value(
+            "Buyer Visibility Rule",
+            filters,
+            ["name", "rule_name", "priority"],
+            as_dict=True
+        )
+
+        if existing:
+            frappe.msgprint(
+                _("Another active rule '{0}' (priority {1}) already exists for "
+                  "field '{2}' at stage '{3}'. The rule with higher priority will "
+                  "take precedence.").format(
+                    existing.rule_name,
+                    existing.priority,
+                    self.field_name,
+                    self.disclosure_stage
+                ),
+                indicator="orange",
+                alert=True
+            )
 
     def validate_priority(self):
         """Validate that priority is a non-negative integer."""
