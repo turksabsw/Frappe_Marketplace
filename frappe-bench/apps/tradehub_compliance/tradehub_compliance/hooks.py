@@ -115,7 +115,18 @@ required_apps = ["tradehub_core"]
 #   - AudienceSegment.on_trash: cleans up segment members
 # Frappe automatically invokes these class methods during document lifecycle.
 
-doc_events = {}
+doc_events = {
+	# Contract automation hooks - auto-generate contracts on key document events
+	"Seller Application": {
+		"on_submit": "tradehub_compliance.utils.contract_automation.on_seller_application_submit"
+	},
+	"Marketplace Order": {
+		"on_submit": "tradehub_compliance.utils.contract_automation.on_marketplace_order_submit"
+	},
+	"Seller Profile": {
+		"after_insert": "tradehub_compliance.utils.contract_automation.on_seller_profile_after_insert"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -126,7 +137,8 @@ doc_events = {}
 # - Audience tasks: compute_all_audience_segments, compute_segment_metrics, cleanup_expired_masked_messages, pii_audit_scan
 scheduler_events = {
 	"daily": [
-		"tradehub_compliance.tasks.certificate_alerts"
+		"tradehub_compliance.tasks.certificate_alerts",
+		"tradehub_compliance.utils.contract_automation.expire_unsigned_contracts"
 	],
 	"weekly": [
 		"tradehub_compliance.tradehub_compliance.transparency.tasks.anonymize_inactive_consent_data",
