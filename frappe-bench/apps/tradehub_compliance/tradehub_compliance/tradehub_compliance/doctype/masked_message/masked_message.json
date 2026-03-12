@@ -1,0 +1,262 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "MSG-.#####",
+ "creation": "2026-02-05 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "sender_section",
+  "sender_type",
+  "sender",
+  "column_break_sender",
+  "recipient_segment",
+  "anonymous_recipient_id",
+  "content_tab",
+  "content_section",
+  "message_body",
+  "message_body_sanitized",
+  "pii_section",
+  "pii_detected",
+  "column_break_pii",
+  "pii_details_json",
+  "delivery_tab",
+  "delivery_section",
+  "status",
+  "column_break_delivery",
+  "sent_at",
+  "expires_at",
+  "system_tab",
+  "tenant_section",
+  "tenant"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "sender_section",
+   "fieldtype": "Section Break",
+   "label": "Sender & Recipient Information"
+  },
+  {
+   "default": "Seller",
+   "fieldname": "sender_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sender Type",
+   "options": "Seller\nPlatform",
+   "reqd": 1,
+   "description": "Type of sender - Seller or Platform"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sender",
+   "options": "Seller Profile",
+   "description": "Seller profile of the message sender"
+  },
+  {
+   "fieldname": "column_break_sender",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipient_segment",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Recipient Segment",
+   "options": "Audience Segment",
+   "description": "Target audience segment for this message"
+  },
+  {
+   "fieldname": "anonymous_recipient_id",
+   "fieldtype": "Data",
+   "label": "Anonymous Recipient ID",
+   "description": "HMAC-based anonymous identifier for the recipient"
+  },
+  {
+   "fieldname": "content_tab",
+   "fieldtype": "Tab Break",
+   "label": "Content"
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Message Content"
+  },
+  {
+   "fieldname": "message_body",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Message Body",
+   "reqd": 1,
+   "description": "The original message body content"
+  },
+  {
+   "fieldname": "message_body_sanitized",
+   "fieldtype": "Text",
+   "label": "Message Body (Sanitized)",
+   "read_only": 1,
+   "description": "Message body with PII data masked/removed"
+  },
+  {
+   "fieldname": "pii_section",
+   "fieldtype": "Section Break",
+   "label": "PII Detection",
+   "collapsible": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pii_detected",
+   "fieldtype": "Check",
+   "label": "PII Detected",
+   "read_only": 1,
+   "description": "Whether personally identifiable information was detected in the message"
+  },
+  {
+   "fieldname": "column_break_pii",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pii_details_json",
+   "fieldtype": "JSON",
+   "label": "PII Details",
+   "read_only": 1,
+   "description": "JSON details of detected PII elements and their locations"
+  },
+  {
+   "fieldname": "delivery_tab",
+   "fieldtype": "Tab Break",
+   "label": "Delivery"
+  },
+  {
+   "fieldname": "delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Status"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSent\nDelivered\nFailed",
+   "reqd": 1,
+   "description": "Current message delivery status"
+  },
+  {
+   "fieldname": "column_break_delivery",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sent_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Sent At",
+   "description": "When the message was sent"
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Expires At",
+   "description": "When the message expires and should no longer be visible"
+  },
+  {
+   "fieldname": "system_tab",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "tenant_section",
+   "fieldtype": "Section Break",
+   "label": "Tenant Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1,
+   "in_standard_filter": 1,
+   "description": "Multi-tenant isolation field"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Sender",
+   "link_doctype": "Seller Profile",
+   "link_fieldname": "sender"
+  },
+  {
+   "group": "Recipient",
+   "link_doctype": "Audience Segment",
+   "link_fieldname": "recipient_segment"
+  }
+ ],
+ "modified": "2026-02-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Masked Message",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 0,
+   "export": 0,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 0,
+   "role": "Seller",
+   "share": 0,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "sender_type, sender, status",
+ "sort_field": "sent_at",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "gray",
+   "title": "Draft"
+  },
+  {
+   "color": "blue",
+   "title": "Sent"
+  },
+  {
+   "color": "green",
+   "title": "Delivered"
+  },
+  {
+   "color": "red",
+   "title": "Failed"
+  }
+ ],
+ "track_changes": 1
+}
