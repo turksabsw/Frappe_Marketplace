@@ -106,6 +106,7 @@ permission_query_conditions = {
 # Hook on document methods and events
 
 # ERPNext reverse sync handlers - Supplier -> Seller Profile
+# Buy Box recalculation triggers on entry/seller profile changes
 doc_events = {
 	"Supplier": {
 		"on_update": "tradehub_seller.webhooks.erpnext_hooks.on_supplier_update",
@@ -114,6 +115,12 @@ doc_events = {
 	},
 	"Delivery Note": {
 		"validate": "tradehub_seller.tradehub_seller.doctype.seller_profile.seller_profile.set_delivery_note_warehouse"
+	},
+	"Buy Box Entry": {
+		"on_update": "tradehub_seller.tradehub_seller.buy_box.api.on_buy_box_entry_update"
+	},
+	"Seller Profile": {
+		"on_update": "tradehub_seller.tradehub_seller.buy_box.api.on_seller_profile_update"
 	}
 }
 
@@ -137,6 +144,9 @@ scheduler_events = {
 		"tradehub_seller.tradehub_seller.seller_tags.tasks.cleanup_old_metrics"
 	],
 	"cron": {
+		"0 2 * * *": [
+			"tradehub_seller.tradehub_seller.buy_box.tasks.scheduled_batch_recalculate"
+		],
 		"0 2 * * 0": [
 			"tradehub_seller.tasks.recalculate_seller_metrics"
 		],
