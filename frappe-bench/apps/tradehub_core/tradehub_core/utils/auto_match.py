@@ -71,6 +71,7 @@ def normalize_turkish(text):
     return result
 
 
+@frappe.whitelist()
 def auto_match_columns(source_columns, target_doctype, import_type, tenant=None, seller=None):
     """
     Auto-match source columns to target DocType fields using 4-priority matching.
@@ -107,6 +108,10 @@ def auto_match_columns(source_columns, target_doctype, import_type, tenant=None,
         ...     tenant="TENANT-001"
         ... )
     """
+    # Handle JSON string from frappe.call
+    if isinstance(source_columns, str):
+        source_columns = json.loads(source_columns)
+
     if not source_columns or not target_doctype:
         return []
 
@@ -140,6 +145,7 @@ def auto_match_columns(source_columns, target_doctype, import_type, tenant=None,
     return results
 
 
+@frappe.whitelist()
 def save_to_mapping_history(confirmed_mappings, target_doctype, import_type,
                             tenant=None, seller=None):
     """
@@ -166,6 +172,10 @@ def save_to_mapping_history(confirmed_mappings, target_doctype, import_type,
         ...     "Listing", "Listing", tenant="TENANT-001"
         ... )
     """
+    # Handle JSON string from frappe.call
+    if isinstance(confirmed_mappings, str):
+        confirmed_mappings = json.loads(confirmed_mappings)
+
     if not confirmed_mappings:
         return 0
 
@@ -265,6 +275,85 @@ def apply_mapping_template(import_job_name, template_name):
     import_job.save(ignore_permissions=True)
 
     return column_mapping
+
+
+@frappe.whitelist()
+def auto_match_for_import_job(import_job_name):
+    """
+    Run auto-match for an Import Job by reading its file headers and matching them.
+
+    This is the primary API endpoint called from the Import Job form's
+    "Auto-Match Columns" button. It reads the import file headers,
+    determines the target DocType from the import type, and runs the
+    4-priority auto-match algorithm.
+
+    Args:
+        import_job_name (str): Name of the Import Job document.
+
+    Returns:
+        dict: Dictionary containing:
+            - ``headers`` (list[str]): Source column headers from the file
+            - ``matches`` (list[dict]): Auto-match results per column
+            - ``target_doctype`` (str): Resolved target DocType name
+            - ``import_type`` (str): Import type from the job
+
+    Raises:
+        frappe.ValidationError: If job status is not Pending or no headers found.
+    """
+    job = frappe.get_doc("Import Job", import_job_name)
+
+    if job.status != "Pending":
+        frappe.throw(
+            _("Auto-match is only available when Import Job status is Pending"),
+            frappe.ValidationError
+        )
+
+    if not job.import_file:
+        frappe.throw(
+            _("No import file attached to this job"),
+            frappe.ValidationError
+        )
+
+    rows, headers = job.read_import_file()
+    if not headers:
+        frappe.throw(_("No column headers found in the import file"))
+
+    # Resolve target DocType from import type
+    target_doctype = _get_target_doctype_for_import(job.import_type)
+
+    results = auto_match_columns(
+        headers, target_doctype, job.import_type,
+        tenant=job.tenant, seller=job.seller
+    )
+
+    return {
+        "headers": headers,
+        "matches": results,
+        "target_doctype": target_doctype,
+        "import_type": job.import_type
+    }
+
+
+def _get_target_doctype_for_import(import_type):
+    """
+    Resolve the target DocType from an import type string.
+
+    Args:
+        import_type (str): The import type (e.g., "Listing", "SKU").
+
+    Returns:
+        str: The target DocType name.
+    """
+    doctype_map = {
+        "Listing": "Listing",
+        "Listing Variant": "Listing Variant",
+        "SKU": "SKU",
+        "Category": "Category",
+        "Media Asset": "Media Asset",
+        "Inventory Update": "Listing",
+        "Price Update": "Listing",
+    }
+    return doctype_map.get(import_type, import_type)
 
 
 # ---------------------------------------------------------------------------

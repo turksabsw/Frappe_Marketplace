@@ -37,6 +37,7 @@
   "stop_on_error",
   "batch_size",
   "column_mapping_section",
+  "mapping_template",
   "column_mapping",
   "field_defaults",
   "progress_tab",
@@ -303,6 +304,14 @@
    "fieldname": "column_mapping_section",
    "fieldtype": "Section Break",
    "label": "Column Mapping"
+  },
+  {
+   "depends_on": "eval:doc.status=='Pending'",
+   "description": "Select an existing mapping template to pre-fill column mappings",
+   "fieldname": "mapping_template",
+   "fieldtype": "Link",
+   "label": "Mapping Template",
+   "options": "Mapping Template"
   },
   {
    "description": "JSON mapping of file columns to DocType fields",
