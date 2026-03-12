@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "SEG-.#####",
+ "creation": "2026-03-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "segment_info_section",
+  "segment_name",
+  "seller",
+  "segment_type",
+  "column_break_info",
+  "is_active",
+  "member_count",
+  "last_computed",
+  "filter_section",
+  "filter_json",
+  "members_tab",
+  "members_section",
+  "members",
+  "thresholds_tab",
+  "thresholds_section",
+  "min_members_display",
+  "column_break_thresholds",
+  "min_members_metrics",
+  "metrics_tab",
+  "metrics_section",
+  "metrics_json",
+  "system_tab",
+  "tenant_section",
+  "tenant"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "segment_info_section",
+   "fieldtype": "Section Break",
+   "label": "Segment Information"
+  },
+  {
+   "fieldname": "segment_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Segment Name",
+   "reqd": 1,
+   "description": "Name of this audience segment"
+  },
+  {
+   "fieldname": "seller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Seller",
+   "options": "Seller Profile",
+   "reqd": 1,
+   "description": "Seller who owns this audience segment"
+  },
+  {
+   "fieldname": "segment_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Segment Type",
+   "options": "\nManual\nDynamic\nImported\nBehavioral\nDemographic\nPurchase History",
+   "description": "How this segment is defined and populated"
+  },
+  {
+   "fieldname": "column_break_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active",
+   "description": "Whether this segment is active"
+  },
+  {
+   "default": "0",
+   "fieldname": "member_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Member Count",
+   "read_only": 1,
+   "description": "Total number of members in this segment"
+  },
+  {
+   "fieldname": "last_computed",
+   "fieldtype": "Datetime",
+   "label": "Last Computed",
+   "read_only": 0,
+   "description": "When this segment was last computed or refreshed"
+  },
+  {
+   "fieldname": "filter_section",
+   "fieldtype": "Section Break",
+   "label": "Filter Criteria",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "filter_json",
+   "fieldtype": "JSON",
+   "label": "Filter JSON",
+   "description": "JSON filter criteria for dynamic segment population"
+  },
+  {
+   "fieldname": "members_tab",
+   "fieldtype": "Tab Break",
+   "label": "Members"
+  },
+  {
+   "fieldname": "members_section",
+   "fieldtype": "Section Break",
+   "label": "Segment Members"
+  },
+  {
+   "fieldname": "members",
+   "fieldtype": "Table",
+   "label": "Members",
+   "options": "Audience Segment Member",
+   "description": "List of members in this audience segment"
+  },
+  {
+   "fieldname": "thresholds_tab",
+   "fieldtype": "Tab Break",
+   "label": "Thresholds"
+  },
+  {
+   "fieldname": "thresholds_section",
+   "fieldtype": "Section Break",
+   "label": "Minimum Member Thresholds"
+  },
+  {
+   "default": "3",
+   "fieldname": "min_members_display",
+   "fieldtype": "Int",
+   "label": "Min Members for Display",
+   "description": "Minimum number of members required before displaying segment data"
+  },
+  {
+   "fieldname": "column_break_thresholds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "5",
+   "fieldname": "min_members_metrics",
+   "fieldtype": "Int",
+   "label": "Min Members for Metrics",
+   "description": "Minimum number of members required before computing metrics"
+  },
+  {
+   "fieldname": "metrics_tab",
+   "fieldtype": "Tab Break",
+   "label": "Metrics"
+  },
+  {
+   "fieldname": "metrics_section",
+   "fieldtype": "Section Break",
+   "label": "Segment Metrics"
+  },
+  {
+   "fieldname": "metrics_json",
+   "fieldtype": "JSON",
+   "label": "Metrics JSON",
+   "read_only": 1,
+   "description": "Computed metrics for this audience segment"
+  },
+  {
+   "fieldname": "system_tab",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "tenant_section",
+   "fieldtype": "Section Break",
+   "label": "Tenant"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1,
+   "description": "Multi-tenant isolation field"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [
+  {
+   "group": "Seller",
+   "link_doctype": "Seller Profile",
+   "link_fieldname": "name"
+  }
+ ],
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Audience Segment",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Seller",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "segment_name, seller, segment_type",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "segment_name",
+ "track_changes": 1
+}
