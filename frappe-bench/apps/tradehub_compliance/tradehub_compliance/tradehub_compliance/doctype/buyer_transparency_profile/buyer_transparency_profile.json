@@ -1,0 +1,182 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:buyer",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "basic_info_section",
+  "buyer",
+  "buyer_tier",
+  "column_break_basic",
+  "tenant",
+  "member_since",
+  "statistics_tab",
+  "statistics_section",
+  "total_orders",
+  "payment_on_time_rate",
+  "column_break_stats",
+  "average_order_value",
+  "transparency_tab",
+  "transparency_section",
+  "disclosure_stage"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "buyer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Buyer",
+   "options": "Buyer Profile",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "description": "Buyer level/tier fetched from Buyer Profile",
+   "fetch_from": "buyer.buyer_level_name",
+   "fieldname": "buyer_tier",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Buyer Tier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_basic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The tenant this profile belongs to",
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "description": "Date when the buyer joined the platform",
+   "fetch_from": "buyer.creation",
+   "fieldname": "member_since",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Member Since",
+   "read_only": 1
+  },
+  {
+   "fieldname": "statistics_tab",
+   "fieldtype": "Tab Break",
+   "label": "Statistics"
+  },
+  {
+   "fieldname": "statistics_section",
+   "fieldtype": "Section Break",
+   "label": "Order Statistics"
+  },
+  {
+   "default": "0",
+   "fetch_from": "buyer.total_orders",
+   "fieldname": "total_orders",
+   "fieldtype": "Int",
+   "label": "Total Orders",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Percentage of payments made on time",
+   "fetch_from": "buyer.payment_on_time_rate",
+   "fieldname": "payment_on_time_rate",
+   "fieldtype": "Percent",
+   "label": "Payment On Time Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_stats",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "buyer.average_order_value",
+   "fieldname": "average_order_value",
+   "fieldtype": "Currency",
+   "label": "Average Order Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transparency_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transparency"
+  },
+  {
+   "fieldname": "transparency_section",
+   "fieldtype": "Section Break",
+   "label": "Disclosure"
+  },
+  {
+   "default": "pre_order",
+   "description": "Stage of information disclosure to sellers",
+   "fieldname": "disclosure_stage",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disclosure Stage",
+   "options": "pre_order\nactive_order\npost_delivery",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Buyer Transparency Profile",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "export": 0,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 0,
+   "role": "Alici",
+   "share": 0,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "buyer, buyer_tier, disclosure_stage",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
