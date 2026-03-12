@@ -260,6 +260,8 @@ scheduler_events = {
 # Platform Provider: Platform Admin, Platform Finance, Compliance Officer, Support Agent
 # Seller: Seller Owner, Seller Admin, Seller Finance, Seller Staff, Seller Viewer
 # Buyer: Buyer Admin, Buyer Procurement, Buyer Finance, Buyer Viewer
+# Role Profile fixtures — 11 pre-configured role bundles for quick user provisioning
 fixtures = [
 	"Role",
+	"Role Profile",
 ]
