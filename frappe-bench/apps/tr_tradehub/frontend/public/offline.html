@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a56db">
+  <title>Çevrimdışı - TradeHub</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f4ff;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      background-color: #1a56db;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+    }
+
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      fill: #ffffff;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a56db;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: #475569;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .status-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .status-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: #fef3c7;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+    }
+
+    .status-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #d97706;
+    }
+
+    .status-text {
+      font-size: 0.9375rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: #1a56db;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .retry-btn:hover {
+      background-color: #1e40af;
+    }
+
+    .retry-btn:active {
+      background-color: #1d4ed8;
+    }
+
+    .retry-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: #ffffff;
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.8125rem;
+      color: #94a3b8;
+    }
+
+    .reconnecting {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9375rem;
+      color: #16a34a;
+      margin-top: 1rem;
+    }
+
+    .reconnecting.visible {
+      display: inline-flex;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #bbf7d0;
+      border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.375rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+      </svg>
+    </div>
+
+    <h1>TradeHub</h1>
+    <p class="subtitle">İnternet bağlantınız kesildi</p>
+
+    <div class="status-card">
+      <div class="status-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M24 .01c0-.01 0-.01 0 0L0 11l7 4.5V22l4-3 4.5 3L24 .01zM2.4 11.4l17.9-8.8-12.4 12 .1 3.8-5.6-3.6v-3.4zM13 18.8l-3.3-2.2 10.7-10.7L13 18.8z"/>
+        </svg>
+      </div>
+      <p class="status-text">
+        Şu anda çevrimdışı görünüyorsunuz. Bağlantınız yeniden kurulduğunda
+        sayfa otomatik olarak yenilenecektir.
+      </p>
+    </div>
+
+    <button class="retry-btn" onclick="location.reload()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+      </svg>
+      Tekrar Dene
+    </button>
+
+    <div class="reconnecting" id="reconnecting">
+      <div class="spinner"></div>
+      Bağlantı kuruluyor...
+    </div>
+
+    <p class="footer">TradeHub Marketplace &copy; 2026</p>
+  </div>
+
+  <script>
+    window.addEventListener('online', function () {
+      var el = document.getElementById('reconnecting');
+      if (el) {
+        el.classList.add('visible');
+      }
+      location.reload();
+    });
+  </script>
+</body>
+</html>
