@@ -1,0 +1,157 @@
+# TradeHub Seller Turkish Translations
+# Format: source,translated,context (optional)
+
+# Common Labels
+Basic Information,Temel Bilgiler,
+Status,Durum,
+Description,Aciklama,
+Details,Detaylar,
+Settings,Ayarlar,
+Notes,Notlar,
+Save,Kaydet,
+Cancel,Iptal,
+Submit,Gonder,
+Delete,Sil,
+Edit,Duzenle,
+
+# Actions
+Add,Ekle,
+Remove,Kaldir,
+Update,Guncelle,
+Search,Ara,
+Filter,Filtrele,
+Refresh,Yenile,
+
+# Seller Profile
+Seller Profile,Satici Profili,
+Seller Name,Satici Adi,
+Seller Type,Satici Tipi,
+Seller Status,Satici Durumu,
+Individual,Bireysel,
+Business,Ticari,
+Enterprise,Kurumsal,
+Display Name,Gorunen Ad,
+
+# Contact Information
+Contact Information,Iletisim Bilgileri,
+Contact Email,Iletisim E-postasi,
+Contact Phone,Iletisim Telefonu,
+Mobile,Cep Telefonu,
+WhatsApp,WhatsApp,
+Website,Web Sitesi,
+
+# Address
+Address,Adres,
+Address Line 1,Adres Satiri 1,
+Address Line 2,Adres Satiri 2,
+City,Sehir,
+State/Province,Il/Bolge,
+Country,Ulke,
+Postal Code,Posta Kodu,
+Addresses,Adresler,
+Locations,Konumlar,
+
+# Tax Information
+Tax Information,Vergi Bilgileri,
+Tax ID,Vergi Numarasi,
+Tax Office,Vergi Dairesi,
+Tax ID Type,Vergi No Tipi,
+TCKN,T.C. Kimlik No,
+VKN,Vergi Kimlik No,
+Trade Registry Number,Ticaret Sicil Numarasi,
+MERSIS Number,MERSIS Numarasi,
+E-Invoice Registered,E-Fatura Kayitli,
+E-Invoice Alias,E-Fatura Etiketi,
+
+# Verification
+Verification,Dogrulama,
+Verification Status,Dogrulama Durumu,
+KYC Profile,KYC Profili,
+Verified At,Dogrulanma Tarihi,
+Verified By,Dogrulayan,
+Identity Verified,Kimlik Dogrulandi,
+Business Verified,Is Dogrulandi,
+Bank Account Verified,Banka Hesabi Dogrulandi,
+Verification Notes,Dogrulama Notlari,
+Pending,Beklemede,
+In Review,Incelemede,
+Documents Requested,Belgeler Istendi,
+Verified,Dogrulandi,
+Rejected,Reddedildi,
+
+# Banking Information
+Banking Information,Banka Bilgileri,
+Bank Name,Banka Adi,
+Bank Branch,Banka Subesi,
+IBAN,IBAN,
+Account Holder Name,Hesap Sahibi Adi,
+SWIFT/BIC Code,SWIFT/BIC Kodu,
+Payout Method,Odeme Yontemi,
+Bank Transfer,Banka Transferi,
+
+# Performance
+Performance & Ratings,Performans ve Puanlar,
+Seller Tier,Satici Seviyesi,
+Seller Score,Satici Puani,
+Total Sales Count,Toplam Satis Sayisi,
+Total Sales Amount,Toplam Satis Tutari,
+Average Rating,Ortalama Puan,
+Total Reviews,Toplam Yorum,
+Performance Metrics,Performans Metrikleri,
+Order Fulfillment Rate,Siparis Tamamlama Orani,
+On-Time Delivery Rate,Zamaninda Teslimat Orani,
+Return Rate,Iade Orani,
+Avg Response Time (hrs),Ort. Yanit Suresi (saat),
+Cancellation Rate,Iptal Orani,
+Complaint Rate,Sikayet Orani,
+Positive Feedback Rate,Olumlu Geri Bildirim Orani,
+Last Metrics Update,Son Metrik Guncellemesi,
+
+# Badges
+Badges & Achievements,Rozetler ve Basarilar,
+Badges,Rozetler,
+Top Seller,En Iyi Satici,
+Premium Seller,Premium Satici,
+
+# Seller Settings
+Seller Settings,Satici Ayarlari,
+Commission Plan,Komisyon Plani,
+Default Shipping Rule,Varsayilan Kargo Kurali,
+Default Return Policy,Varsayilan Iade Politikasi,
+Max Listings,Maksimum Ilan Sayisi,
+Auto Accept Orders,Siparisleri Otomatik Kabul Et,
+Accepts Returns,Iade Kabul Eder,
+Vacation Mode,Tatil Modu,
+
+# Restrictions
+Restrictions,Kisitlamalar,
+Is Restricted,Kisitli Mi,
+Restriction Reason,Kisitlama Nedeni,
+Restricted At,Kisitlanma Tarihi,
+Can Sell,Satis Yapabilir,
+Can Withdraw,Para Cekebilir,
+Can Create Listings,Ilan Olusturabilir,
+
+# Featured
+Featured Status,One Cikan Durumu,
+Is Featured,One Cikan,
+Featured From,One Cikma Baslangici,
+Featured Until,One Cikma Bitisi,
+Joined At,Katilim Tarihi,
+Last Active At,Son Aktivite,
+
+# Seller Onboarding
+Onboarding,Kayit Sureci,
+Onboarding Status,Kayit Durumu,
+Step,Adim,
+Complete Profile,Profili Tamamla,
+Upload Documents,Belgeleri Yukle,
+Bank Details,Banka Detaylari,
+Agreement,Sozlesme,
+Terms Accepted,Sartlar Kabul Edildi,
+
+# Status Values
+Active,Aktif,
+Inactive,Pasif,
+Suspended,Askiya Alindi,
+Under Review,Incelemede,

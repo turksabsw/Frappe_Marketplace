@@ -1,0 +1,184 @@
+# TradeHub Commerce English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+
+# Order
+Marketplace Order,Marketplace Order,
+Order Information,Order Information,
+Order ID,Order ID,
+Order Date,Order Date,
+Order Status,Order Status,
+Sub Order,Sub Order,
+Parent Order,Parent Order,
+Seller Order ID,Seller Order ID,
+
+# Buyer
+Buyer,Buyer,
+Buyer Type,Buyer Type,
+Buyer Details,Buyer Details,
+Buyer Name,Buyer Name,
+Buyer Email,Buyer Email,
+Buyer Phone,Buyer Phone,
+Buyer Tax ID,Buyer Tax ID,
+Company Name,Company Name,
+Buyer Profile,Buyer Profile,
+Guest,Guest,
+
+# Order Items
+Order Items,Order Items,
+Items,Items,
+Marketplace Order Item,Marketplace Order Item,
+Seller Summary,Seller Summary,
+Seller Count,Seller Count,
+Item Name,Item Name,
+Quantity,Quantity,
+Unit Price,Unit Price,
+Total Price,Total Price,
+
+# Order Totals
+Order Totals,Order Totals,
+Subtotal,Subtotal,
+Discount Amount,Discount Amount,
+Shipping Amount,Shipping Amount,
+Tax Amount,Tax Amount,
+Grand Total,Grand Total,
+
+# Discounts & Credits
+Discounts & Credits,Discounts & Credits,
+Coupon Code,Coupon Code,
+Coupon Discount,Coupon Discount,
+Promotion Code,Promotion Code,
+Promotion Discount,Promotion Discount,
+Store Credit Used,Store Credit Used,
+
+# Cart
+Cart,Cart,
+Cart Item,Cart Item,
+Add to Cart,Add to Cart,
+Remove from Cart,Remove from Cart,
+Update Cart,Update Cart,
+Empty Cart,Empty Cart,
+Cart Total,Cart Total,
+Checkout,Checkout,
+Proceed to Checkout,Proceed to Checkout,
+
+# Payment
+Payment,Payment,
+Payment Status,Payment Status,
+Payment Method,Payment Method,
+Payment Gateway,Payment Gateway,
+Payment Intent,Payment Intent,
+Payment Reference,Payment Reference,
+Paid At,Paid At,
+Paid Amount,Paid Amount,
+Credit Card,Credit Card,
+Debit Card,Debit Card,
+Cash on Delivery,Cash on Delivery,
+Wallet,Wallet,
+Partially Paid,Partially Paid,
+Failed,Failed,
+Refunded,Refunded,
+Partially Refunded,Partially Refunded,
+Disputed,Disputed,
+
+# Escrow
+Escrow,Escrow,
+Escrow Status,Escrow Status,
+Escrow Account,Escrow Account,
+Escrow Held Amount,Escrow Held Amount,
+Escrow Release Date,Escrow Release Date,
+Escrow Released At,Escrow Released At,
+Escrow Event,Escrow Event,
+Not Required,Not Required,
+Held,Held,
+Partially Released,Partially Released,
+Released,Released,
+
+# Shipping Address
+Shipping Address,Shipping Address,
+Recipient Name,Recipient Name,
+
+# Billing Address
+Billing Address,Billing Address,
+Same as Shipping Address,Same as Shipping Address,
+Billing Name,Billing Name,
+
+# Fulfillment
+Fulfillment,Fulfillment,
+Fulfillment Status,Fulfillment Status,
+Fully Fulfilled,Fully Fulfilled,
+Partially Shipped,Partially Shipped,
+Shipped,Shipped,
+Delivered,Delivered,
+Partially Delivered,Partially Delivered,
+Returned,Returned,
+
+# Cancellation
+Cancellation,Cancellation,
+Cancellation Requested,Cancellation Requested,
+Cancellation Reason,Cancellation Reason,
+Changed Mind,Changed Mind,
+Found Better Price,Found Better Price,
+Item Out of Stock,Item Out of Stock,
+Payment Issues,Payment Issues,
+Order Error,Order Error,
+
+# Refund
+Refund,Refund,
+Refund Amount,Refund Amount,
+Refund Reason,Refund Reason,
+Refund Status,Refund Status,
+Refund Reference,Refund Reference,
+Defective Product,Defective Product,
+Wrong Item,Wrong Item,
+Not as Described,Not as Described,
+Processing,Processing,
+
+# Commission
+Commission,Commission,
+Total Commission,Total Commission,
+Commission Status,Commission Status,
+Calculated,Calculated,
+Collected,Collected,
+Waived,Waived,
+
+# Review
+Review,Review,
+Rating,Rating,
+Review Text,Review Text,
+Review Date,Review Date,
+
+# Order Status Values
+Await Payment,Await Payment,
+Payment Received,Payment Received,
+Confirmed,Confirmed,
+Completed,Completed,
+On Hold,On Hold,
+Cancelled,Cancelled,
+
+# Source & Tracking
+Source Channel,Source Channel,
+Mobile App,Mobile App,
+API,API,
+POS,POS,
+Manual,Manual,

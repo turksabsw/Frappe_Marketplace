@@ -1,0 +1,177 @@
+# TradeHub Catalog Turkish Translations
+# Format: source,translated,context (optional)
+
+# Common Labels
+Basic Information,Temel Bilgiler,
+Status,Durum,
+Description,Aciklama,
+Image,Resim,
+Details,Detaylar,
+Settings,Ayarlar,
+Notes,Notlar,
+Save,Kaydet,
+Cancel,Iptal,
+Submit,Gonder,
+Delete,Sil,
+Edit,Duzenle,
+
+# Actions
+Add,Ekle,
+Remove,Kaldir,
+Update,Guncelle,
+Search,Ara,
+Filter,Filtrele,
+Refresh,Yenile,
+Export,Disa Aktar,
+Import,Ice Aktar,
+
+# Category
+Category,Kategori,
+Category Name,Kategori Adi,
+Parent Category,Ust Kategori,
+Subcategory,Alt Kategori,
+Category Tree,Kategori Agaci,
+Category Level,Kategori Seviyesi,
+Root Category,Kok Kategori,
+Is Active,Aktif,
+Display Order,Gosterim Sirasi,
+Category Path,Kategori Yolu,
+Category Image,Kategori Resmi,
+Category Icon,Kategori Ikonu,
+
+# Attribute & Attribute Set
+Attribute,Ozellik,
+Attributes,Ozellikler,
+Attribute Name,Ozellik Adi,
+Attribute Type,Ozellik Tipi,
+Attribute Value,Ozellik Degeri,
+Attribute Set,Ozellik Seti,
+Attribute Set Name,Ozellik Seti Adi,
+Attribute Group,Ozellik Grubu,
+Text,Metin,
+Number,Sayi,
+Select,Secim,
+Multi Select,Coklu Secim,
+Boolean,Evet/Hayir,
+Date,Tarih,
+Color,Renk,
+Size,Beden,
+Material,Malzeme,
+
+# Product / Listing
+Listing,Ilan,
+Listing Code,Ilan Kodu,
+Title,Baslik,
+Short Description,Kisa Aciklama,
+Long Description,Uzun Aciklama,
+Listing Type,Ilan Tipi,
+Fixed Price,Sabit Fiyat,
+Auction,Acik Artirma,
+Best Offer,En Iyi Teklif,
+RFQ Only,Sadece Teklif Istegi,
+
+# Brand
+Brand,Marka,
+Brand Name,Marka Adi,
+Brand Logo,Marka Logosu,
+Manufacturer,Uretici,
+
+# Pricing
+Pricing,Fiyatlandirma,
+Currency,Para Birimi,
+Base Price,Taban Fiyat,
+Selling Price,Satis Fiyati,
+Compare at Price,Karsilastirma Fiyati,
+Cost Price,Maliyet Fiyati,
+Price Includes Tax,Fiyata Vergi Dahil,
+Tax Rate (%),Vergi Orani (%),
+Wholesale Price,Toptan Fiyat,
+
+# Inventory
+Inventory,Stok,
+Stock Quantity,Stok Miktari,
+Reserved Quantity,Rezerve Miktar,
+Available Quantity,Mevcut Miktar,
+Stock UOM,Stok Birimi,
+Min Order Quantity,Minimum Siparis Miktari,
+Max Order Quantity,Maksimum Siparis Miktari,
+Low Stock Threshold,Dusuk Stok Esigi,
+Track Inventory,Stok Takibi,
+Allow Backorders,On Siparise Izin Ver,
+Out of Stock,Stokta Yok,
+
+# Variants
+Variant,Varyant,
+Variants,Varyantlar,
+Has Variants,Varyantlari Var,
+Variant Of,Varyanti Oldugu Urun,
+Listing Variant,Ilan Varyanti,
+Variant Attribute,Varyant Ozelligi,
+
+# Specifications & Identifiers
+Specifications,Ozellikler,
+SKU,Stok Kodu,
+Barcode,Barkod,
+Barcode Type,Barkod Tipi,
+MPN,Uretici Parca No,
+GTIN,GTIN,
+
+# Product Details
+Product Details,Urun Detaylari,
+Weight,Agirlik,
+Weight UOM,Agirlik Birimi,
+Length,Uzunluk,
+Width,Genislik,
+Height,Yukseklik,
+Dimension UOM,Boyut Birimi,
+
+# Media
+Media,Medya,
+Primary Image,Ana Resim,
+Images,Resimler,
+Video URL,Video Baglantisi,
+Gallery,Galeri,
+
+# SEO
+SEO,SEO,
+SEO Settings,SEO Ayarlari,
+Route,Rota,
+Meta Title,Meta Baslik,
+Meta Description,Meta Aciklama,
+Meta Keywords,Meta Anahtar Kelimeler,
+Canonical URL,Kanonik URL,
+OG Image,OG Resmi,
+
+# Commission
+Commission Settings,Komisyon Ayarlari,
+Commission Rate (%),Komisyon Orani (%),
+Minimum Commission,Minimum Komisyon,
+Maximum Commission,Maksimum Komisyon,
+Fixed Commission,Sabit Komisyon,
+
+# Visibility
+Visibility,Gorunurluk,
+Visible in Marketplace,Pazaryerinde Gorunur,
+Searchable,Aranabilir,
+Featured,One Cikan,
+New Arrival,Yeni Urun,
+Best Seller,Cok Satan,
+On Sale,Indirimde,
+
+# Moderation
+Moderation,Moderasyon,
+Moderation Status,Moderasyon Durumu,
+Approved,Onaylandi,
+Rejected,Reddedildi,
+Pending Review,Onay Bekliyor,
+Flagged,Isaretlendi,
+Rejection Reason,Red Nedeni,
+Quality Score,Kalite Puani,
+
+# Status Values
+Active,Aktif,
+Inactive,Pasif,
+Draft,Taslak,
+Paused,Duraklatildi,
+Sold Out,Tukendi,
+Archived,Arsivlendi,

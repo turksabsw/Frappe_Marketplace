@@ -1,0 +1,151 @@
+# TradeHub Core English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+User,User,
+Tenant,Tenant,
+Organization,Organization,
+Description,Description,
+Image,Image,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+System,System,
+System Information,System Information,
+Created By,Created By,
+Modified By,Modified By,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+Print,Print,
+Email,Email,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+Refresh,Refresh,
+Export,Export,
+Import,Import,
+
+# Platform Core
+Platform,Platform,
+Marketplace,Marketplace,
+Dashboard,Dashboard,
+Configuration,Configuration,
+Module,Module,
+Application,Application,
+Service,Service,
+Integration,Integration,
+
+# User Management
+User Management,User Management,
+Role,Role,
+Permission,Permission,
+Access Level,Access Level,
+User Role,User Role,
+Role Profile,Role Profile,
+User Permission,User Permission,
+Has Role,Has Role,
+Administrator,Administrator,
+System Manager,System Manager,
+
+# Tenant Management
+Tenant Management,Tenant Management,
+Tenant Name,Tenant Name,
+Tenant Type,Tenant Type,
+Tenant Status,Tenant Status,
+Tenant Settings,Tenant Settings,
+Subscription Plan,Subscription Plan,
+Plan Type,Plan Type,
+Subscription Status,Subscription Status,
+
+# Organization
+Organization Name,Organization Name,
+Organization Type,Organization Type,
+Parent Organization,Parent Organization,
+Legal Name,Legal Name,
+Tax ID,Tax ID,
+Registration Number,Registration Number,
+
+# Notifications
+Notification,Notification,
+Notifications,Notifications,
+Notification Type,Notification Type,
+Notification Channel,Notification Channel,
+Email Notification,Email Notification,
+SMS Notification,SMS Notification,
+Push Notification,Push Notification,
+In-App Notification,In-App Notification,
+Read,Read,
+Unread,Unread,
+Mark as Read,Mark as Read,
+
+# Audit & Logging
+Audit Log,Audit Log,
+Activity Log,Activity Log,
+Event,Event,
+Event Type,Event Type,
+Timestamp,Timestamp,
+IP Address,IP Address,
+User Agent,User Agent,
+
+# Configuration
+System Settings,System Settings,
+General Settings,General Settings,
+Default Currency,Default Currency,
+Default Language,Default Language,
+Default Country,Default Country,
+Time Zone,Time Zone,
+Date Format,Date Format,
+Number Format,Number Format,
+
+# Status Values
+Active,Active,
+Inactive,Inactive,
+Draft,Draft,
+Enabled,Enabled,
+Disabled,Disabled,
+Suspended,Suspended,
+Archived,Archived,
+Pending,Pending,
+Approved,Approved,
+Rejected,Rejected,
+
+# Common Messages
+Required,Required,
+Invalid,Invalid,
+Success,Success,
+Error,Error,
+Warning,Warning,
+Info,Info,
+Loading,Loading,
+Please wait,Please wait,
+No data found,No data found,
+Are you sure?,Are you sure?,
+Yes,Yes,
+No,No,
+
+# Validation Messages
+This field is required,This field is required,
+Invalid email address,Invalid email address,
+Invalid phone number,Invalid phone number,
+Value must be greater than zero,Value must be greater than zero,
+Duplicate entry found,Duplicate entry found,
+
+# API & Webhooks
+API Key,API Key,
+API Secret,API Secret,
+Webhook,Webhook,
+Webhook URL,Webhook URL,
+Webhook Secret,Webhook Secret,
+Endpoint,Endpoint,
+Request,Request,
+Response,Response,

@@ -1,0 +1,151 @@
+# TradeHub Logistics English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+
+# Shipping
+Shipping,Shipping,
+Shipping Method,Shipping Method,
+Shipping Rule,Shipping Rule,
+Shipping Rate,Shipping Rate,
+Shipping Class,Shipping Class,
+Free Shipping,Free Shipping,
+Shipping Weight (kg),Shipping Weight (kg),
+Shipping Label,Shipping Label,
+Shipping Cost,Shipping Cost,
+Estimated Shipping,Estimated Shipping,
+
+# Shipping Classes
+Standard,Standard,
+Express,Express,
+Economy,Economy,
+Same Day,Same Day,
+Next Day,Next Day,
+Bulky,Bulky,
+Fragile,Fragile,
+Hazardous,Hazardous,
+Perishable,Perishable,
+
+# Carrier
+Carrier,Carrier,
+Carrier Name,Carrier Name,
+Carrier Code,Carrier Code,
+Carrier Service,Carrier Service,
+Shipping Provider,Shipping Provider,
+Contract Number,Contract Number,
+
+# Tracking
+Tracking,Tracking,
+Tracking Number,Tracking Number,
+Tracking URL,Tracking URL,
+Tracking Status,Tracking Status,
+Tracking Event,Tracking Event,
+Tracking History,Tracking History,
+Last Update,Last Update,
+
+# Shipment
+Shipment,Shipment,
+Shipment ID,Shipment ID,
+Shipment Date,Shipment Date,
+Shipment Status,Shipment Status,
+Ships From Country,Ships From Country,
+Ships From City,Ships From City,
+Handling Days,Handling Days,
+Estimated Delivery,Estimated Delivery,
+Actual Delivery,Actual Delivery,
+
+# Package
+Package,Package,
+Package Type,Package Type,
+Package Weight,Package Weight,
+Package Dimensions,Package Dimensions,
+Length,Length,
+Width,Width,
+Height,Height,
+Volumetric Weight,Volumetric Weight,
+Number of Packages,Number of Packages,
+Packing Slip,Packing Slip,
+Box,Box,
+Envelope,Envelope,
+Pallet,Pallet,
+
+# Delivery
+Delivery,Delivery,
+Delivery Date,Delivery Date,
+Delivery Time,Delivery Time,
+Delivery Address,Delivery Address,
+Delivery Note,Delivery Note,
+Delivery Attempt,Delivery Attempt,
+Delivery Confirmation,Delivery Confirmation,
+Proof of Delivery,Proof of Delivery,
+Signature Required,Signature Required,
+Delivery Instructions,Delivery Instructions,
+
+# Fulfillment Status
+Fulfillment,Fulfillment,
+Fulfillment Status,Fulfillment Status,
+Items Packed,Items Packed,
+Items Shipped,Items Shipped,
+Items Delivered,Items Delivered,
+Items Returned,Items Returned,
+Packed,Packed,
+Shipped,Shipped,
+In Transit,In Transit,
+Out for Delivery,Out for Delivery,
+Delivered,Delivered,
+Failed Delivery,Failed Delivery,
+
+# Warehouse
+Warehouse,Warehouse,
+Warehouse Name,Warehouse Name,
+Warehouse Location,Warehouse Location,
+Stock Location,Stock Location,
+Pickup Location,Pickup Location,
+Drop-off Location,Drop-off Location,
+
+# Return Shipping
+Return Shipping,Return Shipping,
+Return Label,Return Label,
+Return Tracking,Return Tracking,
+Return Reason,Return Reason,
+Return Status,Return Status,
+Return Address,Return Address,
+Return Received,Return Received,
+
+# Customs & International
+Customs,Customs,
+Customs Declaration,Customs Declaration,
+HS Code,HS Code,
+Country of Origin,Country of Origin,
+Customs Value,Customs Value,
+Duty,Duty,
+Import Tax,Import Tax,
+International Shipping,International Shipping,
+
+# Status Values
+Pending,Pending,
+Processing,Processing,
+Ready to Ship,Ready to Ship,
+Picked Up,Picked Up,
+Completed,Completed,
+Cancelled,Cancelled,
+On Hold,On Hold,

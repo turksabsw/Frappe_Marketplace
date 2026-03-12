@@ -1,0 +1,143 @@
+# TradeHub Compliance English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+
+# KYC
+KYC,KYC,
+KYC Profile,KYC Profile,
+KYC Status,KYC Status,
+KYC Level,KYC Level,
+KYC Document,KYC Document,
+KYC Review,KYC Review,
+KYC Verification,KYC Verification,
+Identity Verification,Identity Verification,
+Business Verification,Business Verification,
+Address Verification,Address Verification,
+
+# Documents
+Document,Document,
+Documents,Documents,
+Document Type,Document Type,
+Document Number,Document Number,
+Document Date,Document Date,
+Expiry Date,Expiry Date,
+Issue Date,Issue Date,
+Issuing Authority,Issuing Authority,
+Document Status,Document Status,
+Document Upload,Document Upload,
+Upload Document,Upload Document,
+Verify Document,Verify Document,
+ID Card,ID Card,
+Passport,Passport,
+Driver License,Driver License,
+Tax Certificate,Tax Certificate,
+Trade License,Trade License,
+Chamber of Commerce Registration,Chamber of Commerce Registration,
+
+# E-Invoice (Turkish E-Fatura)
+E-Invoice,E-Invoice,
+E-Invoice (Turkish E-Fatura),E-Invoice (Turkish E-Fatura),
+E-Invoice Enabled,E-Invoice Enabled,
+E-Invoice Status,E-Invoice Status,
+E-Invoice UUID,E-Invoice UUID,
+E-Invoice Number,E-Invoice Number,
+E-Invoice Date,E-Invoice Date,
+E-Invoice PDF,E-Invoice PDF,
+E-Archive (E-Arsiv),E-Archive (E-Arsiv),
+
+# Invoice
+Invoice,Invoice,
+Invoice Type,Invoice Type,
+Invoice Number,Invoice Number,
+Invoice Date,Invoice Date,
+Invoice Status,Invoice Status,
+Paper Invoice,Paper Invoice,
+Queued,Queued,
+Sent,Sent,
+Accepted,Accepted,
+Cancelled,Cancelled,
+Error,Error,
+
+# Tax Compliance
+Tax Compliance,Tax Compliance,
+Tax ID,Tax ID,
+Tax Office,Tax Office,
+Tax ID Type,Tax ID Type,
+TCKN,TCKN,
+VKN,VKN,
+Tax Rate,Tax Rate,
+Tax Exemption,Tax Exemption,
+Withholding Tax,Withholding Tax,
+VAT,VAT,
+
+# Regulatory
+Regulatory,Regulatory,
+Compliance Status,Compliance Status,
+Compliance Check,Compliance Check,
+Compliance Report,Compliance Report,
+Risk Assessment,Risk Assessment,
+Risk Level,Risk Level,
+Low Risk,Low Risk,
+Medium Risk,Medium Risk,
+High Risk,High Risk,
+Critical Risk,Critical Risk,
+
+# Sanctions & Screening
+Sanctions Check,Sanctions Check,
+Screening,Screening,
+Watchlist,Watchlist,
+Blacklist,Blacklist,
+Whitelist,Whitelist,
+Sanctions Match,Sanctions Match,
+False Positive,False Positive,
+
+# Audit
+Audit,Audit,
+Audit Trail,Audit Trail,
+Audit Log,Audit Log,
+Compliance Audit,Compliance Audit,
+Audit Date,Audit Date,
+Auditor,Auditor,
+Audit Result,Audit Result,
+Passed,Passed,
+Failed,Failed,
+
+# Consent & Privacy
+Consent,Consent,
+Privacy Policy,Privacy Policy,
+Terms of Service,Terms of Service,
+Data Processing Agreement,Data Processing Agreement,
+GDPR,GDPR,
+KVKK,KVKK,
+Data Subject Request,Data Subject Request,
+Right to Erasure,Right to Erasure,
+Data Retention,Data Retention,
+
+# Status Values
+Compliant,Compliant,
+Non-Compliant,Non-Compliant,
+Pending Review,Pending Review,
+Under Investigation,Under Investigation,
+Approved,Approved,
+Rejected,Rejected,
+Expired,Expired,

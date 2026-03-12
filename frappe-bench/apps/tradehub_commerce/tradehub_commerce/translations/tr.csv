@@ -1,0 +1,183 @@
+# TradeHub Commerce Turkish Translations
+# Format: source,translated,context (optional)
+
+# Common Labels
+Basic Information,Temel Bilgiler,
+Status,Durum,
+Description,Aciklama,
+Details,Detaylar,
+Settings,Ayarlar,
+Notes,Notlar,
+Save,Kaydet,
+Cancel,Iptal,
+Submit,Gonder,
+Delete,Sil,
+Edit,Duzenle,
+
+# Actions
+Add,Ekle,
+Remove,Kaldir,
+Update,Guncelle,
+Search,Ara,
+Filter,Filtrele,
+
+# Order
+Marketplace Order,Pazaryeri Siparisi,
+Order Information,Siparis Bilgileri,
+Order ID,Siparis No,
+Order Date,Siparis Tarihi,
+Order Status,Siparis Durumu,
+Sub Order,Alt Siparis,
+Parent Order,Ana Siparis,
+Seller Order ID,Satici Siparis No,
+
+# Buyer
+Buyer,Alici,
+Buyer Type,Alici Tipi,
+Buyer Details,Alici Detaylari,
+Buyer Name,Alici Adi,
+Buyer Email,Alici E-postasi,
+Buyer Phone,Alici Telefonu,
+Buyer Tax ID,Alici Vergi No,
+Company Name,Sirket Adi,
+Buyer Profile,Alici Profili,
+Guest,Misafir,
+
+# Order Items
+Order Items,Siparis Kalemleri,
+Items,Kalemler,
+Marketplace Order Item,Siparis Kalemi,
+Seller Summary,Satici Ozeti,
+Seller Count,Satici Sayisi,
+Item Name,Urun Adi,
+Quantity,Miktar,
+Unit Price,Birim Fiyat,
+Total Price,Toplam Fiyat,
+
+# Order Totals
+Order Totals,Siparis Toplamlari,
+Subtotal,Ara Toplam,
+Discount Amount,Indirim Tutari,
+Shipping Amount,Kargo Tutari,
+Tax Amount,Vergi Tutari,
+Grand Total,Genel Toplam,
+
+# Discounts & Credits
+Discounts & Credits,Indirimler ve Krediler,
+Coupon Code,Kupon Kodu,
+Coupon Discount,Kupon Indirimi,
+Promotion Code,Promosyon Kodu,
+Promotion Discount,Promosyon Indirimi,
+Store Credit Used,Kullanilan Magaza Kredisi,
+
+# Cart
+Cart,Sepet,
+Cart Item,Sepet Kalemi,
+Add to Cart,Sepete Ekle,
+Remove from Cart,Sepetten Kaldir,
+Update Cart,Sepeti Guncelle,
+Empty Cart,Sepeti Bosalt,
+Cart Total,Sepet Toplami,
+Checkout,Odeme,
+Proceed to Checkout,Odemeye Gecin,
+
+# Payment
+Payment,Odeme,
+Payment Status,Odeme Durumu,
+Payment Method,Odeme Yontemi,
+Payment Gateway,Odeme Gecidi,
+Payment Intent,Odeme Niyeti,
+Payment Reference,Odeme Referansi,
+Paid At,Odeme Tarihi,
+Paid Amount,Odenen Tutar,
+Credit Card,Kredi Karti,
+Debit Card,Banka Karti,
+Cash on Delivery,Kapida Odeme,
+Wallet,Cuzdan,
+Partially Paid,Kismi Odendi,
+Failed,Basarisiz,
+Refunded,Iade Edildi,
+Partially Refunded,Kismi Iade,
+Disputed,Itirazli,
+
+# Escrow
+Escrow,Emanet,
+Escrow Status,Emanet Durumu,
+Escrow Account,Emanet Hesabi,
+Escrow Held Amount,Tutulan Emanet Tutari,
+Escrow Release Date,Emanet Serbest Birakma Tarihi,
+Escrow Released At,Emanet Serbest Birakilma Tarihi,
+Escrow Event,Emanet Olaysi,
+Not Required,Gerekli Degil,
+Held,Tutuluyor,
+Partially Released,Kismi Serbest,
+Released,Serbest Birakildi,
+
+# Shipping Address
+Shipping Address,Teslimat Adresi,
+Recipient Name,Alici Adi,
+
+# Billing Address
+Billing Address,Fatura Adresi,
+Same as Shipping Address,Teslimat Adresi ile Ayni,
+Billing Name,Fatura Adi,
+
+# Fulfillment
+Fulfillment,Tedarik,
+Fulfillment Status,Tedarik Durumu,
+Fully Fulfilled,Tamamen Tamamlandi,
+Partially Shipped,Kismi Gonderildi,
+Shipped,Gonderildi,
+Delivered,Teslim Edildi,
+Partially Delivered,Kismi Teslim,
+Returned,Iade Edildi,
+
+# Cancellation
+Cancellation,Iptal,
+Cancellation Requested,Iptal Istendi,
+Cancellation Reason,Iptal Nedeni,
+Changed Mind,Fikrimi Degistirdim,
+Found Better Price,Daha Iyi Fiyat Buldum,
+Item Out of Stock,Urun Stokta Yok,
+Payment Issues,Odeme Sorunu,
+Order Error,Siparis Hatasi,
+
+# Refund
+Refund,Iade,
+Refund Amount,Iade Tutari,
+Refund Reason,Iade Nedeni,
+Refund Status,Iade Durumu,
+Refund Reference,Iade Referansi,
+Defective Product,Kusurlu Urun,
+Wrong Item,Yanlis Urun,
+Not as Described,Aciklamayla Uyumsuz,
+Processing,Isleniyor,
+
+# Commission
+Commission,Komisyon,
+Total Commission,Toplam Komisyon,
+Commission Status,Komisyon Durumu,
+Calculated,Hesaplandi,
+Collected,Tahsil Edildi,
+Waived,Muaf Tutuldu,
+
+# Review
+Review,Yorum,
+Rating,Puan,
+Review Text,Yorum Metni,
+Review Date,Yorum Tarihi,
+
+# Order Status Values
+Await Payment,Odeme Bekleniyor,
+Payment Received,Odeme Alindi,
+Confirmed,Onaylandi,
+Completed,Tamamlandi,
+On Hold,Beklemede,
+Cancelled,Iptal Edildi,
+
+# Source & Tracking
+Source Channel,Kaynak Kanal,
+Mobile App,Mobil Uygulama,
+API,API,
+POS,POS,
+Manual,Manuel,

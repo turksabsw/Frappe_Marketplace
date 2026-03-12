@@ -1,0 +1,178 @@
+# TradeHub Catalog English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Image,Image,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+Refresh,Refresh,
+Export,Export,
+Import,Import,
+
+# Category
+Category,Category,
+Category Name,Category Name,
+Parent Category,Parent Category,
+Subcategory,Subcategory,
+Category Tree,Category Tree,
+Category Level,Category Level,
+Root Category,Root Category,
+Is Active,Is Active,
+Display Order,Display Order,
+Category Path,Category Path,
+Category Image,Category Image,
+Category Icon,Category Icon,
+
+# Attribute & Attribute Set
+Attribute,Attribute,
+Attributes,Attributes,
+Attribute Name,Attribute Name,
+Attribute Type,Attribute Type,
+Attribute Value,Attribute Value,
+Attribute Set,Attribute Set,
+Attribute Set Name,Attribute Set Name,
+Attribute Group,Attribute Group,
+Text,Text,
+Number,Number,
+Select,Select,
+Multi Select,Multi Select,
+Boolean,Boolean,
+Date,Date,
+Color,Color,
+Size,Size,
+Material,Material,
+
+# Product / Listing
+Listing,Listing,
+Listing Code,Listing Code,
+Title,Title,
+Short Description,Short Description,
+Long Description,Long Description,
+Listing Type,Listing Type,
+Fixed Price,Fixed Price,
+Auction,Auction,
+Best Offer,Best Offer,
+RFQ Only,RFQ Only,
+
+# Brand
+Brand,Brand,
+Brand Name,Brand Name,
+Brand Logo,Brand Logo,
+Manufacturer,Manufacturer,
+
+# Pricing
+Pricing,Pricing,
+Currency,Currency,
+Base Price,Base Price,
+Selling Price,Selling Price,
+Compare at Price,Compare at Price,
+Cost Price,Cost Price,
+Price Includes Tax,Price Includes Tax,
+Tax Rate (%),Tax Rate (%),
+Wholesale Price,Wholesale Price,
+
+# Inventory
+Inventory,Inventory,
+Stock Quantity,Stock Quantity,
+Reserved Quantity,Reserved Quantity,
+Available Quantity,Available Quantity,
+Stock UOM,Stock UOM,
+Min Order Quantity,Min Order Quantity,
+Max Order Quantity,Max Order Quantity,
+Low Stock Threshold,Low Stock Threshold,
+Track Inventory,Track Inventory,
+Allow Backorders,Allow Backorders,
+Out of Stock,Out of Stock,
+
+# Variants
+Variant,Variant,
+Variants,Variants,
+Has Variants,Has Variants,
+Variant Of,Variant Of,
+Listing Variant,Listing Variant,
+Variant Attribute,Variant Attribute,
+
+# Specifications & Identifiers
+Specifications,Specifications,
+SKU,SKU,
+Barcode,Barcode,
+Barcode Type,Barcode Type,
+MPN,MPN,
+GTIN,GTIN,
+
+# Product Details
+Product Details,Product Details,
+Weight,Weight,
+Weight UOM,Weight UOM,
+Length,Length,
+Width,Width,
+Height,Height,
+Dimension UOM,Dimension UOM,
+
+# Media
+Media,Media,
+Primary Image,Primary Image,
+Images,Images,
+Video URL,Video URL,
+Gallery,Gallery,
+
+# SEO
+SEO,SEO,
+SEO Settings,SEO Settings,
+Route,Route,
+Meta Title,Meta Title,
+Meta Description,Meta Description,
+Meta Keywords,Meta Keywords,
+Canonical URL,Canonical URL,
+OG Image,OG Image,
+
+# Commission
+Commission Settings,Commission Settings,
+Commission Rate (%),Commission Rate (%),
+Minimum Commission,Minimum Commission,
+Maximum Commission,Maximum Commission,
+Fixed Commission,Fixed Commission,
+
+# Visibility
+Visibility,Visibility,
+Visible in Marketplace,Visible in Marketplace,
+Searchable,Searchable,
+Featured,Featured,
+New Arrival,New Arrival,
+Best Seller,Best Seller,
+On Sale,On Sale,
+
+# Moderation
+Moderation,Moderation,
+Moderation Status,Moderation Status,
+Approved,Approved,
+Rejected,Rejected,
+Pending Review,Pending Review,
+Flagged,Flagged,
+Rejection Reason,Rejection Reason,
+Quality Score,Quality Score,
+
+# Status Values
+Active,Active,
+Inactive,Inactive,
+Draft,Draft,
+Paused,Paused,
+Sold Out,Sold Out,
+Archived,Archived,

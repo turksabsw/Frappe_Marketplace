@@ -1,0 +1,150 @@
+# TradeHub Logistics Turkish Translations
+# Format: source,translated,context (optional)
+
+# Common Labels
+Basic Information,Temel Bilgiler,
+Status,Durum,
+Description,Aciklama,
+Details,Detaylar,
+Settings,Ayarlar,
+Notes,Notlar,
+Save,Kaydet,
+Cancel,Iptal,
+Submit,Gonder,
+Delete,Sil,
+Edit,Duzenle,
+
+# Actions
+Add,Ekle,
+Remove,Kaldir,
+Update,Guncelle,
+Search,Ara,
+Filter,Filtrele,
+
+# Shipping
+Shipping,Kargo,
+Shipping Method,Kargo Yontemi,
+Shipping Rule,Kargo Kurali,
+Shipping Rate,Kargo Ucreti,
+Shipping Class,Kargo Sinifi,
+Free Shipping,Ucretsiz Kargo,
+Shipping Weight (kg),Kargo Agirligi (kg),
+Shipping Label,Kargo Etiketi,
+Shipping Cost,Kargo Maliyeti,
+Estimated Shipping,Tahmini Kargo,
+
+# Shipping Classes
+Standard,Standart,
+Express,Hizli,
+Economy,Ekonomik,
+Same Day,Ayni Gun,
+Next Day,Ertesi Gun,
+Bulky,Hacimli,
+Fragile,Kirilgan,
+Hazardous,Tehlikeli,
+Perishable,Bozulabilir,
+
+# Carrier
+Carrier,Tasiyici,
+Carrier Name,Tasiyici Adi,
+Carrier Code,Tasiyici Kodu,
+Carrier Service,Tasiyici Servisi,
+Shipping Provider,Kargo Firmasi,
+Contract Number,Sozlesme Numarasi,
+
+# Tracking
+Tracking,Takip,
+Tracking Number,Takip Numarasi,
+Tracking URL,Takip Baglantisi,
+Tracking Status,Takip Durumu,
+Tracking Event,Takip Olaysi,
+Tracking History,Takip Gecmisi,
+Last Update,Son Guncelleme,
+
+# Shipment
+Shipment,Gonderi,
+Shipment ID,Gonderi No,
+Shipment Date,Gonderi Tarihi,
+Shipment Status,Gonderi Durumu,
+Ships From Country,Gonderim Ulkesi,
+Ships From City,Gonderim Sehri,
+Handling Days,Hazirlama Suresi (Gun),
+Estimated Delivery,Tahmini Teslimat,
+Actual Delivery,Gercek Teslimat,
+
+# Package
+Package,Paket,
+Package Type,Paket Tipi,
+Package Weight,Paket Agirligi,
+Package Dimensions,Paket Boyutlari,
+Length,Uzunluk,
+Width,Genislik,
+Height,Yukseklik,
+Volumetric Weight,Desi Agirligi,
+Number of Packages,Paket Sayisi,
+Packing Slip,Paketleme Fisi,
+Box,Kutu,
+Envelope,Zarf,
+Pallet,Palet,
+
+# Delivery
+Delivery,Teslimat,
+Delivery Date,Teslimat Tarihi,
+Delivery Time,Teslimat Saati,
+Delivery Address,Teslimat Adresi,
+Delivery Note,Irsaliye,
+Delivery Attempt,Teslimat Denemesi,
+Delivery Confirmation,Teslimat Onaysi,
+Proof of Delivery,Teslimat Kaniti,
+Signature Required,Imza Gerekli,
+Delivery Instructions,Teslimat Talimatlari,
+
+# Fulfillment Status
+Fulfillment,Tedarik,
+Fulfillment Status,Tedarik Durumu,
+Items Packed,Paketlenen Kalemler,
+Items Shipped,Gonderilen Kalemler,
+Items Delivered,Teslim Edilen Kalemler,
+Items Returned,Iade Edilen Kalemler,
+Packed,Paketlendi,
+Shipped,Gonderildi,
+In Transit,Yolda,
+Out for Delivery,Dagitimda,
+Delivered,Teslim Edildi,
+Failed Delivery,Basarisiz Teslimat,
+
+# Warehouse
+Warehouse,Depo,
+Warehouse Name,Depo Adi,
+Warehouse Location,Depo Konumu,
+Stock Location,Stok Konumu,
+Pickup Location,Teslim Alma Noktasi,
+Drop-off Location,Birakma Noktasi,
+
+# Return Shipping
+Return Shipping,Iade Kargosu,
+Return Label,Iade Etiketi,
+Return Tracking,Iade Takibi,
+Return Reason,Iade Nedeni,
+Return Status,Iade Durumu,
+Return Address,Iade Adresi,
+Return Received,Iade Alindi,
+
+# Customs & International
+Customs,Gumruk,
+Customs Declaration,Gumruk Beyani,
+HS Code,GTiP Kodu,
+Country of Origin,Mensei Ulke,
+Customs Value,Gumruk Degeri,
+Duty,Vergi,
+Import Tax,Ithalat Vergisi,
+International Shipping,Uluslararasi Kargo,
+
+# Status Values
+Pending,Beklemede,
+Processing,Isleniyor,
+Ready to Ship,Gonderime Hazir,
+Picked Up,Teslim Alindi,
+Completed,Tamamlandi,
+Cancelled,Iptal Edildi,
+On Hold,Beklemede,

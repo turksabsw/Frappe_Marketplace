@@ -1,0 +1,158 @@
+# TradeHub Seller English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+Refresh,Refresh,
+
+# Seller Profile
+Seller Profile,Seller Profile,
+Seller Name,Seller Name,
+Seller Type,Seller Type,
+Seller Status,Seller Status,
+Individual,Individual,
+Business,Business,
+Enterprise,Enterprise,
+Display Name,Display Name,
+
+# Contact Information
+Contact Information,Contact Information,
+Contact Email,Contact Email,
+Contact Phone,Contact Phone,
+Mobile,Mobile,
+WhatsApp,WhatsApp,
+Website,Website,
+
+# Address
+Address,Address,
+Address Line 1,Address Line 1,
+Address Line 2,Address Line 2,
+City,City,
+State/Province,State/Province,
+Country,Country,
+Postal Code,Postal Code,
+Addresses,Addresses,
+Locations,Locations,
+
+# Tax Information
+Tax Information,Tax Information,
+Tax ID,Tax ID,
+Tax Office,Tax Office,
+Tax ID Type,Tax ID Type,
+TCKN,TCKN,
+VKN,VKN,
+Trade Registry Number,Trade Registry Number,
+MERSIS Number,MERSIS Number,
+E-Invoice Registered,E-Invoice Registered,
+E-Invoice Alias,E-Invoice Alias,
+
+# Verification
+Verification,Verification,
+Verification Status,Verification Status,
+KYC Profile,KYC Profile,
+Verified At,Verified At,
+Verified By,Verified By,
+Identity Verified,Identity Verified,
+Business Verified,Business Verified,
+Bank Account Verified,Bank Account Verified,
+Verification Notes,Verification Notes,
+Pending,Pending,
+In Review,In Review,
+Documents Requested,Documents Requested,
+Verified,Verified,
+Rejected,Rejected,
+
+# Banking Information
+Banking Information,Banking Information,
+Bank Name,Bank Name,
+Bank Branch,Bank Branch,
+IBAN,IBAN,
+Account Holder Name,Account Holder Name,
+SWIFT/BIC Code,SWIFT/BIC Code,
+Payout Method,Payout Method,
+Bank Transfer,Bank Transfer,
+
+# Performance
+Performance & Ratings,Performance & Ratings,
+Seller Tier,Seller Tier,
+Seller Score,Seller Score,
+Total Sales Count,Total Sales Count,
+Total Sales Amount,Total Sales Amount,
+Average Rating,Average Rating,
+Total Reviews,Total Reviews,
+Performance Metrics,Performance Metrics,
+Order Fulfillment Rate,Order Fulfillment Rate,
+On-Time Delivery Rate,On-Time Delivery Rate,
+Return Rate,Return Rate,
+Avg Response Time (hrs),Avg Response Time (hrs),
+Cancellation Rate,Cancellation Rate,
+Complaint Rate,Complaint Rate,
+Positive Feedback Rate,Positive Feedback Rate,
+Last Metrics Update,Last Metrics Update,
+
+# Badges
+Badges & Achievements,Badges & Achievements,
+Badges,Badges,
+Top Seller,Top Seller,
+Premium Seller,Premium Seller,
+
+# Seller Settings
+Seller Settings,Seller Settings,
+Commission Plan,Commission Plan,
+Default Shipping Rule,Default Shipping Rule,
+Default Return Policy,Default Return Policy,
+Max Listings,Max Listings,
+Auto Accept Orders,Auto Accept Orders,
+Accepts Returns,Accepts Returns,
+Vacation Mode,Vacation Mode,
+
+# Restrictions
+Restrictions,Restrictions,
+Is Restricted,Is Restricted,
+Restriction Reason,Restriction Reason,
+Restricted At,Restricted At,
+Can Sell,Can Sell,
+Can Withdraw,Can Withdraw,
+Can Create Listings,Can Create Listings,
+
+# Featured
+Featured Status,Featured Status,
+Is Featured,Is Featured,
+Featured From,Featured From,
+Featured Until,Featured Until,
+Joined At,Joined At,
+Last Active At,Last Active At,
+
+# Seller Onboarding
+Onboarding,Onboarding,
+Onboarding Status,Onboarding Status,
+Step,Step,
+Complete Profile,Complete Profile,
+Upload Documents,Upload Documents,
+Bank Details,Bank Details,
+Agreement,Agreement,
+Terms Accepted,Terms Accepted,
+
+# Status Values
+Active,Active,
+Inactive,Inactive,
+Suspended,Suspended,
+Under Review,Under Review,
