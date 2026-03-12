@@ -105,21 +105,56 @@ required_apps = ["tradehub_core"]
 
 # Hook on document methods and events
 
-# doc_events = {
-# 	"Certificate": {
-# 		"on_update": "tradehub_compliance.doctype.certificate.certificate.on_update"
-# 	}
-# }
+# Data Sharing Preference: consent withdrawal triggers 3-phase cleanup
+# Seller Transparency Profile: refresh metrics from seller on update
+# Masked Message: PII scan and sanitize on insert, clear cache on update
+# Audience Segment: recompute members on filter change, cleanup on delete
+doc_events = {
+	"Data Sharing Preference": {
+		"on_update": "tradehub_compliance.tradehub_compliance.doctype.data_sharing_preference.data_sharing_preference.propagate_consent_withdrawal",
+	},
+	"Seller Transparency Profile": {
+		"on_update": "tradehub_compliance.tradehub_compliance.doctype.seller_transparency_profile.seller_transparency_profile.SellerTransparencyProfile.on_update",
+	},
+	"Masked Message": {
+		"before_insert": "tradehub_compliance.tradehub_compliance.doctype.masked_message.masked_message.MaskedMessage.scan_and_sanitize_message_body",
+	},
+	"Audience Segment": {
+		"on_update": "tradehub_compliance.tradehub_compliance.doctype.audience_segment.audience_segment.AudienceSegment.enqueue_recompute_if_filter_changed",
+		"on_trash": "tradehub_compliance.tradehub_compliance.doctype.audience_segment.audience_segment.AudienceSegment.on_trash",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
 
-# Compliance-specific scheduled tasks: certificate_alerts
-# This task is moved from the monolithic tr_tradehub app during decomposition
+# Compliance-specific scheduled tasks:
+# - certificate_alerts: daily alerts for expiring certificates (legacy)
+# - Transparency tasks: refresh_transparency_metrics, check_certificate_expiry, anonymize_inactive_consent_data
+# - Audience tasks: compute_all_audience_segments, compute_segment_metrics, cleanup_expired_masked_messages, pii_audit_scan
 scheduler_events = {
 	"daily": [
 		"tradehub_compliance.tasks.certificate_alerts"
-	]
+	],
+	"weekly": [
+		"tradehub_compliance.tradehub_compliance.transparency.tasks.anonymize_inactive_consent_data",
+		"tradehub_compliance.tradehub_compliance.audience.tasks.cleanup_expired_masked_messages",
+		"tradehub_compliance.tradehub_compliance.audience.tasks.pii_audit_scan",
+	],
+	"cron": {
+		"0 2 * * *": [
+			"tradehub_compliance.tradehub_compliance.transparency.tasks.refresh_transparency_metrics",
+		],
+		"30 2 * * *": [
+			"tradehub_compliance.tradehub_compliance.transparency.tasks.check_certificate_expiry",
+		],
+		"0 3 * * *": [
+			"tradehub_compliance.tradehub_compliance.audience.tasks.compute_all_audience_segments",
+		],
+		"30 3 * * *": [
+			"tradehub_compliance.tradehub_compliance.audience.tasks.compute_segment_metrics",
+		],
+	}
 }
 
 # Testing
