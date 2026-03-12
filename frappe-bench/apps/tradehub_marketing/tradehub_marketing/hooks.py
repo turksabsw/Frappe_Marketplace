@@ -83,14 +83,27 @@ required_apps = ["tradehub_core", "tradehub_catalog", "tradehub_commerce"]
 # -----------
 
 # Permissions evaluated in scripted ways
+# Tenant-based permission hooks for multi-tenant isolation
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Campaign": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Coupon": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Group Buy": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Group Buy Commitment": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Storefront": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Subscription": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Wholesale Offer": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+}
+
+has_permission = {
+	"Campaign": "tradehub_core.permissions.has_tenant_permission",
+	"Coupon": "tradehub_core.permissions.has_tenant_permission",
+	"Group Buy": "tradehub_core.permissions.has_tenant_permission",
+	"Group Buy Commitment": "tradehub_core.permissions.has_tenant_permission",
+	"Storefront": "tradehub_core.permissions.has_tenant_permission",
+	"Subscription": "tradehub_core.permissions.has_tenant_permission",
+	"Wholesale Offer": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------

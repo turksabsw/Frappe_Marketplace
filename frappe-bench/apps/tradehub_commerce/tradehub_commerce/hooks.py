@@ -84,14 +84,45 @@ after_install = "tradehub_commerce.install.after_install"
 # -----------
 
 # Permissions evaluated in scripted ways
+# Tenant-based permission hooks for multi-tenant isolation
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Account Action": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Cart": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Commission Plan": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Commission Rule": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Escrow Account": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Incoterm Price": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Marketplace Order": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Order": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Order Event": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Order Item": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Payment Intent": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Payment Plan": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Quotation": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"RFQ": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"RFQ Quote": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Sub Order": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+}
+
+has_permission = {
+	"Account Action": "tradehub_core.permissions.has_tenant_permission",
+	"Cart": "tradehub_core.permissions.has_tenant_permission",
+	"Commission Plan": "tradehub_core.permissions.has_tenant_permission",
+	"Commission Rule": "tradehub_core.permissions.has_tenant_permission",
+	"Escrow Account": "tradehub_core.permissions.has_tenant_permission",
+	"Incoterm Price": "tradehub_core.permissions.has_tenant_permission",
+	"Marketplace Order": "tradehub_core.permissions.has_tenant_permission",
+	"Order": "tradehub_core.permissions.has_tenant_permission",
+	"Order Event": "tradehub_core.permissions.has_tenant_permission",
+	"Order Item": "tradehub_core.permissions.has_tenant_permission",
+	"Payment Intent": "tradehub_core.permissions.has_tenant_permission",
+	"Payment Plan": "tradehub_core.permissions.has_tenant_permission",
+	"Quotation": "tradehub_core.permissions.has_tenant_permission",
+	"RFQ": "tradehub_core.permissions.has_tenant_permission",
+	"RFQ Quote": "tradehub_core.permissions.has_tenant_permission",
+	"Sub Order": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------

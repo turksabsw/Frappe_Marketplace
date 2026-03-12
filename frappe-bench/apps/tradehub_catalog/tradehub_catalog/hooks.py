@@ -84,20 +84,49 @@ app_include_js = "/assets/tradehub_catalog/js/category_icon.js"
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
+	# App-specific permission handlers
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.get_permission_query_conditions",
 	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.get_permission_query_conditions",
 	"Brand Gating": "tradehub_catalog.tradehub_catalog.permissions.brand_gating_conditions",
 	"Brand Ownership Claim": "tradehub_catalog.tradehub_catalog.permissions.brand_ownership_claim_conditions",
 	"Brand Authorization Request": "tradehub_catalog.tradehub_catalog.permissions.brand_authorization_request_conditions",
 	"Variant Request": "tradehub_catalog.tradehub_catalog.permissions.variant_request_conditions",
+	# Tenant-based permission hooks for multi-tenant isolation
+	"Brand": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Filter Config": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Media Asset": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Media Library": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Product Attribute": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Product Attribute Value": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Product Category": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Product Variant": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Quick Favorite": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Ranking Weight Config": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"SEO Meta": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"User Wishlist": "tradehub_core.permissions.get_tenant_permission_query_conditions",
 }
 
 has_permission = {
+	# App-specific permission handlers
 	"Seller Custom Category": "tradehub_catalog.tradehub_catalog.doctype.seller_custom_category.seller_custom_category.has_permission",
 	"Category Proposal": "tradehub_catalog.tradehub_catalog.doctype.category_proposal.category_proposal.has_permission",
 	"Brand": "tradehub_catalog.tradehub_catalog.permissions.brand_has_permission",
 	"Brand Gating": "tradehub_catalog.tradehub_catalog.permissions.brand_gating_has_permission",
 	"Variant Request": "tradehub_catalog.tradehub_catalog.permissions.variant_request_has_permission",
+	# Tenant-based permission hooks for multi-tenant isolation
+	"Brand Authorization Request": "tradehub_core.permissions.has_tenant_permission",
+	"Brand Ownership Claim": "tradehub_core.permissions.has_tenant_permission",
+	"Filter Config": "tradehub_core.permissions.has_tenant_permission",
+	"Media Asset": "tradehub_core.permissions.has_tenant_permission",
+	"Media Library": "tradehub_core.permissions.has_tenant_permission",
+	"Product Attribute": "tradehub_core.permissions.has_tenant_permission",
+	"Product Attribute Value": "tradehub_core.permissions.has_tenant_permission",
+	"Product Category": "tradehub_core.permissions.has_tenant_permission",
+	"Product Variant": "tradehub_core.permissions.has_tenant_permission",
+	"Quick Favorite": "tradehub_core.permissions.has_tenant_permission",
+	"Ranking Weight Config": "tradehub_core.permissions.has_tenant_permission",
+	"SEO Meta": "tradehub_core.permissions.has_tenant_permission",
+	"User Wishlist": "tradehub_core.permissions.has_tenant_permission",
 }
 
 # DocType Class
