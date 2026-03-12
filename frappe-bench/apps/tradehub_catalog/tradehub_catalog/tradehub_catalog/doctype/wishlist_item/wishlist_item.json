@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "creation": "2026-03-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "listing",
+  "seller_store",
+  "column_break_links",
+  "added_price",
+  "current_price",
+  "price_change_pct",
+  "pricing_section",
+  "target_price",
+  "column_break_pricing",
+  "priority",
+  "notification_enabled",
+  "details_section",
+  "notes",
+  "column_break_details",
+  "added_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Product",
+   "reqd": 1,
+   "description": "The product added to the wishlist"
+  },
+  {
+   "fieldname": "listing",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Listing",
+   "options": "Listing",
+   "description": "The specific listing for this product"
+  },
+  {
+   "fieldname": "seller_store",
+   "fieldtype": "Link",
+   "label": "Seller Store",
+   "options": "Seller Store",
+   "description": "The seller store offering this product"
+  },
+  {
+   "fieldname": "column_break_links",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "added_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Added Price",
+   "description": "Price when the item was added to the wishlist"
+  },
+  {
+   "fieldname": "current_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Current Price",
+   "description": "Current price of the product"
+  },
+  {
+   "fieldname": "price_change_pct",
+   "fieldtype": "Percent",
+   "label": "Price Change %",
+   "read_only": 1,
+   "description": "Percentage change between added price and current price"
+  },
+  {
+   "fieldname": "pricing_section",
+   "fieldtype": "Section Break",
+   "label": "Preferences"
+  },
+  {
+   "fieldname": "target_price",
+   "fieldtype": "Currency",
+   "label": "Target Price",
+   "description": "Desired price for this product"
+  },
+  {
+   "fieldname": "column_break_pricing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh",
+   "description": "Priority level for this wishlist item"
+  },
+  {
+   "default": "1",
+   "fieldname": "notification_enabled",
+   "fieldtype": "Check",
+   "label": "Notification Enabled",
+   "description": "Enable notifications for price changes on this item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Details"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "description": "Additional notes about this wishlist item"
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "added_at",
+   "fieldtype": "Datetime",
+   "label": "Added At",
+   "read_only": 1,
+   "description": "Date and time when this item was added to the wishlist"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Catalog",
+ "name": "Wishlist Item",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}
