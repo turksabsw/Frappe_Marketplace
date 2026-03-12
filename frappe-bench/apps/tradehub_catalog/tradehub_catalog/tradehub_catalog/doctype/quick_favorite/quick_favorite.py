@@ -13,11 +13,28 @@ Key features:
 - Unique constraint: one favorite per user + target_type + target_reference
 - Dynamic Link pattern for polymorphic target references
 - Auto-populated target_name for display convenience
+- Automatic counter management on target documents
+
+Counter Map:
+- Product → favorite_count
+- Seller Profile → favorite_count
+- Seller Store → favorite_count
+- Listing → wishlist_count
 """
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
+
+
+# Counter field map: target_type → counter field name on the target document
+COUNTER_FIELD_MAP = {
+    "Product": "favorite_count",
+    "Seller Profile": "favorite_count",
+    "Seller Store": "favorite_count",
+    "Listing": "wishlist_count",
+}
 
 
 class QuickFavorite(Document):
@@ -31,7 +48,7 @@ class QuickFavorite(Document):
     """
 
     def before_insert(self):
-        """Validate uniqueness and set defaults before inserting."""
+        """Validate uniqueness before inserting a new favorite."""
         self.validate_unique_favorite()
 
     def validate(self):
@@ -39,6 +56,14 @@ class QuickFavorite(Document):
         self.validate_target()
         self.set_target_name()
         self.validate_tenant_isolation()
+
+    def after_insert(self):
+        """Increment target counter after inserting a new favorite."""
+        self.update_target_counter(increment=True)
+
+    def on_trash(self):
+        """Decrement target counter when a favorite is deleted."""
+        self.update_target_counter(increment=False)
 
     # =========================================================================
     # VALIDATION METHODS
@@ -49,16 +74,15 @@ class QuickFavorite(Document):
         Enforce unique constraint: user + target_type + target_reference.
 
         A user cannot favorite the same target more than once.
+        Uses frappe.db.exists for efficient existence check.
         """
-        existing = frappe.db.get_value(
+        existing = frappe.db.exists(
             "Quick Favorite",
             {
                 "user": self.user,
                 "target_type": self.target_type,
                 "target_reference": self.target_reference,
-                "name": ("!=", self.name or "")
-            },
-            "name"
+            }
         )
 
         if existing:
@@ -130,3 +154,44 @@ class QuickFavorite(Document):
             frappe.throw(
                 _("Access denied: You can only manage favorites in your tenant")
             )
+
+    # =========================================================================
+    # COUNTER MANAGEMENT
+    # =========================================================================
+
+    def update_target_counter(self, increment=True):
+        """
+        Increment or decrement the favorite/wishlist counter on the target document.
+
+        Uses frappe.db.set_value for direct DB update without triggering
+        the target document's hooks.
+
+        Args:
+            increment: If True, increment counter by 1. If False, decrement by 1.
+        """
+        counter_field = COUNTER_FIELD_MAP.get(self.target_type)
+
+        if not counter_field:
+            return
+
+        if not frappe.db.exists(self.target_type, self.target_reference):
+            return
+
+        current_count = cint(
+            frappe.db.get_value(
+                self.target_type, self.target_reference, counter_field
+            )
+        )
+
+        if increment:
+            new_count = current_count + 1
+        else:
+            new_count = max(0, current_count - 1)
+
+        frappe.db.set_value(
+            self.target_type,
+            self.target_reference,
+            counter_field,
+            new_count,
+            update_modified=False
+        )

@@ -31,21 +31,64 @@ class UserWishlist(Document):
 	create multiple wishlists but only one can be the default.
 	"""
 
-	def before_insert(self):
-		"""Set defaults before inserting a new wishlist."""
+	def before_save(self):
+		"""Set defaults and ensure constraints before saving."""
+		self.ensure_default_uniqueness()
 		self.generate_share_token()
+		self.compute_share_url()
 
 	def validate(self):
 		"""Validate wishlist data before saving."""
 		self.validate_unique_list_name()
-		self.validate_default_uniqueness()
 		self.validate_tenant_isolation()
-		self.update_total_items()
-		self.update_share_url()
+		self.recount_total_items()
 
 	def on_trash(self):
-		"""Actions before wishlist is deleted."""
-		self.clear_default_on_delete()
+		"""Cleanup Wishlist Items and notify on default deletion."""
+		self.cleanup_wishlist_items()
+		self.notify_default_deletion()
+
+	# =========================================================================
+	# BEFORE SAVE METHODS
+	# =========================================================================
+
+	def ensure_default_uniqueness(self):
+		"""
+		Ensure only one default wishlist per user.
+
+		If this wishlist is being set as default, unset any other default
+		wishlist for the same user.
+		"""
+		if not self.is_default:
+			return
+
+		existing_default = frappe.db.get_value(
+			"User Wishlist",
+			{
+				"user": self.user,
+				"is_default": 1,
+				"name": ("!=", self.name or "")
+			},
+			"name"
+		)
+
+		if existing_default:
+			frappe.db.set_value(
+				"User Wishlist", existing_default, "is_default", 0
+			)
+
+	def generate_share_token(self):
+		"""Generate a unique share token for public wishlist sharing."""
+		if not self.share_token:
+			self.share_token = frappe.generate_hash(length=16)
+
+	def compute_share_url(self):
+		"""Compute the share URL from the share token."""
+		if self.share_token and self.is_public:
+			site_url = frappe.utils.get_url()
+			self.share_url = f"{site_url}/wishlist/{self.share_token}"
+		elif not self.is_public:
+			self.share_url = None
 
 	# =========================================================================
 	# VALIDATION METHODS
@@ -74,31 +117,6 @@ class UserWishlist(Document):
 				)
 			)
 
-	def validate_default_uniqueness(self):
-		"""
-		Ensure only one default wishlist per user.
-
-		If this wishlist is being set as default, unset any other default
-		wishlist for the same user.
-		"""
-		if not self.is_default:
-			return
-
-		existing_default = frappe.db.get_value(
-			"User Wishlist",
-			{
-				"user": self.user,
-				"is_default": 1,
-				"name": ("!=", self.name or "")
-			},
-			"name"
-		)
-
-		if existing_default:
-			frappe.db.set_value(
-				"User Wishlist", existing_default, "is_default", 0
-			)
-
 	def validate_tenant_isolation(self):
 		"""
 		Validate that wishlist belongs to user's tenant.
@@ -124,33 +142,20 @@ class UserWishlist(Document):
 	# ITEM COUNT MANAGEMENT
 	# =========================================================================
 
-	def update_total_items(self):
-		"""Update the total_items count based on the items child table."""
+	def recount_total_items(self):
+		"""Recount the total_items based on the items child table."""
 		self.total_items = len(self.items) if self.items else 0
-
-	# =========================================================================
-	# SHARING METHODS
-	# =========================================================================
-
-	def generate_share_token(self):
-		"""Generate a unique share token for public wishlist sharing."""
-		if not self.share_token:
-			self.share_token = frappe.generate_hash(length=16)
-
-	def update_share_url(self):
-		"""Compute the share URL from the share token."""
-		if self.share_token and self.is_public:
-			site_url = frappe.utils.get_url()
-			self.share_url = f"{site_url}/wishlist/{self.share_token}"
-		elif not self.is_public:
-			self.share_url = None
 
 	# =========================================================================
 	# CLEANUP METHODS
 	# =========================================================================
 
-	def clear_default_on_delete(self):
-		"""Log if a default wishlist is being deleted."""
+	def cleanup_wishlist_items(self):
+		"""Delete all Wishlist Item child records linked to this wishlist."""
+		frappe.db.delete("Wishlist Item", {"parent": self.name})
+
+	def notify_default_deletion(self):
+		"""Notify if a default wishlist is being deleted."""
 		if self.is_default:
 			frappe.msgprint(
 				_("Default wishlist '{0}' has been deleted").format(self.list_name),
