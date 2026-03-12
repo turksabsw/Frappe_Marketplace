@@ -21,9 +21,10 @@ class RFQQuote(Document):
     """
 
     def before_insert(self):
-        """Set submission timestamp."""
+        """Set submission timestamp and auto-populate items from RFQ."""
         if not self.submitted_at:
             self.submitted_at = now_datetime()
+        self.auto_populate_items_from_rfq()
 
     def validate(self):
         """Validate quote data."""
@@ -33,6 +34,8 @@ class RFQQuote(Document):
         self.validate_nda_signed()
         self.validate_deadline()
         self.validate_duplicate_quote()
+        self.validate_single_active_quote()
+        self.validate_readonly_fields()
         self.validate_rfq_status()
         self.calculate_totals()
 
@@ -50,6 +53,139 @@ class RFQQuote(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def auto_populate_items_from_rfq(self):
+        """
+        Auto-populate RFQ Quote Item rows from linked RFQ Items on before_insert.
+
+        For each RFQ Item in the linked RFQ, appends an RFQ Quote Item row
+        with fetched fields: item_name, description, qty, unit, specifications,
+        target_price. Skips if items are already populated.
+        """
+        if not self.rfq:
+            return
+
+        # Skip if items already populated (e.g. client-side pre-fill)
+        if self.get("items"):
+            return
+
+        rfq_items = frappe.get_all(
+            "RFQ Item",
+            filters={"parent": self.rfq},
+            fields=[
+                "name", "item_name", "description", "quantity",
+                "unit", "specifications", "target_price"
+            ],
+            order_by="idx asc"
+        )
+
+        for rfq_item in rfq_items:
+            self.append("items", {
+                "rfq_item": rfq_item.name,
+                "item_name": rfq_item.item_name,
+                "item_description": rfq_item.description,
+                "qty": flt(rfq_item.quantity, 3),
+                "uom": rfq_item.unit,
+                "rfq_qty": flt(rfq_item.quantity, 3),
+                "rfq_specifications": rfq_item.specifications,
+                "rfq_target_price": flt(rfq_item.target_price, 2),
+            })
+
+    def validate_single_active_quote(self):
+        """
+        Prevent same seller from having multiple active quotes per RFQ.
+
+        Active statuses include Submitted, Under Review, and Quoting.
+        Sellers must withdraw existing active quotes before creating new ones.
+        """
+        if not self.rfq or not self.seller:
+            return
+
+        active_statuses = ["Submitted", "Under Review", "Quoting"]
+
+        filters = {
+            "rfq": self.rfq,
+            "seller": self.seller,
+            "status": ["in", active_statuses],
+            "docstatus": ["<", 2],
+        }
+
+        # Exclude current document on update
+        if not self.is_new():
+            filters["name"] = ["!=", self.name]
+
+        existing = frappe.db.exists("RFQ Quote", filters)
+        if existing:
+            frappe.throw(
+                _("Seller already has an active quote for this RFQ. "
+                  "Please withdraw the existing quote before creating a new one.")
+            )
+
+    def validate_readonly_fields(self):
+        """
+        Server-side immutability check for fetch_from fields on RFQ Quote Items.
+
+        Ensures fields fetched from RFQ Item cannot be tampered with client-side.
+        Validates item_name, item_description, rfq_qty, uom, rfq_specifications,
+        and rfq_target_price against authoritative RFQ Item data.
+
+        CRITICAL: Buyer email is explicitly excluded from this validation
+        to prevent exposure of buyer PII through error messages.
+        """
+        if self.is_new():
+            return
+
+        # NOTE: buyer email is intentionally excluded from readonly validation
+        # to avoid leaking buyer PII in error messages
+        field_map = {
+            "item_name": "item_name",
+            "item_description": "description",
+            "rfq_qty": "quantity",
+            "uom": "unit",
+            "rfq_specifications": "specifications",
+            "rfq_target_price": "target_price",
+        }
+
+        for item in self.get("items", []):
+            if not item.rfq_item:
+                continue
+
+            rfq_item_data = frappe.db.get_value(
+                "RFQ Item", item.rfq_item,
+                list(field_map.values()),
+                as_dict=True
+            )
+            if not rfq_item_data:
+                continue
+
+            for quote_field, rfq_field in field_map.items():
+                expected = rfq_item_data.get(rfq_field)
+                actual = item.get(quote_field)
+
+                # Skip comparison if source value is empty/None
+                if expected is None or expected == "":
+                    continue
+
+                # Use flt for numeric fields to handle precision differences
+                if rfq_field in ("quantity", "target_price"):
+                    precision = 3 if rfq_field == "quantity" else 2
+                    if actual is not None and flt(actual, precision) != flt(expected, precision):
+                        frappe.throw(
+                            _("Field '{0}' in row {1} cannot be modified. "
+                              "It is fetched from the RFQ Item.").format(
+                                quote_field, item.idx
+                            ),
+                            frappe.PermissionError
+                        )
+                else:
+                    if actual is not None and str(actual) != str(expected):
+                        frappe.throw(
+                            _("Field '{0}' in row {1} cannot be modified. "
+                              "It is fetched from the RFQ Item.").format(
+                                quote_field, item.idx
+                            ),
+                            frappe.PermissionError
+                        )
 
     def refetch_denormalized_fields(self):
         """
@@ -294,3 +430,18 @@ class RFQQuote(Document):
         self.save()
 
         return revision.name
+
+
+# ---------------------------------------------------------------------------
+# Doc event hook handlers (registered in hooks.py)
+# ---------------------------------------------------------------------------
+
+def rfq_quote_before_insert(doc, method):
+    """Doc event hook: auto-populate items from linked RFQ on before_insert."""
+    doc.auto_populate_items_from_rfq()
+
+
+def rfq_quote_validate(doc, method):
+    """Doc event hook: validate single active quote and readonly fields."""
+    doc.validate_single_active_quote()
+    doc.validate_readonly_fields()

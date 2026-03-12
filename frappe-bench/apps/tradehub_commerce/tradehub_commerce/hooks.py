@@ -133,6 +133,10 @@ doc_events = {
 	},
 	"Shipment": {
 		"after_insert": "tradehub_commerce.overrides.marketplace_order_actions.on_shipment_create"
+	},
+	"RFQ Quote": {
+		"before_insert": "tradehub_commerce.tradehub_commerce.doctype.rfq_quote.rfq_quote.rfq_quote_before_insert",
+		"validate": "tradehub_commerce.tradehub_commerce.doctype.rfq_quote.rfq_quote.rfq_quote_validate"
 	}
 }
 
