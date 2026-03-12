@@ -1,0 +1,196 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "USER-WISH-.#####",
+ "creation": "2026-03-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "wishlist_section",
+  "user",
+  "list_name",
+  "column_break_wishlist",
+  "is_default",
+  "is_public",
+  "digest_mode",
+  "sharing_section",
+  "share_token",
+  "column_break_sharing",
+  "share_url",
+  "items_tab",
+  "items_section",
+  "items",
+  "total_items",
+  "tenant_tab",
+  "tenant_section",
+  "tenant"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "wishlist_section",
+   "fieldtype": "Section Break",
+   "label": "Wishlist Information"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "description": "The user who owns this wishlist"
+  },
+  {
+   "fieldname": "list_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "List Name",
+   "reqd": 1,
+   "description": "Name of the wishlist"
+  },
+  {
+   "fieldname": "column_break_wishlist",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default",
+   "description": "Whether this is the user's default wishlist"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_public",
+   "fieldtype": "Check",
+   "label": "Is Public",
+   "description": "Whether this wishlist is publicly shareable"
+  },
+  {
+   "default": "0",
+   "fieldname": "digest_mode",
+   "fieldtype": "Check",
+   "label": "Digest Mode",
+   "description": "Enable digest notifications for price changes in this wishlist"
+  },
+  {
+   "fieldname": "sharing_section",
+   "fieldtype": "Section Break",
+   "label": "Sharing",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "share_token",
+   "fieldtype": "Data",
+   "label": "Share Token",
+   "read_only": 1,
+   "description": "Auto-generated token for sharing this wishlist"
+  },
+  {
+   "fieldname": "column_break_sharing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "share_url",
+   "fieldtype": "Data",
+   "label": "Share URL",
+   "read_only": 1,
+   "description": "Public URL for sharing this wishlist (computed from share_token)"
+  },
+  {
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Wishlist Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Wishlist Item",
+   "description": "Products and listings in this wishlist"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_items",
+   "fieldtype": "Int",
+   "label": "Total Items",
+   "read_only": 1,
+   "description": "Total number of items in this wishlist"
+  },
+  {
+   "fieldname": "tenant_tab",
+   "fieldtype": "Tab Break",
+   "label": "Tenant"
+  },
+  {
+   "fieldname": "tenant_section",
+   "fieldtype": "Section Break",
+   "label": "Tenant"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1,
+   "in_standard_filter": 1,
+   "description": "Multi-tenant isolation field"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Catalog",
+ "name": "User Wishlist",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Buyer",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "list_name, user",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "list_name",
+ "track_changes": 1
+}
