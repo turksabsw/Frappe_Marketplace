@@ -65,6 +65,18 @@
   "rating_score",
   "stock_score",
   "is_winner",
+  "enhanced_scoring_section",
+  "service_score",
+  "seller_tier_bonus",
+  "rank",
+  "total_competitors",
+  "column_break_enhanced_scoring",
+  "is_disqualified",
+  "disqualification_reason",
+  "last_winner_change",
+  "score_details_section",
+  "score_breakdown_json",
+  "improvement_suggestions",
   "system_tab",
   "status_section",
   "status",
@@ -491,6 +503,91 @@
    "label": "Buy Box Winner",
    "read_only": 1,
    "description": "Whether this entry currently wins the Buy Box"
+  },
+  {
+   "fieldname": "enhanced_scoring_section",
+   "fieldtype": "Section Break",
+   "label": "Enhanced Scoring"
+  },
+  {
+   "default": "0",
+   "fieldname": "service_score",
+   "fieldtype": "Float",
+   "label": "Service Score",
+   "read_only": 1,
+   "precision": 2,
+   "description": "Score based on seller service quality metrics"
+  },
+  {
+   "default": "0",
+   "fieldname": "seller_tier_bonus",
+   "fieldtype": "Float",
+   "label": "Seller Tier Bonus",
+   "read_only": 1,
+   "precision": 2,
+   "description": "Bonus score applied based on seller tier level"
+  },
+  {
+   "default": "0",
+   "fieldname": "rank",
+   "fieldtype": "Int",
+   "label": "Rank",
+   "read_only": 1,
+   "description": "Seller rank among competitors for this product"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_competitors",
+   "fieldtype": "Int",
+   "label": "Total Competitors",
+   "read_only": 1,
+   "description": "Total number of sellers competing for this product's Buy Box"
+  },
+  {
+   "fieldname": "column_break_enhanced_scoring",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_disqualified",
+   "fieldtype": "Check",
+   "label": "Is Disqualified",
+   "read_only": 1,
+   "description": "Whether this entry is disqualified from Buy Box competition"
+  },
+  {
+   "fieldname": "disqualification_reason",
+   "fieldtype": "Data",
+   "label": "Disqualification Reason",
+   "read_only": 1,
+   "description": "Reason for disqualification from Buy Box competition"
+  },
+  {
+   "fieldname": "last_winner_change",
+   "fieldtype": "Datetime",
+   "label": "Last Winner Change",
+   "read_only": 1,
+   "description": "When the Buy Box winner last changed for this product"
+  },
+  {
+   "fieldname": "score_details_section",
+   "fieldtype": "Section Break",
+   "label": "Score Details",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "score_breakdown_json",
+   "fieldtype": "Long Text",
+   "label": "Score Breakdown",
+   "read_only": 1,
+   "description": "JSON breakdown of individual scoring components"
+  },
+  {
+   "fieldname": "improvement_suggestions",
+   "fieldtype": "Text",
+   "label": "Improvement Suggestions",
+   "read_only": 1,
+   "description": "Suggestions for improving Buy Box score"
   },
   {
    "fieldname": "system_tab",
