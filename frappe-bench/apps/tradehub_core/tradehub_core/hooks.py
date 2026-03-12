@@ -227,3 +227,14 @@ scheduler_events = {
 # auth_hooks = [
 # 	"tradehub_core.auth.validate"
 # ]
+
+# Fixtures
+# --------
+
+# RBAC role hierarchy fixtures — 13 roles in 3 tiers:
+# Platform Provider: Platform Admin, Platform Finance, Compliance Officer, Support Agent
+# Seller: Seller Owner, Seller Admin, Seller Finance, Seller Staff, Seller Viewer
+# Buyer: Buyer Admin, Buyer Procurement, Buyer Finance, Buyer Viewer
+fixtures = [
+	"Role",
+]
