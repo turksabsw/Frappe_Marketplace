@@ -19,7 +19,8 @@
   "is_active",
   "column_break_status",
   "joined_at",
-  "left_at"
+  "left_at",
+  "unique_key"
  ],
  "fields": [
   {
@@ -129,6 +130,15 @@
    "fieldtype": "Datetime",
    "label": "Left At",
    "read_only": 1
+  },
+  {
+   "description": "Composite unique key: segment|member_type|member_id (auto-generated)",
+   "fieldname": "unique_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Unique Key",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 0,

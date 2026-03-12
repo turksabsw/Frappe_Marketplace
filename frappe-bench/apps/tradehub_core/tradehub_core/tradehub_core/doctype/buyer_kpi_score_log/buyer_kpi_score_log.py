@@ -57,6 +57,9 @@ class BuyerKPIScoreLog(Document):
 		"""Prevent modification of system-generated fields after creation."""
 		if self.is_new():
 			return
+		# Allow programmatic lifecycle transitions (finalize, appeal, revise)
+		if self.flags.get("ignore_guard"):
+			return
 
 		system_fields = [
 			'previous_score',
@@ -312,6 +315,7 @@ class BuyerKPIScoreLog(Document):
 		self.status = "Finalized"
 		self.finalized_at = now_datetime()
 		self.finalized_by = user or frappe.session.user
+		self.flags.ignore_guard = True
 		self.save()
 
 		# Update buyer's current score
@@ -369,6 +373,7 @@ class BuyerKPIScoreLog(Document):
 			(self.calculation_notes or "") +
 			"\n\nAppeal submitted: {0}".format(reason)
 		)
+		self.flags.ignore_guard = True
 		self.save()
 
 		frappe.msgprint(_("Appeal submitted successfully"))
@@ -404,6 +409,7 @@ class BuyerKPIScoreLog(Document):
 		self.calculate_score_change()
 		self.determine_grade()
 		self.determine_passing_status()
+		self.flags.ignore_guard = True
 		self.save()
 
 		# Update buyer if this was the latest score

@@ -249,7 +249,7 @@ class UserSegment(Document):
                 "Buyer KPI Score Log",
                 filters={"buyer": member_id, "status": "Finalized"},
                 fields=["*"],
-                order_by="scoring_date desc",
+                order_by="calculation_date desc",
                 limit=1
             )
             return logs[0] if logs else None

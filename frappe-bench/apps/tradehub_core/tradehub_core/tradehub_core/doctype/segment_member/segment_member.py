@@ -37,6 +37,7 @@ class SegmentMember(Document):
             self.joined_at = now_datetime()
         self._set_member_doctype()
         self._check_duplicate()
+        self._set_unique_key()
 
     def validate(self):
         """Validate membership data."""
@@ -44,7 +45,13 @@ class SegmentMember(Document):
         self._validate_member_type()
         self._validate_member_exists()
         self._check_duplicate()
+        self._set_unique_key()
         self._sync_active_timestamps()
+
+    def _set_unique_key(self):
+        """Set composite unique key for DB-level uniqueness enforcement."""
+        if self.segment and self.member_type and self.member_id:
+            self.unique_key = f"{self.segment}|{self.member_type}|{self.member_id}"
 
     def _set_member_doctype(self):
         """Auto-set member_doctype from member_type for Dynamic Link resolution."""

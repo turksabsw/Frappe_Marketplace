@@ -644,14 +644,14 @@ def _update_template_stats(template_name):
     if frappe.db.exists("DocType", "Buyer KPI Score Log"):
         usage_count = frappe.db.count(
             "Buyer KPI Score Log",
-            {"template": template_name}
+            {"kpi_template": template_name}
         )
 
         if usage_count > 0:
             avg_result = frappe.db.sql("""
                 SELECT AVG(overall_score) as avg_score
                 FROM `tabBuyer KPI Score Log`
-                WHERE template = %s AND status = 'Finalized'
+                WHERE kpi_template = %s AND status = 'Finalized'
             """, template_name, as_dict=True)
 
             if avg_result and avg_result[0].avg_score:
@@ -712,7 +712,7 @@ def _run_user_segment_refresh():
             "auto_refresh": 1,
         },
         fields=["name", "segment_name", "target_type"],
-        order_by="priority desc"
+        order_by="priority asc"
     )
 
     if not segments:

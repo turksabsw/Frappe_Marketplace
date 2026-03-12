@@ -15,13 +15,13 @@ Implements the 8-step scoring pipeline for buyer performance evaluation:
     8. Finalize  — Clamp to [0, 100], round, and return result
 
 Default Buyer KPI Metrics (STD_BUYER_SCORE, 9 metrics, Σ=100%):
-    TOTAL_SPEND         (total_spent)           — 15%, logarithmic
+    TOTAL_SPEND         (total_spent)           — 20%, logarithmic
     ORDER_FREQ          (total_orders)          — 15%, logarithmic
     PAYMENT_ON_TIME     (payment_on_time_rate)  — 15%, higher_is_better
-    BUYER_RETURN_RATE   (return_rate)           — 12%, lower_is_better
-    AVG_ORDER_VAL       (average_order_value)   — 8%,  logarithmic
-    BUYER_DISPUTE_RATE  (dispute_rate)          — 12%, lower_is_better
-    FEEDBACK_RATE       (feedback_rate)         — 8%,  higher_is_better
+    BUYER_RETURN_RATE   (return_rate)           — 10%, lower_is_better
+    AVG_ORDER_VAL       (average_order_value)   — 10%, logarithmic
+    BUYER_DISPUTE_RATE  (dispute_rate)          — 10%, lower_is_better
+    FEEDBACK_RATE       (feedback_rate)         — 5%,  higher_is_better
     ACCOUNT_AGE         (account_age_days)      — 10%, higher_is_better
     LAST_ACTIVITY       (days_since_last_active)— 5%,  lower_is_better
 
@@ -47,13 +47,13 @@ from tradehub_core.tradehub_core.scoring.normalizers import (
 # Each entry: (kpi_code, metric_field, weight, normalization_type, config)
 # config is a dict with normalization-specific parameters
 DEFAULT_BUYER_METRICS = [
-    ("TOTAL_SPEND", "total_spent", 15, "logarithmic", {"target_good": 10000}),
+    ("TOTAL_SPEND", "total_spent", 20, "logarithmic", {"target_good": 10000}),
     ("ORDER_FREQ", "total_orders", 15, "logarithmic", {"target_good": 50}),
     ("PAYMENT_ON_TIME", "payment_on_time_rate", 15, "higher_is_better", {"target_good": 100, "target_poor": 50}),
-    ("BUYER_RETURN_RATE", "return_rate", 12, "lower_is_better", {"target_good": 0, "target_poor": 20}),
-    ("AVG_ORDER_VAL", "average_order_value", 8, "logarithmic", {"target_good": 5000}),
-    ("BUYER_DISPUTE_RATE", "dispute_rate", 12, "lower_is_better", {"target_good": 0, "target_poor": 10}),
-    ("FEEDBACK_RATE", "feedback_rate", 8, "higher_is_better", {"target_good": 100, "target_poor": 0}),
+    ("BUYER_RETURN_RATE", "return_rate", 10, "lower_is_better", {"target_good": 0, "target_poor": 20}),
+    ("AVG_ORDER_VAL", "average_order_value", 10, "logarithmic", {"target_good": 5000}),
+    ("BUYER_DISPUTE_RATE", "dispute_rate", 10, "lower_is_better", {"target_good": 0, "target_poor": 10}),
+    ("FEEDBACK_RATE", "feedback_rate", 5, "higher_is_better", {"target_good": 100, "target_poor": 0}),
     ("ACCOUNT_AGE", "account_age_days", 10, "higher_is_better", {"target_good": 730, "target_poor": 0}),
     ("LAST_ACTIVITY", "days_since_last_active", 5, "lower_is_better", {"target_good": 0, "target_poor": 90}),
 ]

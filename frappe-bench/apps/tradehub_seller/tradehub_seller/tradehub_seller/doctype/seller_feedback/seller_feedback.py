@@ -80,7 +80,7 @@ class SellerFeedback(Document):
     def on_update(self):
         """Actions after feedback is updated."""
         # Track revision
-        if not self.is_new() and self.has_value_changed("feedback_text") or self.has_value_changed("overall_rating"):
+        if not self.is_new() and (self.has_value_changed("feedback_text") or self.has_value_changed("overall_rating")):
             if self.status == "Active":
                 self.db_set("revised_date", now_datetime())
                 self.db_set("revised_by", frappe.session.user)

@@ -480,7 +480,7 @@ def _recalculate_metrics_for_seller(seller_name):
     Args:
         seller_name: Seller Profile name.
     """
-    existing_metrics = frappe.db.exists("Seller Metrics", {"seller_profile": seller_name})
+    existing_metrics = frappe.db.exists("Seller Metrics", {"seller": seller_name})
 
     if not existing_metrics:
         return
@@ -589,7 +589,7 @@ def _calculate_score_for_seller(seller_name):
     from tradehub_seller.tradehub_seller.scoring.engine import calculate_score
 
     # Get seller metrics
-    metrics_name = frappe.db.exists("Seller Metrics", {"seller_profile": seller_name})
+    metrics_name = frappe.db.exists("Seller Metrics", {"seller": seller_name})
     if not metrics_name:
         return
 

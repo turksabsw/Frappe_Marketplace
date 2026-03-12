@@ -1,8 +1,6 @@
 # Copyright (c) 2024, TR TradeHub and contributors
 # For license information, please see license.txt
 
-import math
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -10,6 +8,12 @@ from frappe.utils import cint, flt, getdate, now_datetime, nowdate
 from datetime import datetime
 
 from tradehub_core.tradehub_core.utils.safe_math import safe_divide
+from tradehub_core.tradehub_core.scoring.grading import score_to_grade
+from tradehub_core.tradehub_core.scoring.normalizers import (
+    normalize_higher_is_better,
+    normalize_lower_is_better,
+    normalize_logarithmic,
+)
 
 
 # Default grading weights (§8.3 Naming Contract)
@@ -29,106 +33,6 @@ MIN_ORDERS_FOR_GRADING = 3
 # Provisional grade for buyers below minimum order threshold
 PROVISIONAL_GRADE = "C"
 PROVISIONAL_SCORE = 55.0
-
-
-def score_to_grade(score):
-    """Convert a numeric score (0-100) to a letter grade (A-F).
-
-    Grade boundaries (inclusive lower bound):
-        A >= 85, B >= 70, C >= 55, D >= 40, E >= 25, F < 25
-
-    Always rounds to 2 decimal places before comparison to handle
-    floating point precision issues.
-
-    Args:
-        score: Numeric score value (0-100).
-
-    Returns:
-        str: Letter grade (A, B, C, D, E, or F).
-    """
-    score = round(flt(score), 2)
-    if score >= 85:
-        return "A"
-    if score >= 70:
-        return "B"
-    if score >= 55:
-        return "C"
-    if score >= 40:
-        return "D"
-    if score >= 25:
-        return "E"
-    return "F"
-
-
-def normalize_higher_is_better(value, target_good, target_poor):
-    """Normalize a metric where higher values are better.
-
-    Maps value linearly from [target_poor, target_good] to [0, 100].
-    Values at or above target_good get 100. Values at or below target_poor get 0.
-
-    Args:
-        value: Raw metric value.
-        target_good: Value that maps to score 100.
-        target_poor: Value that maps to score 0.
-
-    Returns:
-        float: Normalized score (0-100).
-    """
-    value = flt(value)
-    target_good = flt(target_good)
-    target_poor = flt(target_poor)
-
-    if value >= target_good:
-        return 100.0
-    if value <= target_poor:
-        return 0.0
-    return safe_divide(value - target_poor, target_good - target_poor) * 100.0
-
-
-def normalize_lower_is_better(value, target_good, target_poor):
-    """Normalize a metric where lower values are better.
-
-    Maps value linearly from [target_good, target_poor] to [100, 0].
-    Values at or below target_good get 100. Values at or above target_poor get 0.
-
-    Args:
-        value: Raw metric value.
-        target_good: Value that maps to score 100 (low end).
-        target_poor: Value that maps to score 0 (high end).
-
-    Returns:
-        float: Normalized score (0-100).
-    """
-    value = flt(value)
-    target_good = flt(target_good)
-    target_poor = flt(target_poor)
-
-    if value <= target_good:
-        return 100.0
-    if value >= target_poor:
-        return 0.0
-    return safe_divide(target_poor - value, target_poor - target_good) * 100.0
-
-
-def normalize_logarithmic(value, target_good):
-    """Normalize a metric using logarithmic scale.
-
-    Useful for metrics like total_spend where marginal value decreases
-    at higher amounts. Uses log10 for normalization.
-
-    Args:
-        value: Raw metric value (must be >= 0).
-        target_good: Value that maps to score 100.
-
-    Returns:
-        float: Normalized score (0-100).
-    """
-    value = flt(value)
-    target_good = flt(target_good)
-
-    if value <= 0:
-        return 0.0
-    return min(100.0, safe_divide(math.log10(value + 1), math.log10(target_good + 1)) * 100.0)
 
 
 class CustomerGrade(Document):
@@ -196,6 +100,9 @@ class CustomerGrade(Document):
     def _guard_system_fields(self):
         """Prevent modification of system-generated fields after creation."""
         if self.is_new():
+            return
+        # Allow programmatic lifecycle transitions (finalize, override)
+        if self.flags.get("ignore_guard"):
             return
 
         system_fields = [
@@ -625,6 +532,7 @@ class CustomerGrade(Document):
         self.status = "Finalized"
         self.finalized_at = now_datetime()
         self.finalized_by = user or frappe.session.user
+        self.flags.ignore_guard = True
         self.save()
 
         # Update buyer's current grade
@@ -688,6 +596,7 @@ class CustomerGrade(Document):
             (self.calculation_notes or "") +
             f"\n\nGrade overridden from {old_grade} to {new_grade}: {reason}"
         )
+        self.flags.ignore_guard = True
         self.save()
 
         frappe.msgprint(_("Grade overridden from {0} to {1}").format(old_grade, new_grade))

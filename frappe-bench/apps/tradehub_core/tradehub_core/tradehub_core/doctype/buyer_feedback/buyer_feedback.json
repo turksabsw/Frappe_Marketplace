@@ -67,7 +67,7 @@
    "fieldname": "buyer_name",
    "fieldtype": "Data",
    "label": "Buyer Name",
-   "fetch_from": "buyer.full_name",
+   "fetch_from": "buyer.buyer_name",
    "read_only": 1
   },
   {
