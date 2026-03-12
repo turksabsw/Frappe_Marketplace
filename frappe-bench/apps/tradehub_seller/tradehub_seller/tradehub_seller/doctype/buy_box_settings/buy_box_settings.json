@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-02-05 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "weights_section",
+  "price_weight",
+  "delivery_weight",
+  "rating_weight",
+  "column_break_weights",
+  "stock_weight",
+  "service_weight",
+  "tier_weight",
+  "total_weight",
+  "tier_bonuses_section",
+  "tier_bonuses",
+  "algorithm_section",
+  "cooldown_seconds",
+  "column_break_algorithm",
+  "min_orders_for_metrics",
+  "recalculation_batch_size"
+ ],
+ "fields": [
+  {
+   "fieldname": "weights_section",
+   "fieldtype": "Section Break",
+   "label": "Scoring Weights",
+   "description": "Weights must sum to 1.0"
+  },
+  {
+   "default": "0.35",
+   "fieldname": "price_weight",
+   "fieldtype": "Float",
+   "label": "Price Weight",
+   "reqd": 1,
+   "description": "Weight for price competitiveness score"
+  },
+  {
+   "default": "0.20",
+   "fieldname": "delivery_weight",
+   "fieldtype": "Float",
+   "label": "Delivery Weight",
+   "reqd": 1,
+   "description": "Weight for delivery speed score"
+  },
+  {
+   "default": "0.20",
+   "fieldname": "rating_weight",
+   "fieldtype": "Float",
+   "label": "Rating Weight",
+   "reqd": 1,
+   "description": "Weight for seller rating score"
+  },
+  {
+   "fieldname": "column_break_weights",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0.15",
+   "fieldname": "stock_weight",
+   "fieldtype": "Float",
+   "label": "Stock Weight",
+   "reqd": 1,
+   "description": "Weight for stock availability score"
+  },
+  {
+   "default": "0.05",
+   "fieldname": "service_weight",
+   "fieldtype": "Float",
+   "label": "Service Weight",
+   "reqd": 1,
+   "description": "Weight for customer service score"
+  },
+  {
+   "default": "0.05",
+   "fieldname": "tier_weight",
+   "fieldtype": "Float",
+   "label": "Tier Weight",
+   "reqd": 1,
+   "description": "Weight for seller tier bonus score"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "read_only": 1,
+   "description": "Computed total of all weights (must equal 1.0)"
+  },
+  {
+   "fieldname": "tier_bonuses_section",
+   "fieldtype": "Section Break",
+   "label": "Tier Bonuses"
+  },
+  {
+   "fieldname": "tier_bonuses",
+   "fieldtype": "Table",
+   "label": "Tier Bonuses",
+   "options": "Buy Box Tier Bonus",
+   "description": "Bonus scores applied per seller tier"
+  },
+  {
+   "fieldname": "algorithm_section",
+   "fieldtype": "Section Break",
+   "label": "Algorithm Settings"
+  },
+  {
+   "default": "300",
+   "fieldname": "cooldown_seconds",
+   "fieldtype": "Int",
+   "label": "Cooldown Seconds",
+   "description": "Minimum seconds between Buy Box recalculations for the same product"
+  },
+  {
+   "fieldname": "column_break_algorithm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "5",
+   "fieldname": "min_orders_for_metrics",
+   "fieldtype": "Int",
+   "label": "Min Orders for Metrics",
+   "description": "Minimum number of orders before seller metrics are used in scoring"
+  },
+  {
+   "default": "100",
+   "fieldname": "recalculation_batch_size",
+   "fieldtype": "Int",
+   "label": "Recalculation Batch Size",
+   "description": "Number of products to process per batch during bulk recalculation"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Seller",
+ "name": "Buy Box Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
