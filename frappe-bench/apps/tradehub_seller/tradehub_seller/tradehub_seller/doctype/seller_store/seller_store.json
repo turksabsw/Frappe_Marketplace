@@ -105,6 +105,8 @@
   "column_break_settings",
   "timezone",
   "date_format",
+  "social_proof_section",
+  "favorite_count",
   "system_tab",
   "system_section",
   "created_date",
@@ -731,6 +733,18 @@
    "label": "Date Format",
    "options": "dd.mm.yyyy\nmm/dd/yyyy\nyyyy-mm-dd\ndd/mm/yyyy",
    "description": "Date display format"
+  },
+  {
+   "fieldname": "social_proof_section",
+   "fieldtype": "Section Break",
+   "label": "Social Proof"
+  },
+  {
+   "default": "0",
+   "fieldname": "favorite_count",
+   "fieldtype": "Int",
+   "label": "Favorite Count",
+   "read_only": 1
   },
   {
    "fieldname": "system_tab",

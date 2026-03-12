@@ -83,6 +83,10 @@
   "total_sales_amount",
   "average_rating",
   "total_reviews",
+  "social_proof_section",
+  "favorite_count",
+  "column_break_social_proof",
+  "total_wishlist_count",
   "metrics_section",
   "order_fulfillment_rate",
   "on_time_delivery_rate",
@@ -604,6 +608,29 @@
    "fieldname": "total_reviews",
    "fieldtype": "Int",
    "label": "Total Reviews",
+   "read_only": 1
+  },
+  {
+   "fieldname": "social_proof_section",
+   "fieldtype": "Section Break",
+   "label": "Social Proof"
+  },
+  {
+   "default": "0",
+   "fieldname": "favorite_count",
+   "fieldtype": "Int",
+   "label": "Favorite Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_social_proof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_wishlist_count",
+   "fieldtype": "Int",
+   "label": "Total Wishlist Count",
    "read_only": 1
   },
   {

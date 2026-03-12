@@ -26,7 +26,11 @@
   "section_break_7",
   "base_price",
   "column_break_8",
-  "currency"
+  "currency",
+  "social_proof_section",
+  "wishlist_count",
+  "column_break_social_proof",
+  "favorite_count"
  ],
  "fields": [
   {
@@ -160,6 +164,29 @@
    "label": "Currency",
    "options": "Currency",
    "default": "TRY"
+  },
+  {
+   "fieldname": "social_proof_section",
+   "fieldtype": "Section Break",
+   "label": "Social Proof"
+  },
+  {
+   "default": "0",
+   "fieldname": "wishlist_count",
+   "fieldtype": "Int",
+   "label": "Wishlist Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_social_proof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "favorite_count",
+   "fieldtype": "Int",
+   "label": "Favorite Count",
+   "read_only": 1
   }
  ],
  "autoname": "naming_series:",
