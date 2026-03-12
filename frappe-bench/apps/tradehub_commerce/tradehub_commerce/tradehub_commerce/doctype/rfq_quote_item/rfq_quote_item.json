@@ -12,6 +12,9 @@
   "column_break_item",
   "qty",
   "uom",
+  "rfq_qty",
+  "rfq_specifications",
+  "rfq_target_price",
   "pricing_section",
   "unit_price",
   "currency",
@@ -51,7 +54,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "rfq_item.item_description",
+   "fetch_from": "rfq_item.description",
    "fieldname": "item_description",
    "fieldtype": "Small Text",
    "label": "Item Description",
@@ -72,12 +75,33 @@
    "reqd": 1
   },
   {
-   "fetch_from": "rfq_item.uom",
+   "fetch_from": "rfq_item.unit",
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq_item.quantity",
+   "fieldname": "rfq_qty",
+   "fieldtype": "Float",
+   "label": "RFQ Quantity",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq_item.specifications",
+   "fieldname": "rfq_specifications",
+   "fieldtype": "Text",
+   "label": "RFQ Specifications",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq_item.target_price",
+   "fieldname": "rfq_target_price",
+   "fieldtype": "Currency",
+   "label": "RFQ Target Price",
    "read_only": 1
   },
   {
@@ -210,7 +234,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-03-09 00:00:00.000000",
+ "modified": "2026-03-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "RFQ Quote Item",

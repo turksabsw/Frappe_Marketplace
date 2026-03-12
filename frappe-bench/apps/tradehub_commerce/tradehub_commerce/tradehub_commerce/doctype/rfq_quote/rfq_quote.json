@@ -17,6 +17,28 @@
   "column_break_basic",
   "status",
   "submitted_at",
+  "rfq_details_section",
+  "rfq_code",
+  "rfq_description",
+  "rfq_category",
+  "column_break_rfq_details",
+  "rfq_deadline",
+  "rfq_buyer_name",
+  "rfq_buyer_company",
+  "rfq_requirements_section",
+  "rfq_quantity",
+  "rfq_unit",
+  "rfq_budget_min",
+  "column_break_rfq_req",
+  "rfq_budget_max",
+  "rfq_delivery_date",
+  "rfq_delivery_location",
+  "rfq_options_section",
+  "rfq_requires_nda",
+  "rfq_allow_partial",
+  "rfq_require_all_items",
+  "items_section",
+  "items",
   "pricing_section",
   "price",
   "currency",
@@ -97,6 +119,150 @@
    "fieldtype": "Datetime",
    "label": "Submitted At",
    "read_only": 1
+  },
+  {
+   "fieldname": "rfq_details_section",
+   "fieldtype": "Section Break",
+   "label": "RFQ Details",
+   "collapsible": 1
+  },
+  {
+   "fetch_from": "rfq.rfq_code",
+   "fieldname": "rfq_code",
+   "fieldtype": "Data",
+   "label": "RFQ Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.description",
+   "fieldname": "rfq_description",
+   "fieldtype": "Text Editor",
+   "label": "RFQ Description",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.category",
+   "fieldname": "rfq_category",
+   "fieldtype": "Link",
+   "label": "RFQ Category",
+   "options": "Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rfq_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rfq.deadline",
+   "fieldname": "rfq_deadline",
+   "fieldtype": "Datetime",
+   "label": "RFQ Deadline",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.buyer_name",
+   "fieldname": "rfq_buyer_name",
+   "fieldtype": "Data",
+   "label": "RFQ Buyer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.buyer_company",
+   "fieldname": "rfq_buyer_company",
+   "fieldtype": "Data",
+   "label": "RFQ Buyer Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rfq_requirements_section",
+   "fieldtype": "Section Break",
+   "label": "RFQ Requirements",
+   "collapsible": 1
+  },
+  {
+   "fetch_from": "rfq.quantity",
+   "fieldname": "rfq_quantity",
+   "fieldtype": "Float",
+   "label": "RFQ Quantity",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.unit",
+   "fieldname": "rfq_unit",
+   "fieldtype": "Link",
+   "label": "RFQ Unit",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.budget_min",
+   "fieldname": "rfq_budget_min",
+   "fieldtype": "Currency",
+   "label": "RFQ Budget Min",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_rfq_req",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rfq.budget_max",
+   "fieldname": "rfq_budget_max",
+   "fieldtype": "Currency",
+   "label": "RFQ Budget Max",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.delivery_date",
+   "fieldname": "rfq_delivery_date",
+   "fieldtype": "Date",
+   "label": "RFQ Delivery Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.delivery_location",
+   "fieldname": "rfq_delivery_location",
+   "fieldtype": "Data",
+   "label": "RFQ Delivery Location",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rfq_options_section",
+   "fieldtype": "Section Break",
+   "label": "RFQ Options",
+   "collapsible": 1
+  },
+  {
+   "fetch_from": "rfq.requires_nda",
+   "fieldname": "rfq_requires_nda",
+   "fieldtype": "Check",
+   "label": "RFQ Requires NDA",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.allow_partial_quotes",
+   "fieldname": "rfq_allow_partial",
+   "fieldtype": "Check",
+   "label": "RFQ Allow Partial",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "rfq.require_all_items",
+   "fieldname": "rfq_require_all_items",
+   "fieldtype": "Check",
+   "label": "RFQ Require All Items",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "RFQ Quote Item"
   },
   {
    "fieldname": "pricing_section",
@@ -313,7 +479,7 @@
    "link_fieldname": "original_quote"
   }
  ],
- "modified": "2026-03-04 12:55:54.321726",
+ "modified": "2026-03-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "TradeHub Commerce",
  "name": "RFQ Quote",
