@@ -1,0 +1,212 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "BBLOG-.#####",
+ "creation": "2026-02-05 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "entry_section",
+  "buy_box_entry",
+  "sku_product",
+  "column_break_entry",
+  "seller",
+  "recalculated_at",
+  "scores_section",
+  "previous_score",
+  "new_score",
+  "column_break_scores",
+  "previous_rank",
+  "new_rank",
+  "is_winner_change",
+  "details_section",
+  "score_breakdown_json",
+  "disqualification_reason",
+  "column_break_details",
+  "triggered_by",
+  "tenant_section",
+  "tenant"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "entry_section",
+   "fieldtype": "Section Break",
+   "label": "Buy Box Entry Information"
+  },
+  {
+   "fieldname": "buy_box_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Buy Box Entry",
+   "options": "Buy Box Entry",
+   "reqd": 1,
+   "description": "The Buy Box Entry this log relates to"
+  },
+  {
+   "fieldname": "sku_product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "SKU Product",
+   "options": "SKU Product",
+   "description": "Product associated with this log"
+  },
+  {
+   "fieldname": "column_break_entry",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "seller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Seller",
+   "options": "Seller Profile",
+   "description": "Seller associated with this log"
+  },
+  {
+   "fieldname": "recalculated_at",
+   "fieldtype": "Datetime",
+   "label": "Recalculated At",
+   "description": "When the recalculation occurred"
+  },
+  {
+   "fieldname": "scores_section",
+   "fieldtype": "Section Break",
+   "label": "Score Changes"
+  },
+  {
+   "fieldname": "previous_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Previous Score",
+   "precision": 2,
+   "description": "Buy Box score before recalculation"
+  },
+  {
+   "fieldname": "new_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "New Score",
+   "precision": 2,
+   "description": "Buy Box score after recalculation"
+  },
+  {
+   "fieldname": "column_break_scores",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "previous_rank",
+   "fieldtype": "Int",
+   "label": "Previous Rank",
+   "description": "Rank before recalculation"
+  },
+  {
+   "fieldname": "new_rank",
+   "fieldtype": "Int",
+   "label": "New Rank",
+   "description": "Rank after recalculation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_winner_change",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Winner Change",
+   "description": "Whether the Buy Box winner changed in this recalculation"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Details"
+  },
+  {
+   "fieldname": "score_breakdown_json",
+   "fieldtype": "JSON",
+   "label": "Score Breakdown",
+   "description": "Detailed JSON breakdown of individual score components"
+  },
+  {
+   "fieldname": "disqualification_reason",
+   "fieldtype": "Data",
+   "label": "Disqualification Reason",
+   "description": "Reason for disqualification from Buy Box, if applicable"
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "triggered_by",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Triggered By",
+   "options": "\nManual\nScheduled\nHook\nAPI",
+   "description": "What triggered this recalculation"
+  },
+  {
+   "fieldname": "tenant_section",
+   "fieldtype": "Section Break",
+   "label": "Tenant"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1,
+   "in_standard_filter": 1,
+   "description": "Multi-tenant isolation field"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Buy Box",
+   "link_doctype": "Buy Box Entry",
+   "link_fieldname": "name"
+  }
+ ],
+ "modified": "2026-02-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Seller",
+ "name": "Buy Box Log",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 0,
+   "export": 0,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 0,
+   "role": "Seller",
+   "share": 0,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "buy_box_entry, sku_product, seller",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
