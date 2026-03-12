@@ -139,7 +139,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Event Type",
-   "options": "General\nOrder Created\nOrder Confirmed\nOrder Shipped\nOrder Delivered\nOrder Cancelled\nPayment Received\nPayment Failed\nPayment Reminder\nRFQ Created\nRFQ Response Received\nRFQ Expired\nQuotation Received\nQuotation Accepted\nQuotation Rejected\nSample Request Created\nSample Request Approved\nSample Request Rejected\nSample Shipped\nMessage Received\nSeller Verification\nBuyer Verification\nCertificate Expiring\nCertificate Expired\nLow Stock Alert\nPrice Change Alert\nNew Product Alert\nWelcome Email\nPassword Reset\nAccount Deactivated",
+   "options": "General\nOrder Created\nOrder Confirmed\nOrder Shipped\nOrder Delivered\nOrder Cancelled\nPayment Received\nPayment Failed\nPayment Reminder\nRFQ Created\nRFQ Response Received\nRFQ Expired\nQuotation Received\nQuotation Accepted\nQuotation Rejected\nSample Request Created\nSample Request Approved\nSample Request Rejected\nSample Shipped\nMessage Received\nSeller Verification\nBuyer Verification\nCertificate Expiring\nCertificate Expired\nLow Stock Alert\nPrice Change Alert\nNew Product Alert\nWelcome Email\nPassword Reset\nAccount Deactivated\nBack In Stock\nWishlist Share\nWishlist Digest",
    "reqd": 1,
    "description": "The triggering event for this notification"
   },
