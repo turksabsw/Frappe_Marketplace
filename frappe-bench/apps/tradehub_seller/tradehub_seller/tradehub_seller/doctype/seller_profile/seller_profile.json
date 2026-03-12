@@ -1031,7 +1031,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Marka Sahibi",
+   "role": "Seller Owner",
    "share": 0,
    "write": 0
   },
@@ -1043,7 +1043,7 @@
    "print": 1,
    "read": 1,
    "report": 0,
-   "role": "Alici Admin",
+   "role": "Buyer Admin",
    "share": 0,
    "write": 0
   },
@@ -1055,7 +1055,7 @@
    "print": 0,
    "read": 1,
    "report": 0,
-   "role": "Alici Editor",
+   "role": "Buyer Procurement",
    "share": 0,
    "write": 0
   },
@@ -1067,7 +1067,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Satici Admin",
+   "role": "Seller Admin",
    "share": 1,
    "write": 1
   },
@@ -1080,7 +1080,7 @@
    "print": 1,
    "read": 1,
    "report": 0,
-   "role": "Satici",
+   "role": "Seller Staff",
    "share": 0,
    "write": 1
   }
