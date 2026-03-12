@@ -58,6 +58,7 @@ class ModerationCase(Document):
     def validate(self):
         """Validate case data before saving."""
         self._guard_system_fields()
+        self.validate_snapshot_immutability()
         self.validate_content()
         self.validate_status_transitions()
         self.validate_decision()
@@ -95,6 +96,28 @@ class ModerationCase(Document):
                     _("Field '{0}' cannot be modified after creation").format(field),
                     frappe.PermissionError
                 )
+
+    def validate_snapshot_immutability(self):
+        """Ensure content_snapshot is not modified after creation."""
+        if self.is_new():
+            return
+
+        # Get the stored snapshot from the database
+        stored_snapshot = frappe.db.get_value(
+            "Moderation Case", self.name, "content_snapshot"
+        )
+
+        # Handle None/empty gracefully - if both are empty, no mismatch
+        if not stored_snapshot and not self.content_snapshot:
+            return
+
+        # If stored snapshot exists but current is cleared, or vice versa, throw error
+        if (stored_snapshot or "") != (self.content_snapshot or ""):
+            frappe.throw(
+                _("Content snapshot cannot be modified after case creation. "
+                  "The snapshot is immutable for audit integrity."),
+                frappe.ValidationError
+            )
 
     def on_update(self):
         """Actions to perform after case is updated."""
@@ -184,7 +207,8 @@ class ModerationCase(Document):
                             self.content_owner_type = "User"
                         break
 
-                self.content_snapshot = json.dumps(snapshot)
+                self.content_snapshot = json.dumps(snapshot, indent=2, ensure_ascii=False, default=str)
+                self.snapshot_timestamp = now_datetime()
 
             except Exception as e:
                 frappe.log_error(
