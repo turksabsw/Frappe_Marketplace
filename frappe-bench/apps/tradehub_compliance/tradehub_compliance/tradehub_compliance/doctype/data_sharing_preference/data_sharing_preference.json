@@ -1,0 +1,190 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:user",
+ "creation": "2026-03-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "user_section",
+  "user",
+  "column_break_user",
+  "tenant",
+  "consent_section",
+  "consent_given",
+  "consent_timestamp",
+  "sharing_section",
+  "share_order_history",
+  "share_rating_history",
+  "column_break_sharing",
+  "share_payment_metrics",
+  "withdrawal_tab",
+  "withdrawal_section",
+  "withdrawal_requested",
+  "withdrawal_timestamp",
+  "column_break_withdrawal",
+  "withdrawal_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "user_section",
+   "fieldtype": "Section Break",
+   "label": "User Information"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1,
+   "description": "User whose data sharing preferences are recorded"
+  },
+  {
+   "fieldname": "column_break_user",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "set_only_once": 1,
+   "description": "Multi-tenant isolation field"
+  },
+  {
+   "fieldname": "consent_section",
+   "fieldtype": "Section Break",
+   "label": "Consent"
+  },
+  {
+   "default": "0",
+   "fieldname": "consent_given",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Consent Given",
+   "description": "Whether the user has given consent for data sharing"
+  },
+  {
+   "fieldname": "consent_timestamp",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Consent Timestamp",
+   "description": "When consent was given or last updated"
+  },
+  {
+   "fieldname": "sharing_section",
+   "fieldtype": "Section Break",
+   "label": "Data Sharing Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "share_order_history",
+   "fieldtype": "Check",
+   "label": "Share Order History",
+   "description": "Allow sharing of order history data with sellers"
+  },
+  {
+   "default": "0",
+   "fieldname": "share_rating_history",
+   "fieldtype": "Check",
+   "label": "Share Rating History",
+   "description": "Allow sharing of rating and review history"
+  },
+  {
+   "fieldname": "column_break_sharing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "share_payment_metrics",
+   "fieldtype": "Check",
+   "label": "Share Payment Metrics",
+   "description": "Allow sharing of payment reliability metrics"
+  },
+  {
+   "fieldname": "withdrawal_tab",
+   "fieldtype": "Tab Break",
+   "label": "Withdrawal"
+  },
+  {
+   "fieldname": "withdrawal_section",
+   "fieldtype": "Section Break",
+   "label": "Consent Withdrawal"
+  },
+  {
+   "default": "0",
+   "fieldname": "withdrawal_requested",
+   "fieldtype": "Check",
+   "label": "Withdrawal Requested",
+   "description": "Whether the user has requested withdrawal of data sharing consent"
+  },
+  {
+   "fieldname": "withdrawal_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Withdrawal Timestamp",
+   "depends_on": "eval:doc.withdrawal_requested",
+   "description": "When consent withdrawal was requested"
+  },
+  {
+   "fieldname": "column_break_withdrawal",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "withdrawal_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Withdrawal Status",
+   "options": "\nPending\nProcessing\nCompleted",
+   "depends_on": "eval:doc.withdrawal_requested",
+   "description": "Current status of the consent withdrawal process"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-03-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Data Sharing Preference",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "read": 1,
+   "write": 1,
+   "role": "All",
+   "if_owner": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "user, withdrawal_status",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "user",
+ "track_changes": 1
+}
