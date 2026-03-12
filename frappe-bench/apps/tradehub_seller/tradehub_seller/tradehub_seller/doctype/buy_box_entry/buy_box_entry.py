@@ -10,31 +10,37 @@ can quickly add items to cart.
 
 Key features:
 - Multi-tenant data isolation via Seller Profile's tenant
-- Price, delivery time, rating, and stock scoring factors
-- Winner determination based on composite score
-- Automatic score calculation on save
-- fetch_from pattern for product, seller, and tenant information
+- 6-criteria weighted scoring delegated to buy_box/scoring.py
+- 11 disqualification rules delegated to buy_box/disqualification.py
+- Winner determination based on composite score with tiebreaker cascade
+- Redis-based cooldown for recalculation throttling
+- Buy Box Log creation on each recalculation
+- Improvement suggestions generated from score breakdown
 
-Buy Box Algorithm Factors:
-- Price Score (40%): Lower prices score higher
-- Delivery Score (25%): Faster delivery scores higher
-- Rating Score (20%): Higher seller ratings score higher
-- Stock Score (15%): Higher stock availability scores higher
+Buy Box Algorithm (6 Criteria — weights from Buy Box Settings):
+- Price Score: Lower prices score higher
+- Delivery Score: Faster delivery scores higher
+- Rating Score: Higher seller ratings score higher (with confidence)
+- Stock Score: Higher stock availability scores higher (log scale)
+- Service Score: Better service metrics score higher
+- Tier Bonus: Seller tier bonus from Settings tier_bonuses table
 """
+
+import json
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, cint, now_datetime, getdate, nowdate
+from frappe.utils import flt, cint, now_datetime
 
-
-# Default scoring weights
-DEFAULT_WEIGHTS = {
-    "price": 0.40,
-    "delivery": 0.25,
-    "rating": 0.20,
-    "stock": 0.15
-}
+from tradehub_seller.tradehub_seller.buy_box.scoring import (
+    calculate_buy_box_score,
+    apply_tiebreaker,
+    get_buy_box_settings,
+)
+from tradehub_seller.tradehub_seller.buy_box.disqualification import (
+    check_disqualification,
+)
 
 
 class BuyBoxEntry(Document):
@@ -63,11 +69,13 @@ class BuyBoxEntry(Document):
 
     def on_update(self):
         """Actions after Buy Box entry is updated."""
-        self.trigger_buy_box_recalculation()
+        if not self._check_cooldown():
+            return
+        self._trigger_recalculation("Hook")
 
     def on_trash(self):
         """Actions before Buy Box entry is deleted."""
-        self.trigger_buy_box_recalculation_on_delete()
+        self._trigger_recalculation("Hook")
 
     # =========================================================================
     # VALIDATION METHODS
@@ -244,173 +252,172 @@ class BuyBoxEntry(Document):
         self.save()
 
     # =========================================================================
-    # BUY BOX RECALCULATION TRIGGERS
+    # COOLDOWN & RECALCULATION TRIGGERS
     # =========================================================================
 
-    def trigger_buy_box_recalculation(self):
-        """Trigger Buy Box recalculation for this product."""
-        frappe.enqueue(
-            "tr_tradehub.trade_hub.doctype.buy_box_entry.buy_box_entry.recalculate_buy_box_for_product",
-            sku_product=self.sku_product,
-            queue="short",
-            deduplicate=True
-        )
+    def _check_cooldown(self):
+        """
+        Check Redis-based cooldown for Buy Box recalculation.
 
-    def trigger_buy_box_recalculation_on_delete(self):
-        """Trigger recalculation when an entry is deleted."""
+        Uses Redis key trade_hub:buybox_cooldown:{sku_product} with TTL
+        from Buy Box Settings.cooldown_seconds. Returns True if recalculation
+        is allowed, False if still in cooldown period.
+
+        Returns:
+            bool: True if recalculation can proceed
+        """
+        if not self.sku_product:
+            return False
+
+        cache_key = f"trade_hub:buybox_cooldown:{self.sku_product}"
+        cooldown_active = frappe.cache().get_value(cache_key)
+
+        if cooldown_active:
+            return False
+
+        # Set cooldown
+        try:
+            settings = get_buy_box_settings()
+            cooldown_seconds = cint(settings.cooldown_seconds) or 300
+        except Exception:
+            cooldown_seconds = 300
+
+        frappe.cache().set_value(cache_key, 1, expires_in_sec=cooldown_seconds)
+        return True
+
+    def _trigger_recalculation(self, triggered_by="Hook"):
+        """
+        Trigger Buy Box recalculation for this product via background queue.
+
+        Args:
+            triggered_by: Source that triggered recalculation (Hook/Manual/Scheduled/API)
+        """
         frappe.enqueue(
-            "tr_tradehub.trade_hub.doctype.buy_box_entry.buy_box_entry.recalculate_buy_box_for_product",
+            "tradehub_seller.tradehub_seller.doctype.buy_box_entry.buy_box_entry.recalculate_buy_box_for_product",
             sku_product=self.sku_product,
+            triggered_by=triggered_by,
             queue="short",
             deduplicate=True
         )
 
 
 # =============================================================================
-# BUY BOX SCORING FUNCTIONS
+# IMPROVEMENT SUGGESTIONS
 # =============================================================================
 
 
-def calculate_price_score(offer_price, all_prices):
+def _generate_improvement_suggestions(score_breakdown, is_disqualified, disqualification_reason):
     """
-    Calculate price score (0-100) based on competitiveness.
+    Generate actionable improvement suggestions from score breakdown.
 
-    Lower prices get higher scores. The lowest price gets 100,
-    and scores decrease proportionally.
+    Analyzes each scoring component and identifies the weakest areas
+    where sellers can improve their Buy Box competitiveness.
 
     Args:
-        offer_price: The entry's offer price
-        all_prices: List of all active offer prices for the product
+        score_breakdown: Dict with score breakdown per criterion
+        is_disqualified: Whether entry is disqualified
+        disqualification_reason: Reason for disqualification if applicable
 
     Returns:
-        float: Score between 0 and 100
+        str: Newline-separated list of improvement suggestions
     """
-    if not all_prices or len(all_prices) == 0:
-        return 100.0
+    suggestions = []
 
-    min_price = min(all_prices)
-    max_price = max(all_prices)
+    if is_disqualified and disqualification_reason:
+        suggestions.append(
+            _("Disqualified: {0}. Resolve this issue first.").format(disqualification_reason)
+        )
+        return "\n".join(suggestions)
 
-    if max_price == min_price:
-        return 100.0
+    if not score_breakdown or not isinstance(score_breakdown, dict):
+        return ""
 
-    # Linear scoring: lowest price = 100, highest price = 0
-    score = 100 * (1 - (offer_price - min_price) / (max_price - min_price))
-    return max(0, min(100, score))
+    # Analyze each component and suggest improvements for weak scores
+    threshold = 0.5  # Scores below 50% normalized are considered weak
+
+    criteria_advice = {
+        "price": _("Lower your offer price to be more competitive with other sellers."),
+        "delivery": _("Reduce delivery time to improve your delivery score."),
+        "rating": _("Improve your seller rating by providing better customer service and requesting reviews."),
+        "stock": _("Increase stock availability to improve your stock score."),
+        "service": _("Improve response rate, reduce refund rate, and maintain on-time delivery to boost service score."),
+        "tier": _("Upgrade your seller tier to earn tier bonus points."),
+    }
+
+    weak_areas = []
+    for criterion, advice in criteria_advice.items():
+        data = score_breakdown.get(criterion, {})
+        normalized = flt(data.get("normalized", 0))
+        weight = flt(data.get("weight", 0))
+
+        if weight > 0 and normalized < threshold:
+            weak_areas.append((criterion, normalized, weight, advice))
+
+    # Sort by potential impact (weight × improvement room)
+    weak_areas.sort(key=lambda x: x[2] * (1 - x[1]), reverse=True)
+
+    for criterion, normalized, weight, advice in weak_areas:
+        score_pct = round(normalized * 100, 1)
+        suggestions.append(
+            _("{0} score is {1}% (weight: {2}). {3}").format(
+                criterion.title(), score_pct, round(weight * 100, 1), advice
+            )
+        )
+
+    if not suggestions:
+        suggestions.append(_("Your Buy Box scores are competitive. Maintain current performance levels."))
+
+    return "\n".join(suggestions)
 
 
-def calculate_delivery_score(delivery_days, all_delivery_days):
+# =============================================================================
+# BUY BOX LOG CREATION
+# =============================================================================
+
+
+def _create_buy_box_log(entry_name, sku_product, seller, tenant,
+                        previous_score, new_score, previous_rank, new_rank,
+                        is_winner_change, score_breakdown_json,
+                        disqualification_reason, triggered_by):
     """
-    Calculate delivery score (0-100) based on speed.
-
-    Faster delivery gets higher scores.
+    Create a Buy Box Log record for audit trail.
 
     Args:
-        delivery_days: The entry's delivery days
-        all_delivery_days: List of all active delivery days for the product
-
-    Returns:
-        float: Score between 0 and 100
+        entry_name: Buy Box Entry name
+        sku_product: SKU Product name
+        seller: Seller Profile name
+        tenant: Tenant name
+        previous_score: Score before recalculation
+        new_score: Score after recalculation
+        previous_rank: Rank before recalculation
+        new_rank: Rank after recalculation
+        is_winner_change: Whether the winner changed
+        score_breakdown_json: JSON string of score breakdown
+        disqualification_reason: Disqualification reason if applicable
+        triggered_by: What triggered the recalculation
     """
-    if not all_delivery_days or len(all_delivery_days) == 0:
-        return 100.0
-
-    min_days = min(all_delivery_days)
-    max_days = max(all_delivery_days)
-
-    if max_days == min_days:
-        return 100.0
-
-    # Linear scoring: fastest delivery = 100, slowest = 0
-    score = 100 * (1 - (delivery_days - min_days) / (max_days - min_days))
-    return max(0, min(100, score))
-
-
-def calculate_rating_score(average_rating, total_reviews):
-    """
-    Calculate rating score (0-100) based on seller rating.
-
-    Higher ratings with more reviews get higher scores.
-
-    Args:
-        average_rating: Seller's average rating (0-5)
-        total_reviews: Total number of reviews
-
-    Returns:
-        float: Score between 0 and 100
-    """
-    if not average_rating or average_rating <= 0:
-        return 50.0  # Neutral score for unrated sellers
-
-    # Base score from rating (0-5 scale to 0-100)
-    base_score = (average_rating / 5) * 100
-
-    # Confidence boost based on review count (logarithmic)
-    import math
-    confidence_factor = min(1.0, math.log10(total_reviews + 1) / 3)
-
-    # Weighted score: confidence increases weight toward actual rating
-    final_score = 50 + (base_score - 50) * confidence_factor
-
-    return max(0, min(100, final_score))
-
-
-def calculate_stock_score(stock_available, all_stock):
-    """
-    Calculate stock score (0-100) based on availability.
-
-    Higher stock availability gets higher scores.
-
-    Args:
-        stock_available: The entry's stock quantity
-        all_stock: List of all active stock quantities for the product
-
-    Returns:
-        float: Score between 0 and 100
-    """
-    if stock_available <= 0:
-        return 0.0
-
-    if not all_stock or len(all_stock) == 0:
-        return 100.0
-
-    max_stock = max(all_stock)
-
-    if max_stock <= 0:
-        return 100.0
-
-    # Logarithmic scoring to prevent massive stock from dominating
-    import math
-    stock_ratio = math.log10(stock_available + 1) / math.log10(max_stock + 1)
-    score = stock_ratio * 100
-
-    return max(0, min(100, score))
-
-
-def calculate_composite_score(price_score, delivery_score, rating_score, stock_score, weights=None):
-    """
-    Calculate composite Buy Box score from individual scores.
-
-    Args:
-        price_score: Price competitiveness score (0-100)
-        delivery_score: Delivery speed score (0-100)
-        rating_score: Seller rating score (0-100)
-        stock_score: Stock availability score (0-100)
-        weights: Optional custom weights dict
-
-    Returns:
-        float: Composite score (0-100)
-    """
-    w = weights or DEFAULT_WEIGHTS
-
-    score = (
-        w.get("price", 0.40) * price_score +
-        w.get("delivery", 0.25) * delivery_score +
-        w.get("rating", 0.20) * rating_score +
-        w.get("stock", 0.15) * stock_score
-    )
-
-    return round(score, 2)
+    try:
+        log = frappe.new_doc("Buy Box Log")
+        log.buy_box_entry = entry_name
+        log.sku_product = sku_product
+        log.seller = seller
+        log.tenant = tenant
+        log.recalculated_at = now_datetime()
+        log.previous_score = flt(previous_score)
+        log.new_score = flt(new_score)
+        log.previous_rank = cint(previous_rank)
+        log.new_rank = cint(new_rank)
+        log.is_winner_change = 1 if is_winner_change else 0
+        log.score_breakdown_json = score_breakdown_json
+        log.disqualification_reason = disqualification_reason or ""
+        log.triggered_by = triggered_by or "Hook"
+        log.flags.ignore_permissions = True
+        log.insert()
+    except Exception:
+        frappe.log_error(
+            title=_("Buy Box Log Creation Error"),
+            message=frappe.get_traceback()
+        )
 
 
 # =============================================================================
@@ -419,104 +426,206 @@ def calculate_composite_score(price_score, delivery_score, rating_score, stock_s
 
 
 @frappe.whitelist()
-def recalculate_buy_box_for_product(sku_product):
+def recalculate_buy_box_for_product(sku_product, triggered_by="Hook"):
     """
     Recalculate Buy Box scores for all entries of a product.
 
+    Uses the 6-criteria scoring algorithm from buy_box/scoring.py and
+    the 11 disqualification rules from buy_box/disqualification.py.
+
     This function:
     1. Gets all active entries for the product
-    2. Calculates individual scores for each factor
-    3. Calculates composite scores
-    4. Determines the winner
-    5. Updates all entries
+    2. Checks disqualification rules for each entry
+    3. Calculates 6-criteria scores for qualified entries
+    4. Applies tiebreaker cascade for tied scores
+    5. Determines the winner
+    6. Updates all entries with scores, ranks, and improvement suggestions
+    7. Creates Buy Box Log entries for audit trail
 
     Args:
         sku_product: The SKU Product name
+        triggered_by: What triggered recalculation (Hook/Manual/Scheduled/API)
 
     Returns:
         dict: Recalculation result with winner info
     """
-    # Get all active entries
+    # Get all entries (active and inactive) for comprehensive processing
     entries = frappe.get_all(
         "Buy Box Entry",
         filters={
             "sku_product": sku_product,
-            "status": "Active"
+            "status": ("in", ["Active", "Inactive"]),
         },
-        fields=["name", "offer_price", "delivery_days", "stock_available",
-                "seller_average_rating", "seller_total_reviews", "is_winner"]
+        fields=[
+            "name", "offer_price", "delivery_days", "stock_available",
+            "seller_average_rating", "seller_total_reviews", "is_winner",
+            "seller", "seller_tier", "seller_verification_status",
+            "seller_on_time_delivery_rate", "seller_response_rate",
+            "seller_refund_rate", "status", "tenant",
+            "buy_box_score", "rank", "creation",
+        ]
     )
 
     if not entries:
-        return {"message": _("No active Buy Box entries for this product")}
+        return {"message": _("No Buy Box entries for this product")}
 
-    # Collect all values for relative scoring
-    all_prices = [flt(e.offer_price) for e in entries if flt(e.offer_price) > 0]
-    all_delivery_days = [cint(e.delivery_days) for e in entries if cint(e.delivery_days) > 0]
-    all_stock = [flt(e.stock_available) for e in entries]
-
-    # Calculate scores for each entry
+    total_competitors = len([e for e in entries if e.status == "Active"])
+    now = now_datetime()
     scored_entries = []
-    for entry in entries:
-        price_score = calculate_price_score(flt(entry.offer_price), all_prices)
-        delivery_score = calculate_delivery_score(cint(entry.delivery_days), all_delivery_days)
-        rating_score = calculate_rating_score(
-            flt(entry.seller_average_rating),
-            cint(entry.seller_total_reviews)
-        )
-        stock_score = calculate_stock_score(flt(entry.stock_available), all_stock)
 
-        composite_score = calculate_composite_score(
-            price_score, delivery_score, rating_score, stock_score
-        )
+    for entry in entries:
+        previous_score = flt(entry.buy_box_score)
+        previous_rank = cint(entry.rank)
+
+        # Step 1: Check disqualification
+        is_disqualified, disqualification_reason = check_disqualification(entry)
+
+        if is_disqualified:
+            scored_entries.append({
+                "name": entry.name,
+                "seller": entry.seller,
+                "tenant": entry.tenant,
+                "buy_box_score": 0,
+                "price_score": 0,
+                "delivery_score": 0,
+                "rating_score": 0,
+                "stock_score": 0,
+                "service_score": 0,
+                "seller_tier_bonus": 0,
+                "is_disqualified": 1,
+                "disqualification_reason": disqualification_reason,
+                "score_breakdown_json": "{}",
+                "improvement_suggestions": _generate_improvement_suggestions(
+                    {}, True, disqualification_reason
+                ),
+                "was_winner": entry.is_winner,
+                "previous_score": previous_score,
+                "previous_rank": previous_rank,
+                "creation": entry.creation,
+                "seller_on_time_delivery_rate": flt(entry.seller_on_time_delivery_rate),
+                "seller_refund_rate": flt(entry.seller_refund_rate),
+            })
+            continue
+
+        # Step 2: Calculate 6-criteria score
+        score_result = calculate_buy_box_score(entry)
+
+        # Parse breakdown for improvement suggestions
+        breakdown = {}
+        try:
+            breakdown = json.loads(score_result.get("score_breakdown_json", "{}"))
+        except (json.JSONDecodeError, TypeError):
+            pass
 
         scored_entries.append({
             "name": entry.name,
-            "price_score": round(price_score, 2),
-            "delivery_score": round(delivery_score, 2),
-            "rating_score": round(rating_score, 2),
-            "stock_score": round(stock_score, 2),
-            "buy_box_score": composite_score,
-            "was_winner": entry.is_winner
+            "seller": entry.seller,
+            "tenant": entry.tenant,
+            "buy_box_score": flt(score_result["buy_box_score"]),
+            "price_score": flt(score_result["price_score"]),
+            "delivery_score": flt(score_result["delivery_score"]),
+            "rating_score": flt(score_result["rating_score"]),
+            "stock_score": flt(score_result["stock_score"]),
+            "service_score": flt(score_result["service_score"]),
+            "seller_tier_bonus": flt(score_result["seller_tier_bonus"]),
+            "is_disqualified": 0,
+            "disqualification_reason": None,
+            "score_breakdown_json": score_result.get("score_breakdown_json", "{}"),
+            "improvement_suggestions": _generate_improvement_suggestions(
+                breakdown, False, None
+            ),
+            "was_winner": entry.is_winner,
+            "previous_score": previous_score,
+            "previous_rank": previous_rank,
+            "creation": entry.creation,
+            "seller_on_time_delivery_rate": flt(entry.seller_on_time_delivery_rate),
+            "seller_refund_rate": flt(entry.seller_refund_rate),
         })
 
-    # Sort by score (highest first)
-    scored_entries.sort(key=lambda x: x["buy_box_score"], reverse=True)
+    # Step 3: Sort qualified entries with tiebreaker cascade
+    qualified = [e for e in scored_entries if not e["is_disqualified"]]
+    disqualified = [e for e in scored_entries if e["is_disqualified"]]
 
-    # Determine winner (highest score)
-    winner_name = scored_entries[0]["name"] if scored_entries else None
+    sorted_qualified = apply_tiebreaker(qualified)
 
-    # Update all entries
-    now = now_datetime()
-    for entry_data in scored_entries:
+    # Step 4: Determine winner and assign ranks
+    winner_name = sorted_qualified[0]["name"] if sorted_qualified else None
+    previous_winner = None
+
+    for e in scored_entries:
+        if e["was_winner"]:
+            previous_winner = e["name"]
+            break
+
+    is_winner_change = winner_name != previous_winner
+
+    # Assign ranks to qualified entries
+    for rank_idx, entry_data in enumerate(sorted_qualified, start=1):
+        entry_data["new_rank"] = rank_idx
+
+    # Disqualified entries get rank 0
+    for entry_data in disqualified:
+        entry_data["new_rank"] = 0
+
+    # Step 5: Update all entries in database
+    all_sorted = sorted_qualified + disqualified
+
+    for entry_data in all_sorted:
         is_winner = 1 if entry_data["name"] == winner_name else 0
 
         update_values = {
-            "price_score": entry_data["price_score"],
-            "delivery_score": entry_data["delivery_score"],
-            "rating_score": entry_data["rating_score"],
-            "stock_score": entry_data["stock_score"],
-            "buy_box_score": entry_data["buy_box_score"],
+            "price_score": round(entry_data["price_score"], 2),
+            "delivery_score": round(entry_data["delivery_score"], 2),
+            "rating_score": round(entry_data["rating_score"], 2),
+            "stock_score": round(entry_data["stock_score"], 2),
+            "service_score": round(entry_data["service_score"], 2),
+            "seller_tier_bonus": round(entry_data["seller_tier_bonus"], 2),
+            "buy_box_score": round(entry_data["buy_box_score"], 2),
             "is_winner": is_winner,
-            "last_score_update": now
+            "is_disqualified": entry_data["is_disqualified"],
+            "disqualification_reason": entry_data.get("disqualification_reason") or "",
+            "rank": entry_data["new_rank"],
+            "total_competitors": total_competitors,
+            "score_breakdown_json": entry_data.get("score_breakdown_json", "{}"),
+            "improvement_suggestions": entry_data.get("improvement_suggestions", ""),
+            "last_score_update": now,
         }
 
         # Set winner_since if this is a new winner
         if is_winner and not entry_data["was_winner"]:
             update_values["winner_since"] = now
+            update_values["last_winner_change"] = now
 
         # Clear winner_since if no longer winner
         if not is_winner and entry_data["was_winner"]:
             update_values["winner_since"] = None
+            update_values["last_winner_change"] = now
 
         frappe.db.set_value("Buy Box Entry", entry_data["name"], update_values)
+
+        # Step 6: Create Buy Box Log
+        _create_buy_box_log(
+            entry_name=entry_data["name"],
+            sku_product=sku_product,
+            seller=entry_data.get("seller"),
+            tenant=entry_data.get("tenant"),
+            previous_score=entry_data["previous_score"],
+            new_score=entry_data["buy_box_score"],
+            previous_rank=entry_data["previous_rank"],
+            new_rank=entry_data["new_rank"],
+            is_winner_change=is_winner_change,
+            score_breakdown_json=entry_data.get("score_breakdown_json", "{}"),
+            disqualification_reason=entry_data.get("disqualification_reason"),
+            triggered_by=triggered_by,
+        )
 
     frappe.db.commit()
 
     return {
         "success": True,
         "winner": winner_name,
-        "entries_processed": len(scored_entries),
+        "entries_processed": len(all_sorted),
+        "winner_changed": is_winner_change,
         "message": _("Buy Box recalculated successfully")
     }
 
@@ -574,7 +683,8 @@ def get_product_buy_box_entries(sku_product, include_inactive=False):
             "name", "seller", "seller_name", "offer_price", "currency",
             "delivery_days", "stock_available", "buy_box_score",
             "is_winner", "status", "seller_average_rating",
-            "price_score", "delivery_score", "rating_score", "stock_score"
+            "price_score", "delivery_score", "rating_score", "stock_score",
+            "service_score", "seller_tier_bonus", "rank", "is_disqualified"
         ],
         order_by="buy_box_score desc"
     )
@@ -605,7 +715,8 @@ def get_seller_buy_box_entries(seller, sku_product=None):
         fields=[
             "name", "sku_product", "product_name", "product_sku_code",
             "offer_price", "currency", "delivery_days", "stock_available",
-            "buy_box_score", "is_winner", "status"
+            "buy_box_score", "is_winner", "status", "rank",
+            "improvement_suggestions"
         ],
         order_by="is_winner desc, buy_box_score desc"
     )
@@ -812,12 +923,12 @@ def recalculate_all_buy_boxes():
     recalculated = 0
     for product in products:
         try:
-            recalculate_buy_box_for_product(product.sku_product)
+            recalculate_buy_box_for_product(product.sku_product, triggered_by="Scheduled")
             recalculated += 1
         except Exception as e:
             frappe.log_error(
                 message=str(e),
-                title=f"Buy Box Recalculation Error: {product.sku_product}"
+                title=_("Buy Box Recalculation Error: {0}").format(product.sku_product)
             )
 
     return {

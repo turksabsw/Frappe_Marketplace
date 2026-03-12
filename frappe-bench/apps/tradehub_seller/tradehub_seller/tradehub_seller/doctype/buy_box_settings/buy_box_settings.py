@@ -9,7 +9,7 @@ scoring weights, tier bonuses, and recalculation settings.
 
 Key features:
 - Configurable weights for 6 scoring criteria (price, delivery, rating, stock, service, tier)
-- Validation that all weights sum to exactly 1.0
+- Auto-normalization when weights do not sum to exactly 1.0
 - Tier bonus configuration via child table
 - Algorithm tuning parameters (cooldown, min orders, batch size)
 """
@@ -30,9 +30,9 @@ class BuyBoxSettings(Document):
 
 	def validate(self):
 		"""Validate settings before saving."""
-		self.calculate_total_weight()
-		self.validate_weights_sum()
 		self.validate_individual_weights()
+		self.calculate_total_weight()
+		self.normalize_weights()
 		self.validate_algorithm_settings()
 
 	def calculate_total_weight(self):
@@ -44,17 +44,51 @@ class BuyBoxSettings(Document):
 			flt(self.stock_weight) +
 			flt(self.service_weight) +
 			flt(self.tier_weight),
-			precision=2
+			precision=6
 		)
 
-	def validate_weights_sum(self):
-		"""Validate that all weights sum to exactly 1.0."""
-		if abs(flt(self.total_weight) - 1.0) > 0.001:
+	def normalize_weights(self):
+		"""
+		Auto-normalize weights if they do not sum to 1.0.
+
+		Instead of throwing an error, proportionally adjusts all weights
+		so they sum to exactly 1.0. Notifies the user when normalization occurs.
+		"""
+		if abs(flt(self.total_weight) - 1.0) <= 0.001:
+			# Already sums to 1.0 within tolerance
+			self.total_weight = flt(1.0, precision=2)
+			return
+
+		if flt(self.total_weight) <= 0:
 			frappe.throw(
-				_("Scoring weights must sum to 1.0. Current total: {0}").format(
-					self.total_weight
-				)
+				_("At least one scoring weight must be greater than zero")
 			)
+
+		# Auto-normalize: divide each weight by the total sum
+		total = flt(self.total_weight)
+		original_total = total
+
+		weight_fields = [
+			"price_weight", "delivery_weight", "rating_weight",
+			"stock_weight", "service_weight", "tier_weight",
+		]
+
+		for fieldname in weight_fields:
+			value = flt(getattr(self, fieldname, 0))
+			normalized = flt(value / total, precision=6)
+			setattr(self, fieldname, normalized)
+
+		# Recalculate total after normalization
+		self.calculate_total_weight()
+		self.total_weight = flt(1.0, precision=2)
+
+		frappe.msgprint(
+			_("Scoring weights were auto-normalized from total {0} to 1.0").format(
+				flt(original_total, precision=4)
+			),
+			indicator="blue",
+			alert=True
+		)
 
 	def validate_individual_weights(self):
 		"""Validate that each weight is between 0 and 1."""
@@ -69,9 +103,9 @@ class BuyBoxSettings(Document):
 
 		for fieldname, label in weight_fields:
 			value = flt(getattr(self, fieldname, 0))
-			if value < 0 or value > 1:
+			if value < 0:
 				frappe.throw(
-					_("{0} must be between 0 and 1").format(label)
+					_("{0} cannot be negative").format(label)
 				)
 
 	def validate_algorithm_settings(self):
