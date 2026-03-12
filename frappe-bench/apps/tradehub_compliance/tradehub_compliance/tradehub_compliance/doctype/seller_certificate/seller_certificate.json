@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "certificate_name",
+  "certificate_type",
+  "column_break_cert",
+  "issuing_authority",
+  "certificate_file",
+  "dates_section",
+  "issue_date",
+  "column_break_dates",
+  "expiry_date",
+  "status_section",
+  "verification_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "certificate_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Certificate Name",
+   "reqd": 1,
+   "description": "Name or title of the certificate"
+  },
+  {
+   "fieldname": "certificate_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Certificate Type",
+   "options": "ISO\nHALAL\nORGANIC\nTSE\nCE\nOTHER",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_cert",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issuing_authority",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Issuing Authority",
+   "description": "Organization or body that issued the certificate"
+  },
+  {
+   "fieldname": "certificate_file",
+   "fieldtype": "Attach",
+   "label": "Certificate File",
+   "description": "Upload the certificate document"
+  },
+  {
+   "fieldname": "dates_section",
+   "fieldtype": "Section Break",
+   "label": "Validity Dates"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Issue Date",
+   "description": "Date when the certificate was issued"
+  },
+  {
+   "fieldname": "column_break_dates",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expiry Date",
+   "description": "Date when the certificate expires"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Verification"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "verification_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Verification Status",
+   "options": "Pending\nVerified\nExpired",
+   "description": "Current verification status of the certificate"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Seller Certificate",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 0
+}
