@@ -105,25 +105,17 @@ required_apps = ["tradehub_core"]
 
 # Hook on document methods and events
 
-# Data Sharing Preference: consent withdrawal triggers 3-phase cleanup
-# Seller Transparency Profile: refresh metrics from seller on update
-# Masked Message: PII scan and sanitize on insert, clear cache on update
-# Audience Segment: recompute members on filter change, cleanup on delete
-doc_events = {
-	"Data Sharing Preference": {
-		"on_update": "tradehub_compliance.tradehub_compliance.doctype.data_sharing_preference.data_sharing_preference.propagate_consent_withdrawal",
-	},
-	"Seller Transparency Profile": {
-		"on_update": "tradehub_compliance.tradehub_compliance.doctype.seller_transparency_profile.seller_transparency_profile.SellerTransparencyProfile.on_update",
-	},
-	"Masked Message": {
-		"before_insert": "tradehub_compliance.tradehub_compliance.doctype.masked_message.masked_message.MaskedMessage.scan_and_sanitize_message_body",
-	},
-	"Audience Segment": {
-		"on_update": "tradehub_compliance.tradehub_compliance.doctype.audience_segment.audience_segment.AudienceSegment.enqueue_recompute_if_filter_changed",
-		"on_trash": "tradehub_compliance.tradehub_compliance.doctype.audience_segment.audience_segment.AudienceSegment.on_trash",
-	},
-}
+# NOTE: All compliance DocType lifecycle events are handled directly by their
+# respective class methods (before_insert, validate, on_update, on_trash).
+# No doc_events registration is needed because:
+#   - DataSharingPreference.on_update: triggers 3-phase consent withdrawal
+#   - SellerTransparencyProfile.on_update: refreshes last_refreshed timestamp
+#   - MaskedMessage.before_insert: calls scan_and_sanitize_message_body
+#   - AudienceSegment.on_update: calls enqueue_recompute_if_filter_changed
+#   - AudienceSegment.on_trash: cleans up segment members
+# Frappe automatically invokes these class methods during document lifecycle.
+
+doc_events = {}
 
 # Scheduled Tasks
 # ---------------
