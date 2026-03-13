@@ -94,6 +94,9 @@ class SubscriptionPackage(Document):
         if self.max_team_members and self.max_team_members < 0:
             frappe.throw(_("Max team members cannot be negative"))
 
+        if self.max_rfq_views and self.max_rfq_views < 0:
+            frappe.throw(_("Max RFQ views cannot be negative"))
+
     def validate_grace_period(self):
         """Validate grace period settings."""
         if self.grace_period_days and self.grace_period_days < 0:
@@ -211,11 +214,21 @@ class SubscriptionPackage(Document):
             "max_storage_mb": self.max_storage_mb or 0,
             "max_api_calls_per_day": self.max_api_calls_per_day or 0,
             "max_team_members": self.max_team_members or 0,
+            "max_rfq_views": self.max_rfq_views or 0,
         }
 
     def has_unlimited(self, limit_type):
-        """Check if a specific limit is unlimited (0 = unlimited)."""
-        limit_value = getattr(self, limit_type, None)
+        """Check if a specific limit is unlimited (0 = unlimited).
+
+        Args:
+            limit_type: Field name (e.g. 'max_products') or short type
+                        (e.g. 'rfq_views' which maps to 'max_rfq_views').
+        """
+        field_map = {
+            "rfq_views": "max_rfq_views",
+        }
+        field_name = field_map.get(limit_type, limit_type)
+        limit_value = getattr(self, field_name, None)
         return limit_value is None or limit_value == 0
 
     def calculate_commission(self, transaction_amount):
