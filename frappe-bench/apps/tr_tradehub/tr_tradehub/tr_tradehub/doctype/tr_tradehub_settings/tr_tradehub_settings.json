@@ -1,0 +1,80 @@
+{
+  "actions": [],
+  "creation": "2026-03-13 12:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "commission_settings_section",
+    "commission_enabled",
+    "commission_disabled_message",
+    "column_break_commission",
+    "commission_disabled_date",
+    "commission_enabled_date",
+    "commission_enable_notify_sellers"
+  ],
+  "fields": [
+    {
+      "fieldname": "commission_settings_section",
+      "fieldtype": "Section Break",
+      "label": "Commission Settings"
+    },
+    {
+      "default": "0",
+      "fieldname": "commission_enabled",
+      "fieldtype": "Check",
+      "label": "Komisyon Hesaplamas\u0131 Etkin"
+    },
+    {
+      "depends_on": "eval:!doc.commission_enabled",
+      "fieldname": "commission_disabled_message",
+      "fieldtype": "Small Text",
+      "label": "Commission Disabled Message"
+    },
+    {
+      "fieldname": "column_break_commission",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "commission_disabled_date",
+      "fieldtype": "Date",
+      "label": "Commission Disabled Date",
+      "read_only": 1
+    },
+    {
+      "fieldname": "commission_enabled_date",
+      "fieldtype": "Date",
+      "label": "Commission Enabled Date",
+      "read_only": 1
+    },
+    {
+      "default": "1",
+      "fieldname": "commission_enable_notify_sellers",
+      "fieldtype": "Check",
+      "label": "Commission Enable Notify Sellers"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "issingle": 1,
+  "links": [],
+  "modified": "2026-03-13 12:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "TR TradeHub",
+  "name": "TR TradeHub Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}
