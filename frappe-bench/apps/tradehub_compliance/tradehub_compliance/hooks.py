@@ -167,13 +167,13 @@ has_permission = {
 doc_events = {
 	# Contract automation hooks - auto-generate contracts on key document events
 	"Seller Application": {
-		"on_submit": "tradehub_compliance.utils.contract_automation.on_seller_application_submit"
+		"on_submit": "tradehub_compliance.utils.contract_automation.handle_seller_application_approval"
 	},
 	"Marketplace Order": {
-		"on_submit": "tradehub_compliance.utils.contract_automation.on_marketplace_order_submit"
+		"on_submit": "tradehub_compliance.utils.contract_automation.handle_marketplace_order_submit"
 	},
 	"Seller Profile": {
-		"after_insert": "tradehub_compliance.utils.contract_automation.on_seller_profile_after_insert"
+		"after_insert": "tradehub_compliance.utils.contract_automation.handle_seller_profile_created"
 	}
 }
 
