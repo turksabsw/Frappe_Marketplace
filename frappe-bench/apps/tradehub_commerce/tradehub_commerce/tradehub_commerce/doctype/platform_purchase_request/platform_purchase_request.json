@@ -1,0 +1,310 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "PPR-.YYYY.-.#####",
+ "creation": "2024-01-26 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_tab",
+  "basic_section",
+  "request_code",
+  "title",
+  "column_break_basic",
+  "status",
+  "category",
+  "created_by_user",
+  "published_at",
+  "description_section",
+  "description",
+  "items_tab",
+  "items_section",
+  "items",
+  "targeting_tab",
+  "targeting_section",
+  "target_type",
+  "requirements_tab",
+  "requirements_section",
+  "closing_date",
+  "target_delivery_date",
+  "column_break_req",
+  "budget_range_min",
+  "budget_range_max",
+  "currency",
+  "payment_section",
+  "payment_terms",
+  "evaluation_section",
+  "evaluation_criteria",
+  "minimum_seller_rating",
+  "column_break_eval",
+  "require_sample",
+  "allow_partial_offers",
+  "statistics_tab",
+  "statistics_section",
+  "total_offers_count",
+  "tenant_section",
+  "tenant",
+  "tenant_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "basic_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "request_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Request Code",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_basic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPublished\nReceiving Offers\nEvaluation\nAwarded\nClosed\nCancelled",
+   "reqd": 1,
+   "permlevel": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Category"
+  },
+  {
+   "fieldname": "created_by_user",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "published_at",
+   "fieldtype": "Datetime",
+   "label": "Published At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Requested Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Purchase Request Item"
+  },
+  {
+   "fieldname": "targeting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Targeting"
+  },
+  {
+   "fieldname": "targeting_section",
+   "fieldtype": "Section Break",
+   "label": "Seller Targeting"
+  },
+  {
+   "default": "Public",
+   "fieldname": "target_type",
+   "fieldtype": "Select",
+   "label": "Target Type",
+   "options": "Public\nCategory\nSelected",
+   "description": "Public: All sellers. Category: Sellers in specific categories. Selected: Specific sellers only."
+  },
+  {
+   "fieldname": "requirements_tab",
+   "fieldtype": "Tab Break",
+   "label": "Requirements"
+  },
+  {
+   "fieldname": "requirements_section",
+   "fieldtype": "Section Break",
+   "label": "Dates & Budget"
+  },
+  {
+   "fieldname": "closing_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Closing Date",
+   "description": "Deadline for sellers to submit offers"
+  },
+  {
+   "fieldname": "target_delivery_date",
+   "fieldtype": "Date",
+   "label": "Target Delivery Date"
+  },
+  {
+   "fieldname": "column_break_req",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "budget_range_min",
+   "fieldtype": "Currency",
+   "label": "Budget Range Min",
+   "description": "Minimum budget"
+  },
+  {
+   "fieldname": "budget_range_max",
+   "fieldtype": "Currency",
+   "label": "Budget Range Max",
+   "description": "Maximum budget"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Terms"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Text",
+   "label": "Payment Terms"
+  },
+  {
+   "fieldname": "evaluation_section",
+   "fieldtype": "Section Break",
+   "label": "Evaluation Criteria"
+  },
+  {
+   "fieldname": "evaluation_criteria",
+   "fieldtype": "Text",
+   "label": "Evaluation Criteria"
+  },
+  {
+   "fieldname": "minimum_seller_rating",
+   "fieldtype": "Float",
+   "label": "Minimum Seller Rating",
+   "description": "Minimum required seller rating (0-5)"
+  },
+  {
+   "fieldname": "column_break_eval",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "require_sample",
+   "fieldtype": "Check",
+   "label": "Require Sample",
+   "description": "Sellers must provide samples before offer evaluation"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_partial_offers",
+   "fieldtype": "Check",
+   "label": "Allow Partial Offers",
+   "description": "Allow sellers to submit offers for partial quantities"
+  },
+  {
+   "fieldname": "statistics_tab",
+   "fieldtype": "Tab Break",
+   "label": "Statistics"
+  },
+  {
+   "fieldname": "statistics_section",
+   "fieldtype": "Section Break",
+   "label": "Offer Statistics"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_offers_count",
+   "fieldtype": "Int",
+   "label": "Total Offers Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tenant_section",
+   "fieldtype": "Section Break",
+   "label": "Tenant"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Tenant Name",
+   "fetch_from": "tenant.tenant_name",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-13 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Commerce",
+ "name": "Platform Purchase Request",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "title, request_code, status, category",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}
