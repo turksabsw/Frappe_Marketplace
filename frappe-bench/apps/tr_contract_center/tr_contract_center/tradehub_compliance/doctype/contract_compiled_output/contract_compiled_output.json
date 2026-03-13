@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_section",
+  "contract_template",
+  "seller",
+  "column_break_template",
+  "compiled_at",
+  "compiled_by",
+  "content_section",
+  "compiled_content",
+  "stats_section",
+  "rules_applied",
+  "rules_skipped",
+  "column_break_stats",
+  "content_hash",
+  "log_section",
+  "compilation_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_section",
+   "fieldtype": "Section Break",
+   "label": "Template Details"
+  },
+  {
+   "fieldname": "contract_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Contract Template",
+   "options": "Contract Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "seller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Seller",
+   "options": "Seller Profile"
+  },
+  {
+   "fieldname": "column_break_template",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "compiled_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Compiled At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "compiled_by",
+   "fieldtype": "Link",
+   "label": "Compiled By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "content_section",
+   "fieldtype": "Section Break",
+   "label": "Compiled Content"
+  },
+  {
+   "fieldname": "compiled_content",
+   "fieldtype": "Long Text",
+   "label": "Compiled Content",
+   "reqd": 1
+  },
+  {
+   "fieldname": "stats_section",
+   "fieldtype": "Section Break",
+   "label": "Compilation Statistics"
+  },
+  {
+   "default": "0",
+   "fieldname": "rules_applied",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Rules Applied",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "rules_skipped",
+   "fieldtype": "Int",
+   "label": "Rules Skipped",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_stats",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "content_hash",
+   "fieldtype": "Data",
+   "label": "Content Hash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "log_section",
+   "fieldtype": "Section Break",
+   "label": "Compilation Log"
+  },
+  {
+   "fieldname": "compilation_log",
+   "fieldtype": "Code",
+   "label": "Compilation Log",
+   "options": "JSON"
+  }
+ ],
+ "has_web_view": 0,
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Compliance",
+ "name": "Contract Compiled Output",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "contract_template, seller",
+ "show_name_in_global_search": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 0
+}
