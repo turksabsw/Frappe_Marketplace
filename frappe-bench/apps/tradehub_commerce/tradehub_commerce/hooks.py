@@ -160,7 +160,13 @@ scheduler_events = {
 	"daily": [
 		"tradehub_commerce.tasks.seller_payout",
 		"tradehub_commerce.tasks.daily_abuse_detection",
-		"tradehub_commerce.tasks.cleanup_expired_reservations"
+		"tradehub_commerce.tasks.cleanup_expired_reservations",
+		"tradehub_commerce.tasks.check_ppr_closing_dates",
+		"tradehub_commerce.tasks.recalculate_ppr_scores",
+		"tradehub_commerce.tasks.check_offer_validity"
+	],
+	"monthly": [
+		"tradehub_commerce.tasks.create_recurring_purchase_requests"
 	]
 }
 
