@@ -116,7 +116,16 @@
   "modified_at",
   "column_break_timestamps",
   "created_by",
-  "modified_by"
+  "modified_by",
+  "reminder_flags_section",
+  "reminder_7d_before_sent",
+  "reminder_3d_before_sent",
+  "reminder_due_day_sent",
+  "reminder_1d_after_sent",
+  "column_break_reminder_flags",
+  "reminder_3d_after_sent",
+  "reminder_7d_after_sent",
+  "reminder_14d_after_sent"
  ],
  "fields": [
   {
@@ -838,6 +847,80 @@
    "label": "Modified By",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "fieldname": "reminder_flags_section",
+   "fieldtype": "Section Break",
+   "label": "Reminder Flags",
+   "collapsible": 1,
+   "hidden": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_7d_before_sent",
+   "fieldtype": "Check",
+   "label": "7 Days Before Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 7 days before next billing date"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_3d_before_sent",
+   "fieldtype": "Check",
+   "label": "3 Days Before Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 3 days before next billing date"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_due_day_sent",
+   "fieldtype": "Check",
+   "label": "Due Day Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent on the billing due day"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_1d_after_sent",
+   "fieldtype": "Check",
+   "label": "1 Day After Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 1 day after next billing date"
+  },
+  {
+   "fieldname": "column_break_reminder_flags",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_3d_after_sent",
+   "fieldtype": "Check",
+   "label": "3 Days After Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 3 days after next billing date"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_7d_after_sent",
+   "fieldtype": "Check",
+   "label": "7 Days After Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 7 days after next billing date"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_14d_after_sent",
+   "fieldtype": "Check",
+   "label": "14 Days After Reminder Sent",
+   "read_only": 1,
+   "hidden": 1,
+   "description": "Reminder sent 14 days after next billing date"
   }
  ],
  "index_web_pages_for_search": 1,

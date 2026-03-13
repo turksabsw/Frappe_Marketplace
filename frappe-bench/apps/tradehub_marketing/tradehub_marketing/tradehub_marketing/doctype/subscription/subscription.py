@@ -388,6 +388,195 @@ class Subscription(Document):
                 title="Subscription Notification Error"
             )
 
+    def send_subscription_reminder(self):
+        """Send subscription reminders based on Subscription Billing Settings reminder_days configuration.
+
+        Reads the reminder_days child table from Subscription Billing Settings,
+        calculates which reminders need to be sent based on next_billing_date
+        and day_offset (-7,-3,0,+1,+3,+7,+14). Prevents duplicate reminders
+        by checking flag fields and creates activity log entries for each reminder sent.
+
+        Returns:
+            list: List of day offsets for which reminders were sent
+        """
+        if not self.next_billing_date:
+            return []
+
+        # Only send reminders for subscriptions that are not terminal
+        if self.status not in ["Active", "Trial", "Pending Payment", "Grace Period"]:
+            return []
+
+        today = getdate(nowdate())
+        next_billing = getdate(self.next_billing_date)
+
+        # Calculate days until billing (positive = before, negative = after)
+        days_until_billing = date_diff(next_billing, today)
+
+        # Map days_until_billing values to flag field names
+        days_to_flag = {
+            7: "reminder_7d_before_sent",
+            3: "reminder_3d_before_sent",
+            0: "reminder_due_day_sent",
+            -1: "reminder_1d_after_sent",
+            -3: "reminder_3d_after_sent",
+            -7: "reminder_7d_after_sent",
+            -14: "reminder_14d_after_sent",
+        }
+
+        # Check if today matches any reminder slot
+        flag_field = days_to_flag.get(days_until_billing)
+        if not flag_field:
+            return []
+
+        # Check if reminder already sent (prevent duplicates)
+        if getattr(self, flag_field, 0):
+            return []
+
+        # Read reminder_days from Subscription Billing Settings
+        try:
+            settings = frappe.get_cached_doc("Subscription Billing Settings")
+            reminder_days = settings.get("reminder_days") or []
+        except Exception:
+            return []
+
+        if not reminder_days:
+            return []
+
+        # Find matching enabled reminder configuration
+        # day_offset in child table is non-negative, so use absolute value for matching
+        abs_offset = abs(days_until_billing)
+        matching_reminder = None
+        for reminder in reminder_days:
+            if not reminder.is_enabled:
+                continue
+            if reminder.day_offset == abs_offset:
+                matching_reminder = reminder
+                break
+
+        if not matching_reminder:
+            return []
+
+        # Determine the logical offset for notifications
+        # Negative = before billing, Positive = after billing, 0 = due day
+        logical_offset = -days_until_billing  # Convert: 7 days until → -7 offset, -3 days until → +3 offset
+
+        # Send the reminder notification
+        self._send_reminder_notification(logical_offset, matching_reminder)
+
+        # Set the flag to prevent duplicate reminders
+        frappe.db.set_value(
+            "Subscription",
+            self.name,
+            flag_field,
+            1,
+            update_modified=False
+        )
+
+        # Create activity log entry
+        if logical_offset < 0:
+            detail_msg = _("Subscription reminder sent: {0} days before billing date {1}").format(
+                abs(logical_offset), self.next_billing_date
+            )
+        elif logical_offset == 0:
+            detail_msg = _("Subscription reminder sent: billing due day {0}").format(
+                self.next_billing_date
+            )
+        else:
+            detail_msg = _("Subscription reminder sent: {0} days after billing date {1}").format(
+                logical_offset, self.next_billing_date
+            )
+
+        self._create_activity_log(
+            event_type="notification",
+            old_status=self.status,
+            new_status=self.status,
+            triggered_by="scheduler",
+            details=detail_msg,
+        )
+
+        return [logical_offset]
+
+    def _send_reminder_notification(self, day_offset, reminder_config):
+        """Send a subscription reminder notification to the subscriber.
+
+        Args:
+            day_offset: Logical offset from billing date (negative=before, 0=due day, positive=after)
+            reminder_config: The Subscription Reminder Day row with notification settings
+        """
+        try:
+            subscriber_email = None
+            subscriber_name = None
+
+            if self.subscriber_type == "Seller" and self.seller_profile:
+                subscriber_email = frappe.db.get_value("Seller Profile", self.seller_profile, "email")
+                subscriber_name = self.seller_name or self.seller_profile
+            elif self.subscriber_type == "Buyer" and self.buyer_profile:
+                subscriber_email = frappe.db.get_value("Buyer Profile", self.buyer_profile, "email")
+                subscriber_name = self.buyer_profile
+            elif self.subscriber_type == "Organization" and self.organization:
+                subscriber_email = frappe.db.get_value("Organization", self.organization, "email")
+                subscriber_name = self.organization
+
+            if not subscriber_email:
+                return
+
+            # Build subject and message based on offset
+            if day_offset < 0:
+                subject = _("Subscription Billing Reminder: {0} days until next billing").format(abs(day_offset))
+                message = _(
+                    "Dear {0},<br><br>"
+                    "This is a reminder that your subscription <b>{1}</b> (Package: {2}) "
+                    "will be billed in <b>{3} days</b> on {4}.<br><br>"
+                    "Please ensure your payment method is up to date.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    abs(day_offset),
+                    self.next_billing_date,
+                )
+            elif day_offset == 0:
+                subject = _("Subscription Billing Due Today")
+                message = _(
+                    "Dear {0},<br><br>"
+                    "Your subscription <b>{1}</b> (Package: {2}) billing is due today ({3}).<br><br>"
+                    "Please complete your payment to avoid service disruption.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    self.next_billing_date,
+                )
+            else:
+                subject = _("Subscription Payment Overdue: {0} days past due").format(day_offset)
+                message = _(
+                    "Dear {0},<br><br>"
+                    "Your subscription <b>{1}</b> (Package: {2}) payment is <b>{3} days overdue</b> "
+                    "(billing date: {4}).<br><br>"
+                    "Please make your payment immediately to avoid service suspension.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    day_offset,
+                    self.next_billing_date,
+                )
+
+            # Only send email if notification type includes email
+            notification_type = getattr(reminder_config, "notification_type", "email")
+            if notification_type == "email":
+                frappe.sendmail(
+                    recipients=[subscriber_email],
+                    subject=subject,
+                    message=message,
+                    now=True,
+                )
+        except Exception as e:
+            frappe.log_error(
+                message=f"Error sending subscription reminder for {self.name}: {str(e)}",
+                title="Subscription Reminder Error"
+            )
+
     def check_and_transition_status(self):
         """
         Check if subscription status should transition based on current date.
