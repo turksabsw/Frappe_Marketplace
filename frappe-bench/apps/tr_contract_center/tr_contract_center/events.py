@@ -33,6 +33,81 @@ def contract_instance_on_update(doc, method):
         create_revision(doc)
 
 
+def on_seller_profile_update(doc, method):
+    """
+    Handle Seller Profile on_update event.
+
+    Finds all active Contract Templates with dynamic_rules_enabled=1
+    and enqueues a background job to recompile each template for this seller.
+    """
+    templates = frappe.get_all(
+        "Contract Template",
+        filters={
+            "dynamic_rules_enabled": 1,
+            "docstatus": ["!=", 2],
+        },
+        pluck="name",
+    )
+
+    if not templates:
+        return
+
+    for template_name in templates:
+        frappe.enqueue(
+            "tr_contract_center.rule_engine.compile_contract",
+            template_name=template_name,
+            seller_name=doc.name,
+            queue="default",
+            enqueue_after_commit=True,
+        )
+
+    frappe.logger("events").info(
+        f"Enqueued recompilation of {len(templates)} template(s) for seller '{doc.name}'"
+    )
+
+
+def on_subscription_update(doc, method):
+    """
+    Handle Subscription on_update event.
+
+    When a subscription's package changes, triggers recompilation of all
+    active Contract Templates with dynamic_rules_enabled=1 for the
+    associated seller.
+    """
+    if not doc.has_value_changed("subscription_package"):
+        return
+
+    seller_name = getattr(doc, "seller_profile", None)
+    if not seller_name:
+        return
+
+    templates = frappe.get_all(
+        "Contract Template",
+        filters={
+            "dynamic_rules_enabled": 1,
+            "docstatus": ["!=", 2],
+        },
+        pluck="name",
+    )
+
+    if not templates:
+        return
+
+    for template_name in templates:
+        frappe.enqueue(
+            "tr_contract_center.rule_engine.compile_contract",
+            template_name=template_name,
+            seller_name=seller_name,
+            queue="default",
+            enqueue_after_commit=True,
+        )
+
+    frappe.logger("events").info(
+        f"Enqueued recompilation of {len(templates)} template(s) for seller '{seller_name}' "
+        f"due to subscription package change"
+    )
+
+
 def create_revision(doc):
     """Create a revision record for the contract."""
     # Get current revision number
