@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -34,6 +35,6 @@ class ECARuleCondition(Document):
 
         if self.operator not in no_value_operators and not self.value:
             frappe.throw(
-                frappe._("Value is required for operator '{0}'").format(self.operator),
-                title=frappe._("Missing Value")
+                _("Value is required for operator '{0}'").format(self.operator),
+                title=_("Missing Value")
             )

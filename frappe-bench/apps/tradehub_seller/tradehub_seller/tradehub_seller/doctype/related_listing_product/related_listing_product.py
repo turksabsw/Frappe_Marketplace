@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -28,8 +29,8 @@ class RelatedListingProduct(Document):
         """Ensure product is not referencing itself."""
         if self.parenttype == "Listing" and self.parent == self.product:
             frappe.throw(
-                frappe._("A product cannot be related to itself."),
-                title=frappe._("Invalid Related Product")
+                _("A product cannot be related to itself."),
+                title=_("Invalid Related Product")
             )
 
     def validate_no_duplicate(self):
@@ -45,8 +46,8 @@ class RelatedListingProduct(Document):
 
         if siblings:
             frappe.throw(
-                frappe._("Product {0} is already added as a related product.").format(self.product),
-                title=frappe._("Duplicate Related Product")
+                _("Product {0} is already added as a related product.").format(self.product),
+                title=_("Duplicate Related Product")
             )
 
     def get_parent_doc(self):
