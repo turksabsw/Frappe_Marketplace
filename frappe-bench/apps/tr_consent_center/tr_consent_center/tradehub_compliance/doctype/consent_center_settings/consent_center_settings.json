@@ -1,0 +1,77 @@
+{
+  "actions": [],
+  "creation": "2026-02-12 12:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "double_optin_enabled",
+    "column_break_1",
+    "reacceptance_grace_days",
+    "retention_default_days",
+    "section_break_1",
+    "mandatory_consent_types"
+  ],
+  "fields": [
+    {
+      "default": "1",
+      "fieldname": "double_optin_enabled",
+      "fieldtype": "Check",
+      "label": "Double Opt-In Enabled",
+      "description": "Require double opt-in confirmation for consent grants"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "14",
+      "fieldname": "reacceptance_grace_days",
+      "fieldtype": "Int",
+      "label": "Reacceptance Grace Days",
+      "description": "Number of days allowed for consent reacceptance after a version update"
+    },
+    {
+      "default": "3650",
+      "fieldname": "retention_default_days",
+      "fieldtype": "Int",
+      "label": "Retention Default Days",
+      "description": "Default data retention period in days"
+    },
+    {
+      "fieldname": "section_break_1",
+      "fieldtype": "Section Break",
+      "label": "Mandatory Consent Types"
+    },
+    {
+      "fieldname": "mandatory_consent_types",
+      "fieldtype": "Table",
+      "label": "Mandatory Consent Types",
+      "options": "Consent Topic",
+      "description": "Consent topics that are mandatory for all users"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "issingle": 1,
+  "links": [],
+  "modified": "2026-02-12 12:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "TradeHub Compliance",
+  "name": "Consent Center Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}
