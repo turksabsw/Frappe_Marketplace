@@ -2211,11 +2211,17 @@ def get_commission_breakdown(order_name: str) -> Dict[str, Any]:
         order_name: Marketplace Order or Sub Order name
 
     Returns:
-        dict: Commission breakdown details
+        dict: Commission breakdown details including commission_enabled status
     """
+    from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+        is_commission_enabled,
+    )
+
     user = frappe.session.user
     if user == "Guest":
         frappe.throw(_("You must be logged in"))
+
+    commission_enabled = is_commission_enabled()
 
     # Try as sub-order first
     if frappe.db.exists("Sub Order", order_name):
@@ -2242,6 +2248,7 @@ def get_commission_breakdown(order_name: str) -> Dict[str, Any]:
             "total_fees": flt(sub_order.commission_amount) + flt(sub_order.platform_fee) + flt(sub_order.processing_fee or 0),
             "net_to_seller": flt(sub_order.total) - flt(sub_order.commission_amount) - flt(sub_order.platform_fee),
             "currency": sub_order.currency or "TRY",
+            "commission_enabled": commission_enabled,
         }
 
     # Try as marketplace order
@@ -2271,6 +2278,7 @@ def get_commission_breakdown(order_name: str) -> Dict[str, Any]:
             "sub_orders_count": len(sub_orders),
             "sub_order_breakdown": sub_orders,
             "currency": order.currency or "TRY",
+            "commission_enabled": commission_enabled,
         }
 
     frappe.throw(_("Order not found"))

@@ -12,7 +12,7 @@ commission cache when settings change.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import date_diff, flt, getdate, nowdate
 
 
 # Cache TTL in seconds (5 minutes)
@@ -78,3 +78,69 @@ def invalidate_commission_cache() -> None:
     to is_commission_enabled() re-read from the database.
     """
     frappe.cache().delete_value("commission_enabled")
+
+
+# Banner display threshold in days — shows warning banner when commission
+# was re-enabled less than this many days ago.
+COMMISSION_REENABLE_WARNING_DAYS = 30
+
+
+def get_commission_banner_info(seller: str = None) -> dict:
+    """Return banner display information based on the commission toggle state.
+
+    Rules:
+    - Commission OFF → info banner telling the seller that commission is
+      currently disabled.
+    - Commission ON and was re-enabled less than 30 days ago → warning
+      banner reminding the seller that commission has been recently
+      re-enabled.
+    - Otherwise → no banner.
+
+    Args:
+        seller: Seller Profile name (currently unused but reserved for
+                future per-seller overrides).
+
+    Returns:
+        Dict with show_banner (bool), banner_type ('info' or 'warning'),
+        and message (str).
+    """
+    commission_enabled = is_commission_enabled()
+
+    if not commission_enabled:
+        # Commission is turned OFF — show info banner
+        return {
+            "show_banner": True,
+            "banner_type": "info",
+            "message": _(
+                "Commission is currently disabled. No commission will be "
+                "deducted from your transactions."
+            ),
+        }
+
+    # Commission is ON — check if it was recently re-enabled
+    enabled_since = None
+    try:
+        enabled_since = frappe.db.get_single_value(
+            "TR TradeHub Settings", "commission_enabled_since"
+        )
+    except Exception:
+        pass
+
+    if enabled_since:
+        days_since = date_diff(nowdate(), getdate(enabled_since))
+        if days_since < COMMISSION_REENABLE_WARNING_DAYS:
+            return {
+                "show_banner": True,
+                "banner_type": "warning",
+                "message": _(
+                    "Commission was re-enabled {0} days ago. Standard "
+                    "commission rates now apply to all transactions."
+                ).format(days_since),
+            }
+
+    # Commission is ON and stable — no banner needed
+    return {
+        "show_banner": False,
+        "banner_type": None,
+        "message": "",
+    }
