@@ -7,6 +7,8 @@ TR Contract Center API Endpoints
 REST API for contract management with digital/wet signature support.
 """
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import now_datetime, add_days, cint
@@ -200,7 +202,6 @@ def init_digital_sign(contract_instance, provider=None, signer_info=None):
         dict: API response with signing URL
     """
     try:
-        import json
         if isinstance(signer_info, str):
             signer_info = json.loads(signer_info)
 
@@ -281,8 +282,6 @@ def esign_callback():
     Expects POST with JSON payload from provider.
     """
     try:
-        import json
-
         # Get payload
         payload = frappe.local.form_dict
         if isinstance(payload, str):
@@ -519,3 +518,393 @@ def preview_compiled_contract(template_name, seller_name):
     except Exception as e:
         frappe.log_error(f"preview_compiled_contract error: {str(e)}", "Contract Center API")
         return _api_response(False, message=str(e), errors=[str(e)])
+
+
+@frappe.whitelist(allow_guest=False)
+def get_required_contracts_for_registration(user_type, category=None):
+    """
+    Get required contracts for a user registration flow.
+
+    Queries Contract Rules with trigger_point='Registration', evaluates
+    conditions against the provided user_type and category, and returns
+    the list of required contract templates.
+
+    Args:
+        user_type: Type of user registering (e.g., 'Seller', 'Buyer')
+        category: Optional product/business category for condition evaluation
+
+    Returns:
+        dict: API response with list of required contract templates
+    """
+    try:
+        # Build evaluation context
+        context = {
+            "user_type": user_type,
+        }
+        if category:
+            context["product_category"] = category
+
+        # Query active Contract Rules with trigger_point='Registration'
+        rules = frappe.get_all(
+            "Contract Rule",
+            filters={
+                "status": "Active",
+                "trigger_point": "Registration"
+            },
+            order_by="priority desc"
+        )
+
+        required_templates = []
+        for rule_data in rules:
+            rule = frappe.get_doc("Contract Rule", rule_data.name)
+
+            if not rule.is_active():
+                continue
+
+            if not rule.evaluate_context(context):
+                continue
+
+            # Get template details
+            template_info = {}
+            if rule.contract_template:
+                template_data = frappe.db.get_value(
+                    "Contract Template",
+                    rule.contract_template,
+                    ["name", "title", "contract_type", "status", "signature_method"],
+                    as_dict=True
+                )
+                if template_data and template_data.status == "Published":
+                    template_info = {
+                        "template": template_data.name,
+                        "title": template_data.title,
+                        "contract_type": template_data.contract_type,
+                        "signature_method": template_data.signature_method,
+                    }
+
+            if not template_info:
+                continue
+
+            required_templates.append({
+                "rule": rule.name,
+                "rule_name": rule.rule_name,
+                "blocking": cint(rule.blocking_action),
+                "priority": rule.priority,
+                **template_info
+            })
+
+        return _api_response(
+            True,
+            data={
+                "required_contracts": required_templates,
+                "total": len(required_templates),
+                "user_type": user_type,
+                "category": category
+            },
+            message=_("Found {0} required contract(s) for registration").format(len(required_templates))
+        )
+
+    except Exception as e:
+        frappe.log_error(f"get_required_contracts_for_registration error: {str(e)}", "Contract Center API")
+        return _api_response(False, message=str(e), errors=[str(e)])
+
+
+@frappe.whitelist(allow_guest=False)
+def bulk_sign_contracts(contract_list):
+    """
+    Bulk sign multiple contract instances.
+
+    Accepts a list of contract instance names and signs each one.
+    Creates Legal Audit Trail entries for each signing action.
+    Requires enable_bulk_signing in Contract Center Settings.
+
+    Args:
+        contract_list: JSON string or list of contract instance names
+
+    Returns:
+        dict: API response with success/failure per contract
+    """
+    try:
+        # Parse contract_list if string
+        if isinstance(contract_list, str):
+            contract_list = json.loads(contract_list)
+
+        if not contract_list or not isinstance(contract_list, list):
+            return _api_response(False, message=_("contract_list must be a non-empty list"))
+
+        # Check if bulk signing is enabled
+        enable_bulk_signing = cint(
+            frappe.db.get_single_value("Contract Center Settings", "enable_bulk_signing")
+        )
+        if not enable_bulk_signing:
+            return _api_response(
+                False,
+                message=_("Bulk signing is not enabled. Enable it in Contract Center Settings.")
+            )
+
+        results = []
+        success_count = 0
+        failure_count = 0
+
+        for contract_name in contract_list:
+            result = {"contract_instance": contract_name}
+
+            try:
+                if not frappe.db.exists("Contract Instance", contract_name):
+                    result["success"] = False
+                    result["error"] = _("Contract instance not found")
+                    failure_count += 1
+                    results.append(result)
+                    continue
+
+                doc = frappe.get_doc("Contract Instance", contract_name)
+
+                # Validate contract is in a signable state
+                if doc.status not in ["Sent", "Pending Signature"]:
+                    result["success"] = False
+                    result["error"] = _("Contract is not awaiting signature. Status: {0}").format(doc.status)
+                    failure_count += 1
+                    results.append(result)
+                    continue
+
+                # Perform signing
+                old_status = doc.status
+                doc.signed_at = now_datetime()
+                doc.signed_by = frappe.session.user
+                doc.status = "Signed"
+                doc.save()
+
+                # Create Legal Audit Trail entry
+                from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+                    create_legal_audit_log,
+                )
+
+                create_legal_audit_log(
+                    event_type="contract_signed",
+                    doc_type="Contract Instance",
+                    doc_name=doc.name,
+                    user_id=frappe.session.user,
+                    old_status=old_status,
+                    new_status="Signed",
+                    ip_address=frappe.local.request_ip if hasattr(frappe.local, "request_ip") else None,
+                    user_agent=frappe.get_request_header("User-Agent") if frappe.request else None,
+                    details=_("Bulk signed by {0}").format(frappe.session.user)
+                )
+
+                result["success"] = True
+                result["status"] = "Signed"
+                result["signed_at"] = str(doc.signed_at)
+                success_count += 1
+
+            except Exception as inner_e:
+                result["success"] = False
+                result["error"] = str(inner_e)
+                failure_count += 1
+
+            results.append(result)
+
+        frappe.db.commit()
+
+        return _api_response(
+            True,
+            data={
+                "results": results,
+                "total": len(contract_list),
+                "success_count": success_count,
+                "failure_count": failure_count
+            },
+            message=_("Bulk signing completed: {0} succeeded, {1} failed").format(
+                success_count, failure_count
+            )
+        )
+
+    except Exception as e:
+        frappe.log_error(f"bulk_sign_contracts error: {str(e)}", "Contract Center API")
+        return _api_response(False, message=str(e), errors=[str(e)])
+
+
+@frappe.whitelist(allow_guest=False)
+def trigger_version_update(template_name):
+    """
+    Trigger version update for all active (Signed) contract instances of a template.
+
+    Finds all Contract Instances with status 'Signed' for the given template,
+    sets their status to 'Version Update Required', creates Legal Audit Trail
+    entries, and enqueues notification jobs.
+
+    Args:
+        template_name: Name of the Contract Template
+
+    Returns:
+        dict: API response with update results
+    """
+    try:
+        # Validate template exists
+        if not frappe.db.exists("Contract Template", template_name):
+            return _api_response(
+                False,
+                message=_("Contract Template '{0}' not found").format(template_name)
+            )
+
+        # Get template details for audit trail
+        template_data = frappe.db.get_value(
+            "Contract Template",
+            template_name,
+            ["title", "version"],
+            as_dict=True
+        )
+
+        # Find all active (Signed) Contract Instances for this template
+        signed_instances = frappe.get_all(
+            "Contract Instance",
+            filters={
+                "template": template_name,
+                "status": "Signed"
+            },
+            fields=["name", "party_type", "party", "party_name"],
+            order_by="creation desc"
+        )
+
+        if not signed_instances:
+            return _api_response(
+                True,
+                data={
+                    "template": template_name,
+                    "updated_count": 0,
+                    "instances": []
+                },
+                message=_("No active signed contracts found for template '{0}'").format(template_name)
+            )
+
+        from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+            create_legal_audit_log,
+        )
+
+        updated_instances = []
+        settings = frappe.get_cached_doc("Contract Center Settings")
+        reacceptance_grace_days = cint(settings.reacceptance_grace_days) or 30
+
+        for instance in signed_instances:
+            try:
+                # Use db_set for system-level status update to bypass controller
+                # status transition validation (which may not yet include this transition)
+                frappe.db.set_value(
+                    "Contract Instance",
+                    instance.name,
+                    {
+                        "status": "Version Update Required",
+                        "reacceptance_deadline": add_days(now_datetime(), reacceptance_grace_days),
+                        "reacceptance_notified": 0
+                    },
+                    update_modified=True
+                )
+
+                # Create Legal Audit Trail entry
+                create_legal_audit_log(
+                    event_type="version_update_required",
+                    doc_type="Contract Instance",
+                    doc_name=instance.name,
+                    user_id=frappe.session.user,
+                    old_status="Signed",
+                    new_status="Version Update Required",
+                    details=_("Template '{0}' version updated. Reacceptance required within {1} days.").format(
+                        template_data.title or template_name,
+                        reacceptance_grace_days
+                    ),
+                    document_version=template_data.version
+                )
+
+                updated_instances.append({
+                    "contract_instance": instance.name,
+                    "party_type": instance.party_type,
+                    "party": instance.party,
+                    "party_name": instance.party_name,
+                    "reacceptance_deadline": str(add_days(now_datetime(), reacceptance_grace_days))
+                })
+
+            except Exception as inner_e:
+                frappe.log_error(
+                    f"trigger_version_update error for {instance.name}: {str(inner_e)}",
+                    "Contract Center API"
+                )
+
+        frappe.db.commit()
+
+        # Enqueue notification job for affected parties
+        if updated_instances:
+            frappe.enqueue(
+                _send_version_update_notifications,
+                queue="default",
+                template_name=template_name,
+                template_title=template_data.title,
+                instances=updated_instances,
+                reacceptance_grace_days=reacceptance_grace_days
+            )
+
+        return _api_response(
+            True,
+            data={
+                "template": template_name,
+                "template_title": template_data.title,
+                "updated_count": len(updated_instances),
+                "instances": updated_instances,
+                "reacceptance_grace_days": reacceptance_grace_days
+            },
+            message=_("Version update triggered for {0} contract(s)").format(len(updated_instances))
+        )
+
+    except Exception as e:
+        frappe.log_error(f"trigger_version_update error: {str(e)}", "Contract Center API")
+        return _api_response(False, message=str(e), errors=[str(e)])
+
+
+def _send_version_update_notifications(template_name, template_title, instances, reacceptance_grace_days):
+    """
+    Send notifications to parties affected by a contract version update.
+
+    This function is designed to be called via frappe.enqueue() to avoid
+    blocking the main thread.
+
+    Args:
+        template_name: Name of the updated Contract Template
+        template_title: Title of the updated Contract Template
+        instances: List of dicts with contract instance details
+        reacceptance_grace_days: Number of days for reacceptance
+    """
+    for instance in instances:
+        try:
+            # Get party email
+            party_email = None
+            party_type = instance.get("party_type")
+            party = instance.get("party")
+
+            if party_type == "User":
+                party_email = party
+            else:
+                party_email = frappe.db.get_value(party_type, party, "email")
+
+            if not party_email:
+                continue
+
+            frappe.sendmail(
+                recipients=[party_email],
+                subject=_("Contract Update Required: {0}").format(template_title or template_name),
+                message=_(
+                    "A contract you have signed has been updated. "
+                    "Please review and re-sign the updated contract within {0} days. "
+                    "Contract: {1}"
+                ).format(reacceptance_grace_days, instance.get("contract_instance"))
+            )
+
+            # Mark as notified
+            frappe.db.set_value(
+                "Contract Instance",
+                instance.get("contract_instance"),
+                "reacceptance_notified",
+                1
+            )
+
+        except Exception as e:
+            frappe.log_error(
+                f"Version update notification error for {instance.get('contract_instance')}: {str(e)}",
+                "Contract Center Notification"
+            )
