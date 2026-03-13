@@ -11,6 +11,10 @@ Tasks:
 import frappe
 from frappe.utils import nowdate, add_days, getdate
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+)
+
 
 def seller_payout():
     """
@@ -84,8 +88,12 @@ def process_order_payout(order):
     2. Create/update Seller Balance record
     3. Mark order as payout processed
     """
-    # Get commission plan for seller
-    commission = calculate_commission(order)
+    # Skip commission calculation when commission is globally disabled
+    if not is_commission_enabled():
+        commission = 0
+    else:
+        # Get commission plan for seller
+        commission = calculate_commission(order)
 
     # Calculate seller payout amount
     seller_amount = order.get("grand_total", 0) - commission
@@ -112,6 +120,9 @@ def calculate_commission(order):
     - Seller tier discounts
     - Promotional adjustments
     """
+    if not is_commission_enabled():
+        return 0
+
     base_commission_rate = 0.10  # Default 10%
 
     # In real implementation, this would fetch from Commission Plan/Rule

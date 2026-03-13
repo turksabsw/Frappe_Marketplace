@@ -6,6 +6,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import nowdate, now_datetime, getdate, add_days
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+    get_zero_commission_result,
+)
+
 
 class SubscriptionPackage(Document):
     """Subscription Package DocType for subscription billing system."""
@@ -233,6 +238,9 @@ class SubscriptionPackage(Document):
 
     def calculate_commission(self, transaction_amount):
         """Calculate commission and fees for a transaction."""
+        if not is_commission_enabled():
+            return get_zero_commission_result(transaction_amount)
+
         commission = transaction_amount * ((self.commission_rate or 0) / 100)
         transaction_fee = transaction_amount * ((self.transaction_fee_percent or 0) / 100)
 

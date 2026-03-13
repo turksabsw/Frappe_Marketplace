@@ -9,6 +9,10 @@ from frappe import _
 from frappe.utils import cint, flt
 from frappe.utils.nestedset import NestedSet
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+)
+
 
 class Category(NestedSet):
     """
@@ -50,6 +54,10 @@ class Category(NestedSet):
 
     def validate_commission_rates(self):
         """Validate commission rate settings."""
+        # Skip validation when commission is globally disabled
+        if not is_commission_enabled():
+            return
+
         if flt(self.commission_rate) < 0:
             frappe.throw(_("Commission Rate cannot be negative"))
         if flt(self.commission_rate) > 100:
@@ -310,6 +318,9 @@ class Category(NestedSet):
         Returns:
             Commission amount after applying rate, min, max, and fixed
         """
+        if not is_commission_enabled():
+            return 0
+
         commission_rate = self.get_effective_commission_rate()
         calculated = flt(amount) * flt(commission_rate) / 100
 

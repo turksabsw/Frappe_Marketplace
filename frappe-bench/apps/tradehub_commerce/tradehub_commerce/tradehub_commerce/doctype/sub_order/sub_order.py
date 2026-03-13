@@ -9,6 +9,10 @@ from frappe.utils import (
     add_days, get_datetime, date_diff
 )
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+)
+
 
 class SubOrder(Document):
     """
@@ -435,10 +439,13 @@ class SubOrder(Document):
                 # Line total = taxable_amount + tax
                 item.line_total = flt(flt(taxable_amount, 2) + flt(item.tax_amount, 2), 2)
 
-                # Calculate commission
-                item.commission_amount = flt(
-                    flt(taxable_amount, 2) * flt(item.commission_rate, 2) / 100, 2
-                )
+                # Calculate commission (set to 0 when commission is globally disabled)
+                if not is_commission_enabled():
+                    item.commission_amount = 0
+                else:
+                    item.commission_amount = flt(
+                        flt(taxable_amount, 2) * flt(item.commission_rate, 2) / 100, 2
+                    )
 
                 # Aggregate parent totals
                 subtotal += flt(item.line_subtotal, 2)
