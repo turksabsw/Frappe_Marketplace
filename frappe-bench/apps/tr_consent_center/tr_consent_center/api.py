@@ -24,6 +24,10 @@ from frappe import _
 from frappe.utils import now_datetime, today, getdate
 import json
 
+from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+    create_legal_audit_log,
+)
+
 
 def _api_response(success=True, data=None, message=None, errors=None):
     """Standard API response format."""
@@ -94,6 +98,33 @@ def grant_consent(party_type, party, topic, method=None, channel=None,
 
         doc.insert()
         frappe.db.commit()
+
+        # Create legal audit log for consent granted
+        try:
+            consent_text_snapshot = None
+            content_hash_value = None
+            if consent_text:
+                text_data = frappe.db.get_value(
+                    "Consent Text", consent_text,
+                    ["content", "content_hash"], as_dict=True
+                )
+                if text_data:
+                    consent_text_snapshot = text_data.get("content")
+                    content_hash_value = text_data.get("content_hash")
+
+            create_legal_audit_log(
+                "consent_granted",
+                "Consent Record",
+                doc.name,
+                user_id=frappe.session.user,
+                ip_address=ip_address or getattr(frappe.local, 'request_ip', None),
+                user_agent=user_agent,
+                content_hash=content_hash_value,
+                consent_text_snapshot=consent_text_snapshot,
+                new_status=status
+            )
+        except Exception:
+            frappe.log_error("Failed to create legal audit log for consent_granted", "Consent Center API")
 
         result = {
             "consent_record": doc.name,
@@ -174,6 +205,21 @@ def revoke_consent(consent_record=None, party_type=None, party=None, topic=None,
         doc.revocation_ip_address = ip_address or getattr(frappe.local, 'request_ip', None)
         doc.save()
         frappe.db.commit()
+
+        # Create legal audit log for consent revoked
+        try:
+            create_legal_audit_log(
+                "consent_revoked",
+                "Consent Record",
+                doc.name,
+                user_id=frappe.session.user,
+                ip_address=ip_address or getattr(frappe.local, 'request_ip', None),
+                old_status="Active",
+                new_status="Revoked",
+                details=reason or ""
+            )
+        except Exception:
+            frappe.log_error("Failed to create legal audit log for consent_revoked", "Consent Center API")
 
         return _api_response(
             True,
