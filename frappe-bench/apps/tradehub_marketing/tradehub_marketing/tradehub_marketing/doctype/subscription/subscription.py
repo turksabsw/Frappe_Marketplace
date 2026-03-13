@@ -664,6 +664,9 @@ class Subscription(Document):
             self.flags.ignore_guard = True
             self.save(ignore_permissions=True)
 
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
+
             # Sync premium profile API access
             self.sync_premium_profile_api_access()
 
@@ -796,6 +799,9 @@ class Subscription(Document):
 
         self.save()
 
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
+
         frappe.msgprint(_("Subscription has been suspended. Reason: {0}").format(self.suspended_reason))
 
         # Notify subscriber
@@ -839,6 +845,9 @@ class Subscription(Document):
 
         self.save()
 
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
+
         frappe.msgprint(_("Subscription has been reactivated successfully"))
 
         return True
@@ -860,6 +869,9 @@ class Subscription(Document):
             self.internal_notes = (self.internal_notes or "") + _("\nCancellation Reason: {0}").format(reason)
 
         self.save()
+
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
 
         frappe.msgprint(_("Subscription has been cancelled"))
 
@@ -903,6 +915,9 @@ class Subscription(Document):
 
             self.save()
 
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
+
             frappe.msgprint(_("Subscription renewed successfully until {0}").format(new_end))
         else:
             self.status = "Pending Payment"
@@ -910,6 +925,9 @@ class Subscription(Document):
             self.failed_renewal_attempts = (self.failed_renewal_attempts or 0) + 1
             self.last_renewal_attempt = now_datetime()
             self.save()
+
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
 
         return True
 
@@ -1041,6 +1059,119 @@ class Subscription(Document):
             0,
             update_modified=False
         )
+
+
+# ==================== Caching Functions ====================
+
+def get_cached_subscription_status(subscriber_type, subscriber_id):
+    """Get subscription status with caching.
+
+    Checks frappe.cache().hget('subscription_status', key) first,
+    falls back to DB query, stores with TTL 300s.
+
+    Args:
+        subscriber_type: Type of subscriber (Seller/Buyer/Organization)
+        subscriber_id: ID of the subscriber profile
+
+    Returns:
+        dict: Contains status, subscription_name, package, is_active, api_access_enabled
+    """
+    cache_key = f"{subscriber_type}:{subscriber_id}"
+    ttl_key = f"subscription_status_ttl:{cache_key}"
+
+    # Check cache first — verify TTL key still exists
+    if frappe.cache().get_value(ttl_key):
+        cached = frappe.cache().hget("subscription_status", cache_key)
+        if cached:
+            return cached
+
+    # Fall back to DB query
+    filters = {
+        "subscriber_type": subscriber_type,
+        "status": ["in", ["Draft", "Trial", "Active", "Pending Payment", "Grace Period", "Suspended"]],
+    }
+
+    if subscriber_type == "Seller":
+        filters["seller_profile"] = subscriber_id
+    elif subscriber_type == "Buyer":
+        filters["buyer_profile"] = subscriber_id
+    elif subscriber_type == "Organization":
+        filters["organization"] = subscriber_id
+    else:
+        return {
+            "status": None,
+            "subscription_name": None,
+            "package": None,
+            "is_active": 0,
+            "api_access_enabled": 0,
+        }
+
+    subscription = frappe.db.get_value(
+        "Subscription",
+        filters,
+        ["name", "status", "subscription_package", "package_name", "is_active", "api_access_enabled"],
+        as_dict=True,
+    )
+
+    if not subscription:
+        result = {
+            "status": None,
+            "subscription_name": None,
+            "package": None,
+            "is_active": 0,
+            "api_access_enabled": 0,
+        }
+    else:
+        result = {
+            "status": subscription.status,
+            "subscription_name": subscription.name,
+            "package": subscription.package_name or subscription.subscription_package,
+            "is_active": subscription.is_active,
+            "api_access_enabled": subscription.api_access_enabled,
+        }
+
+    # Store in cache with TTL 300s
+    frappe.cache().hset("subscription_status", cache_key, result)
+    frappe.cache().set_value(ttl_key, 1, expires_in_sec=300)
+
+    return result
+
+
+def invalidate_subscription_cache(subscription_name):
+    """Clear subscription status cache for the subscriber of a given subscription.
+
+    Looks up the subscriber type and ID from the subscription record,
+    then removes the corresponding cache entry.
+
+    Args:
+        subscription_name: Name of the Subscription document
+    """
+    subscriber_info = frappe.db.get_value(
+        "Subscription",
+        subscription_name,
+        ["subscriber_type", "seller_profile", "buyer_profile", "organization"],
+        as_dict=True,
+    )
+
+    if not subscriber_info:
+        return
+
+    subscriber_type = subscriber_info.subscriber_type
+    subscriber_id = None
+
+    if subscriber_type == "Seller":
+        subscriber_id = subscriber_info.seller_profile
+    elif subscriber_type == "Buyer":
+        subscriber_id = subscriber_info.buyer_profile
+    elif subscriber_type == "Organization":
+        subscriber_id = subscriber_info.organization
+
+    if not subscriber_id:
+        return
+
+    cache_key = f"{subscriber_type}:{subscriber_id}"
+    frappe.cache().hdel("subscription_status", cache_key)
+    frappe.cache().delete_key(f"subscription_status_ttl:{cache_key}")
 
 
 # ==================== API Methods ====================
