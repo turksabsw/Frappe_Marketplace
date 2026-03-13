@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-02-05 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day_offset",
+  "notification_type",
+  "column_break_settings",
+  "priority",
+  "is_enabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "day_offset",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Day Offset",
+   "reqd": 1,
+   "description": "Number of days before/after subscription event to send reminder",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "notification_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Notification Type",
+   "options": "email\nsms\npush\nin_app",
+   "reqd": 1,
+   "description": "Channel to use for sending the reminder"
+  },
+  {
+   "fieldname": "column_break_settings",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Priority",
+   "options": "low\nmedium\nhigh",
+   "default": "medium",
+   "description": "Priority level of this reminder"
+  },
+  {
+   "fieldname": "is_enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled",
+   "default": "1",
+   "description": "Enable or disable this reminder day"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Marketing",
+ "name": "Subscription Reminder Day",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "day_offset",
+ "sort_order": "ASC",
+ "track_changes": 0
+}
