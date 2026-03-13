@@ -122,14 +122,23 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# Marketing-specific scheduled tasks: campaign management
+# Marketing-specific scheduled tasks: campaign management, subscription lifecycle
 # This task is moved from the monolithic tr_tradehub app during decomposition
 scheduler_events = {
 	"daily": [
-		"tradehub_marketing.tasks.campaign_tasks"
+		"tradehub_marketing.tasks.campaign_tasks",
+		"tradehub_marketing.tasks.check_subscription_transitions",
+		"tradehub_marketing.tasks.send_subscription_reminders",
+		"tradehub_marketing.tasks.check_grace_period_expiry"
 	],
 	"hourly": [
 		"tradehub_marketing.tasks.group_buy_tasks"
+	],
+	"weekly": [
+		"tradehub_marketing.tasks.auto_cancel_long_suspended"
+	],
+	"monthly": [
+		"tradehub_marketing.tasks.generate_subscription_report"
 	]
 }
 

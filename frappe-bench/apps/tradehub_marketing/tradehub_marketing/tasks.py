@@ -4,6 +4,11 @@ Scheduled tasks for TradeHub Marketing module.
 Tasks moved from the monolithic tr_tradehub app during decomposition:
 - campaign_tasks: Daily campaign status updates (activate/deactivate based on dates)
 - group_buy_tasks: Hourly group buy commitment tracking and status updates
+- check_subscription_transitions: Daily subscription status transitions
+- send_subscription_reminders: Daily subscription billing reminders
+- check_grace_period_expiry: Daily grace period expiry checks
+- auto_cancel_long_suspended: Weekly auto-cancel of long-suspended subscriptions
+- generate_subscription_report: Monthly subscription metrics report
 """
 
 import frappe
@@ -337,3 +342,228 @@ def subscription_renewal_tasks():
 
     frappe.db.commit()
     frappe.logger("tradehub_marketing").info("Subscription renewal tasks completed")
+
+
+def check_subscription_transitions():
+    """
+    Daily scheduled task to check and process subscription status transitions.
+
+    Iterates over all non-terminal subscriptions and calls
+    check_and_transition_status() on each one to handle automatic
+    status changes (Active → Pending Payment → Grace Period → Suspended → Cancelled).
+    """
+    frappe.logger("tradehub_marketing").info("Running check_subscription_transitions task")
+
+    subscriptions = frappe.get_all(
+        "Subscription",
+        filters={
+            "status": ["in", ["Active", "Trial", "Pending Payment", "Grace Period", "Suspended"]]
+        },
+        pluck="name"
+    )
+
+    transitioned = 0
+    for sub_name in subscriptions:
+        try:
+            sub = frappe.get_doc("Subscription", sub_name)
+            result = sub.check_and_transition_status()
+            if result.get("changed"):
+                transitioned += 1
+            frappe.db.commit()
+        except Exception as e:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=f"Failed to check transition for subscription {sub_name}: {str(e)}",
+                title="Subscription Transition Error"
+            )
+
+    frappe.logger("tradehub_marketing").info(
+        f"check_subscription_transitions completed. "
+        f"Checked: {len(subscriptions)}, Transitioned: {transitioned}"
+    )
+
+
+def send_subscription_reminders():
+    """
+    Daily scheduled task to send subscription billing reminders.
+
+    Iterates over all subscriptions in reminder-eligible statuses and calls
+    send_subscription_reminder() on each to send due/overdue notifications
+    based on Subscription Billing Settings reminder_days configuration.
+    """
+    frappe.logger("tradehub_marketing").info("Running send_subscription_reminders task")
+
+    subscriptions = frappe.get_all(
+        "Subscription",
+        filters={
+            "status": ["in", ["Active", "Trial", "Pending Payment", "Grace Period"]]
+        },
+        pluck="name"
+    )
+
+    sent_count = 0
+    for sub_name in subscriptions:
+        try:
+            sub = frappe.get_doc("Subscription", sub_name)
+            reminders_sent = sub.send_subscription_reminder()
+            if reminders_sent:
+                sent_count += 1
+            frappe.db.commit()
+        except Exception as e:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=f"Failed to send reminders for subscription {sub_name}: {str(e)}",
+                title="Subscription Reminder Error"
+            )
+
+    frappe.logger("tradehub_marketing").info(
+        f"send_subscription_reminders completed. "
+        f"Checked: {len(subscriptions)}, Reminders sent: {sent_count}"
+    )
+
+
+def check_grace_period_expiry():
+    """
+    Daily scheduled task to check for expired grace periods.
+
+    Iterates over all subscriptions in Grace Period status and calls
+    check_grace_period_expiry() on each to suspend subscriptions
+    whose grace period has expired without payment.
+    """
+    frappe.logger("tradehub_marketing").info("Running check_grace_period_expiry task")
+
+    subscriptions = frappe.get_all(
+        "Subscription",
+        filters={
+            "status": "Grace Period"
+        },
+        pluck="name"
+    )
+
+    expired_count = 0
+    for sub_name in subscriptions:
+        try:
+            sub = frappe.get_doc("Subscription", sub_name)
+            if sub.check_grace_period_expiry():
+                expired_count += 1
+            frappe.db.commit()
+        except Exception as e:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=f"Failed to check grace period for subscription {sub_name}: {str(e)}",
+                title="Grace Period Expiry Error"
+            )
+
+    frappe.logger("tradehub_marketing").info(
+        f"check_grace_period_expiry completed. "
+        f"Checked: {len(subscriptions)}, Expired: {expired_count}"
+    )
+
+
+def auto_cancel_long_suspended():
+    """
+    Weekly scheduled task to auto-cancel subscriptions that have been
+    suspended for longer than the configured auto_cancel_after_suspension_days.
+
+    Reads the threshold from Subscription Billing Settings and cancels
+    subscriptions that have exceeded it.
+    """
+    frappe.logger("tradehub_marketing").info("Running auto_cancel_long_suspended task")
+
+    try:
+        settings = frappe.get_cached_doc("Subscription Billing Settings")
+        auto_cancel_days = settings.auto_cancel_after_suspension_days or 30
+    except Exception:
+        auto_cancel_days = 30
+
+    cutoff_date = add_days(nowdate(), -auto_cancel_days)
+
+    subscriptions = frappe.get_all(
+        "Subscription",
+        filters={
+            "status": "Suspended",
+            "suspended_at": ["<", cutoff_date]
+        },
+        pluck="name"
+    )
+
+    cancelled_count = 0
+    for sub_name in subscriptions:
+        try:
+            sub = frappe.get_doc("Subscription", sub_name)
+            sub.cancel_subscription(
+                reason=f"Auto-cancelled after {auto_cancel_days} days of suspension"
+            )
+            cancelled_count += 1
+            frappe.db.commit()
+        except Exception as e:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=f"Failed to auto-cancel subscription {sub_name}: {str(e)}",
+                title="Auto Cancel Subscription Error"
+            )
+
+    frappe.logger("tradehub_marketing").info(
+        f"auto_cancel_long_suspended completed. "
+        f"Checked: {len(subscriptions)}, Cancelled: {cancelled_count}"
+    )
+
+
+def generate_subscription_report():
+    """
+    Monthly scheduled task to generate subscription metrics report.
+
+    Collects subscription statistics (active, trial, suspended, cancelled counts,
+    revenue metrics, churn rate) and creates a log entry for monitoring.
+    """
+    frappe.logger("tradehub_marketing").info("Running generate_subscription_report task")
+
+    try:
+        today = getdate(nowdate())
+
+        # Gather subscription metrics by status
+        status_counts = {}
+        for status in ["Active", "Trial", "Pending Payment", "Grace Period", "Suspended", "Cancelled", "Expired"]:
+            count = frappe.db.count("Subscription", filters={"status": status})
+            status_counts[status] = count
+
+        total = sum(status_counts.values())
+
+        # Calculate churn: cancelled + expired in the last 30 days
+        thirty_days_ago = add_days(today, -30)
+        churned = frappe.db.count("Subscription", filters={
+            "status": ["in", ["Cancelled", "Expired"]],
+            "modified": [">=", thirty_days_ago]
+        })
+
+        # New subscriptions in the last 30 days
+        new_subscriptions = frappe.db.count("Subscription", filters={
+            "creation": [">=", thirty_days_ago]
+        })
+
+        # Build report summary
+        report = (
+            f"Subscription Report - {today}\n"
+            f"{'=' * 40}\n"
+            f"Total Subscriptions: {total}\n"
+            f"Active: {status_counts.get('Active', 0)}\n"
+            f"Trial: {status_counts.get('Trial', 0)}\n"
+            f"Pending Payment: {status_counts.get('Pending Payment', 0)}\n"
+            f"Grace Period: {status_counts.get('Grace Period', 0)}\n"
+            f"Suspended: {status_counts.get('Suspended', 0)}\n"
+            f"Cancelled: {status_counts.get('Cancelled', 0)}\n"
+            f"Expired: {status_counts.get('Expired', 0)}\n"
+            f"{'=' * 40}\n"
+            f"New (last 30 days): {new_subscriptions}\n"
+            f"Churned (last 30 days): {churned}\n"
+        )
+
+        frappe.logger("tradehub_marketing").info(report)
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=f"Failed to generate subscription report: {str(e)}",
+            title="Subscription Report Error"
+        )
