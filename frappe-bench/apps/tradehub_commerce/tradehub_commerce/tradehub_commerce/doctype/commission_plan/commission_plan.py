@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate, now_datetime, nowdate, add_days, add_months
 from datetime import date
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import is_commission_enabled, get_zero_commission_result
 
 
 class CommissionPlan(Document):
@@ -236,6 +237,9 @@ class CommissionPlan(Document):
         Returns:
             dict: Commission details including amount, rate, and breakdown
         """
+        if not is_commission_enabled():
+            return get_zero_commission_result(order_value)
+
         # Determine commission base
         commission_base = flt(order_value)
         if cint(self.deduct_shipping_from_commission):
@@ -296,6 +300,9 @@ class CommissionPlan(Document):
         Returns:
             float: Applicable commission rate
         """
+        if not is_commission_enabled():
+            return 0
+
         # Start with base rate
         rate = flt(self.base_commission_rate)
 
@@ -719,6 +726,9 @@ def calculate_commission(plan_name, order_value, category=None, seller=None, shi
     Returns:
         dict: Commission calculation result
     """
+    if not is_commission_enabled():
+        return get_zero_commission_result(flt(order_value))
+
     if not frappe.db.exists("Commission Plan", plan_name):
         frappe.throw(_("Commission plan not found"))
 

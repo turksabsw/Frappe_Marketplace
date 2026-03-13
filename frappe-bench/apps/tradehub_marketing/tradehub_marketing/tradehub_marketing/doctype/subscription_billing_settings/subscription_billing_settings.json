@@ -1,0 +1,99 @@
+{
+  "actions": [],
+  "creation": "2026-02-12 12:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "grace_period_days",
+    "past_due_to_grace_days",
+    "column_break_1",
+    "auto_cancel_after_suspension_days",
+    "max_renewal_retries",
+    "section_break_1",
+    "allow_downgrade_during_period",
+    "section_break_2",
+    "reminder_days"
+  ],
+  "fields": [
+    {
+      "default": "7",
+      "fieldname": "grace_period_days",
+      "fieldtype": "Int",
+      "label": "Grace Period Days",
+      "description": "Number of days to allow after subscription expiry before suspension"
+    },
+    {
+      "default": "3",
+      "fieldname": "past_due_to_grace_days",
+      "fieldtype": "Int",
+      "label": "Past Due to Grace Days",
+      "description": "Number of days after past due before entering grace period"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "90",
+      "fieldname": "auto_cancel_after_suspension_days",
+      "fieldtype": "Int",
+      "label": "Auto Cancel After Suspension Days",
+      "description": "Number of days after suspension before automatic cancellation"
+    },
+    {
+      "default": "3",
+      "fieldname": "max_renewal_retries",
+      "fieldtype": "Int",
+      "label": "Max Renewal Retries",
+      "description": "Maximum number of renewal payment retries before suspension"
+    },
+    {
+      "fieldname": "section_break_1",
+      "fieldtype": "Section Break",
+      "label": "Downgrade Settings"
+    },
+    {
+      "default": "0",
+      "fieldname": "allow_downgrade_during_period",
+      "fieldtype": "Check",
+      "label": "Allow Downgrade During Period",
+      "description": "Allow subscribers to downgrade their plan during an active billing period"
+    },
+    {
+      "fieldname": "section_break_2",
+      "fieldtype": "Section Break",
+      "label": "Reminder Configuration"
+    },
+    {
+      "fieldname": "reminder_days",
+      "fieldtype": "Table",
+      "label": "Reminder Days",
+      "options": "Subscription Reminder Day",
+      "description": "Configure reminder days for subscription renewal notifications"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "issingle": 1,
+  "links": [],
+  "modified": "2026-02-12 12:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "TradeHub Marketing",
+  "name": "Subscription Billing Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": [],
+  "track_changes": 1
+}

@@ -6,6 +6,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+)
+
 
 class SubOrderItem(Document):
     """
@@ -53,8 +57,11 @@ class SubOrderItem(Document):
         # Line total = taxable_amount + tax
         self.line_total = taxable_amount + flt(self.tax_amount)
 
-        # Calculate commission
-        self.commission_amount = taxable_amount * flt(self.commission_rate) / 100
+        # Calculate commission (set to 0 when commission is globally disabled)
+        if not is_commission_enabled():
+            self.commission_amount = 0
+        else:
+            self.commission_amount = taxable_amount * flt(self.commission_rate) / 100
 
     def get_display_data(self):
         """Get item data for display/API."""

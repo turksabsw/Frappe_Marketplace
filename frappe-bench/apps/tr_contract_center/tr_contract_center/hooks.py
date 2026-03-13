@@ -31,7 +31,13 @@ fixtures = [
 doc_events = {
     "Contract Instance": {
         "on_update": "tr_contract_center.events.contract_instance_on_update"
-    }
+    },
+    "Seller Profile": {
+        "on_update": "tr_contract_center.events.on_seller_profile_update"
+    },
+    "Subscription": {
+        "on_update": "tr_contract_center.events.on_subscription_update"
+    },
 }
 
 # Scheduled Tasks

@@ -10,6 +10,10 @@ from frappe.utils import (
 )
 import json
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+)
+
 
 class EscrowAccount(Document):
     """
@@ -222,6 +226,10 @@ class EscrowAccount(Document):
 
     def calculate_fees(self):
         """Calculate total fees and net amount to seller."""
+        # Set commission to zero when commission is globally disabled
+        if not is_commission_enabled():
+            self.commission_amount = 0
+
         self.total_fees = (
             flt(self.commission_amount) +
             flt(self.platform_fee) +
@@ -237,6 +245,12 @@ class EscrowAccount(Document):
     def set_commission_from_seller(self):
         """Calculate commission based on seller's commission plan."""
         if not self.seller:
+            return
+
+        # Skip commission calculation when commission is globally disabled
+        if not is_commission_enabled():
+            self.commission_amount = 0
+            self.calculate_fees()
             return
 
         seller = frappe.get_doc("Seller Profile", self.seller)

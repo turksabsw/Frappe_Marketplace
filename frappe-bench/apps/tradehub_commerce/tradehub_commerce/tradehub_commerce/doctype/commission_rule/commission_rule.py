@@ -9,6 +9,10 @@ from frappe.utils import (
     add_days, time_diff_in_hours
 )
 from datetime import datetime, time as dt_time
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+    get_zero_commission_result,
+)
 
 
 class CommissionRule(Document):
@@ -621,6 +625,9 @@ class CommissionRule(Document):
         Returns:
             dict: Commission calculation result
         """
+        if not is_commission_enabled():
+            return get_zero_commission_result(order_value)
+
         ctx = ctx or {}
 
         # Calculate commission base
@@ -809,6 +816,9 @@ def calculate_commission_with_rules(order_value, ctx, tenant=None):
     Returns:
         dict: Commission calculation result with applied rule info
     """
+    if not is_commission_enabled():
+        return get_zero_commission_result(order_value)
+
     # Get the first matching rule
     rules = get_applicable_rules(ctx, tenant, limit=1)
 
@@ -917,6 +927,9 @@ def calculate_commission(order_value, category=None, seller=None,
     Returns:
         dict: Commission calculation result
     """
+    if not is_commission_enabled():
+        return get_zero_commission_result(flt(order_value))
+
     ctx = {
         "order_value": flt(order_value),
         "category": category,

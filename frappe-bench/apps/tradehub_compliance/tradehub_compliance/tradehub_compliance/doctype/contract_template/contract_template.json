@@ -19,6 +19,19 @@
   "content_section",
   "content",
   "content_summary",
+  "dynamic_rules_tab",
+  "dynamic_rules_section",
+  "dynamic_rules_enabled",
+  "base_text",
+  "column_break_dynamic",
+  "rule_evaluation_order",
+  "conflict_resolution",
+  "condition_rules_section",
+  "condition_rules",
+  "preview_tab",
+  "preview_section",
+  "preview_seller",
+  "compiled_preview",
   "version_tab",
   "version_section",
   "version",
@@ -117,6 +130,82 @@
    "fieldtype": "Small Text",
    "label": "Content Summary",
    "description": "Brief summary of the contract terms"
+  },
+  {
+   "fieldname": "dynamic_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Dynamic Rules Configuration"
+  },
+  {
+   "default": "0",
+   "fieldname": "dynamic_rules_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Dynamic Rules",
+   "description": "Enable rule-based dynamic clause insertion and removal"
+  },
+  {
+   "fieldname": "base_text",
+   "fieldtype": "Text Editor",
+   "label": "Base Text for Dynamic Rules",
+   "depends_on": "dynamic_rules_enabled",
+   "description": "Base contract text with clause markers for dynamic rule processing"
+  },
+  {
+   "fieldname": "column_break_dynamic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "priority_first",
+   "fieldname": "rule_evaluation_order",
+   "fieldtype": "Select",
+   "label": "Rule Evaluation Order",
+   "options": "priority_first\nclause_order_first",
+   "depends_on": "dynamic_rules_enabled",
+   "description": "Order in which rules are evaluated during compilation"
+  },
+  {
+   "default": "all_matching",
+   "fieldname": "conflict_resolution",
+   "fieldtype": "Select",
+   "label": "Conflict Resolution",
+   "options": "first_match\nall_matching\npriority_based",
+   "depends_on": "dynamic_rules_enabled",
+   "description": "How to resolve conflicts when multiple rules match"
+  },
+  {
+   "fieldname": "condition_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Condition Rules",
+   "depends_on": "dynamic_rules_enabled"
+  },
+  {
+   "fieldname": "condition_rules",
+   "fieldtype": "Table",
+   "label": "Condition Rules",
+   "options": "Contract Condition Rule",
+   "depends_on": "dynamic_rules_enabled",
+   "description": "Rules that determine which clauses are added, removed, or replaced"
+  },
+  {
+   "fieldname": "preview_section",
+   "fieldtype": "Section Break",
+   "label": "Contract Preview"
+  },
+  {
+   "fieldname": "preview_seller",
+   "fieldtype": "Link",
+   "label": "Preview Seller",
+   "options": "Seller Profile",
+   "depends_on": "dynamic_rules_enabled",
+   "description": "Select a seller profile to preview compiled contract output"
+  },
+  {
+   "fieldname": "compiled_preview",
+   "fieldtype": "Text Editor",
+   "label": "Compiled Preview",
+   "read_only": 1,
+   "depends_on": "dynamic_rules_enabled",
+   "description": "Preview of the compiled contract with dynamic rules applied"
   },
   {
    "fieldname": "version_section",
@@ -222,6 +311,16 @@
    "fieldname": "content_tab",
    "fieldtype": "Tab Break",
    "label": "Content"
+  },
+  {
+   "fieldname": "dynamic_rules_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dynamic Rules"
+  },
+  {
+   "fieldname": "preview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Preview"
   },
   {
    "fieldname": "version_tab",

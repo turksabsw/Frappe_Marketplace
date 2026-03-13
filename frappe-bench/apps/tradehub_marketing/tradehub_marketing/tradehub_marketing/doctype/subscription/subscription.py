@@ -30,8 +30,17 @@ class Subscription(Document):
         self._guard_system_fields()
 
     def _guard_system_fields(self):
-        """Prevent modification of system-generated fields after creation."""
+        """Prevent modification of system-generated fields after creation.
+
+        The guard is bypassed when self.flags.ignore_guard is set, which is used
+        by internal lifecycle methods (check_and_transition_status, suspend, reactivate, etc.)
+        that legitimately need to update system fields.
+        """
         if self.is_new():
+            return
+
+        # Allow internal lifecycle methods to bypass the guard
+        if getattr(self.flags, "ignore_guard", False):
             return
 
         system_fields = [
@@ -251,10 +260,337 @@ class Subscription(Document):
                 update_modified=False
             )
 
+    def _get_billing_settings(self):
+        """
+        Retrieve Subscription Billing Settings singleton values.
+
+        Returns:
+            dict: Billing settings with grace_period_days, past_due_to_grace_days,
+                  auto_cancel_after_suspension_days, max_renewal_retries
+        """
+        try:
+            settings = frappe.get_cached_doc("Subscription Billing Settings")
+            return {
+                "grace_period_days": settings.grace_period_days or 7,
+                "past_due_to_grace_days": settings.past_due_to_grace_days or 3,
+                "auto_cancel_after_suspension_days": settings.auto_cancel_after_suspension_days or 90,
+                "max_renewal_retries": settings.max_renewal_retries or 3,
+            }
+        except Exception:
+            # Fallback defaults if settings doc does not exist yet
+            return {
+                "grace_period_days": 7,
+                "past_due_to_grace_days": 3,
+                "auto_cancel_after_suspension_days": 90,
+                "max_renewal_retries": 3,
+            }
+
+    def _create_activity_log(self, event_type, old_status, new_status, triggered_by="scheduler", details=None):
+        """
+        Create a Subscription Activity Log entry for this subscription.
+
+        Args:
+            event_type: Type of event (status_change/payment/notification/admin_action)
+            old_status: Previous subscription status
+            new_status: New subscription status
+            triggered_by: What triggered the event (scheduler/manual/payment)
+            details: Additional details about the event (optional)
+
+        Returns:
+            Document: The created activity log entry
+        """
+        from tradehub_marketing.tradehub_marketing.doctype.subscription_activity_log.subscription_activity_log import (
+            create_activity_log,
+        )
+
+        try:
+            return create_activity_log(
+                subscription=self.name,
+                event_type=event_type,
+                triggered_by=triggered_by,
+                old_status=old_status,
+                new_status=new_status,
+                details=details,
+            )
+        except Exception as e:
+            frappe.log_error(
+                message=f"Error creating activity log for subscription {self.name}: {str(e)}",
+                title="Subscription Activity Log Error"
+            )
+            return None
+
+    def send_status_change_notification(self, old_status, new_status):
+        """
+        Send a notification to the subscriber when subscription status changes.
+
+        Args:
+            old_status: Previous subscription status
+            new_status: New subscription status
+        """
+        try:
+            subscriber_email = None
+            subscriber_name = None
+
+            if self.subscriber_type == "Seller" and self.seller_profile:
+                subscriber_email = frappe.db.get_value("Seller Profile", self.seller_profile, "email")
+                subscriber_name = self.seller_name or self.seller_profile
+            elif self.subscriber_type == "Buyer" and self.buyer_profile:
+                subscriber_email = frappe.db.get_value("Buyer Profile", self.buyer_profile, "email")
+                subscriber_name = self.buyer_profile
+            elif self.subscriber_type == "Organization" and self.organization:
+                subscriber_email = frappe.db.get_value("Organization", self.organization, "email")
+                subscriber_name = self.organization
+
+            if not subscriber_email:
+                return
+
+            subject = _("Subscription Status Changed: {0} → {1}").format(old_status, new_status)
+            message = _(
+                "Dear {0},<br><br>"
+                "Your subscription <b>{1}</b> (Package: {2}) status has changed "
+                "from <b>{3}</b> to <b>{4}</b>.<br><br>"
+            ).format(
+                subscriber_name or _("Subscriber"),
+                self.name,
+                self.package_name or self.subscription_package or "",
+                old_status,
+                new_status,
+            )
+
+            # Add context-specific messages
+            if new_status == "Pending Payment":
+                message += _("Please complete your payment to avoid service disruption.<br><br>")
+            elif new_status == "Grace Period":
+                message += _(
+                    "Your subscription is now in grace period until {0}. "
+                    "Please make payment to continue using the service.<br><br>"
+                ).format(self.grace_period_end_date or "")
+            elif new_status == "Suspended":
+                message += _(
+                    "Your subscription has been suspended. API access and premium features "
+                    "have been disabled. Please make payment to reactivate.<br><br>"
+                )
+            elif new_status == "Cancelled":
+                message += _(
+                    "Your subscription has been automatically cancelled due to prolonged suspension. "
+                    "Please contact support if you wish to resubscribe.<br><br>"
+                )
+
+            frappe.sendmail(
+                recipients=[subscriber_email],
+                subject=subject,
+                message=message,
+                now=True,
+            )
+        except Exception as e:
+            frappe.log_error(
+                message=f"Error sending status change notification for subscription {self.name}: {str(e)}",
+                title="Subscription Notification Error"
+            )
+
+    def send_subscription_reminder(self):
+        """Send subscription reminders based on Subscription Billing Settings reminder_days configuration.
+
+        Reads the reminder_days child table from Subscription Billing Settings,
+        calculates which reminders need to be sent based on next_billing_date
+        and day_offset (-7,-3,0,+1,+3,+7,+14). Prevents duplicate reminders
+        by checking flag fields and creates activity log entries for each reminder sent.
+
+        Returns:
+            list: List of day offsets for which reminders were sent
+        """
+        if not self.next_billing_date:
+            return []
+
+        # Only send reminders for subscriptions that are not terminal
+        if self.status not in ["Active", "Trial", "Pending Payment", "Grace Period"]:
+            return []
+
+        today = getdate(nowdate())
+        next_billing = getdate(self.next_billing_date)
+
+        # Calculate days until billing (positive = before, negative = after)
+        days_until_billing = date_diff(next_billing, today)
+
+        # Map days_until_billing values to flag field names
+        days_to_flag = {
+            7: "reminder_7d_before_sent",
+            3: "reminder_3d_before_sent",
+            0: "reminder_due_day_sent",
+            -1: "reminder_1d_after_sent",
+            -3: "reminder_3d_after_sent",
+            -7: "reminder_7d_after_sent",
+            -14: "reminder_14d_after_sent",
+        }
+
+        # Check if today matches any reminder slot
+        flag_field = days_to_flag.get(days_until_billing)
+        if not flag_field:
+            return []
+
+        # Check if reminder already sent (prevent duplicates)
+        if getattr(self, flag_field, 0):
+            return []
+
+        # Read reminder_days from Subscription Billing Settings
+        try:
+            settings = frappe.get_cached_doc("Subscription Billing Settings")
+            reminder_days = settings.get("reminder_days") or []
+        except Exception:
+            return []
+
+        if not reminder_days:
+            return []
+
+        # Find matching enabled reminder configuration
+        # day_offset in child table is non-negative, so use absolute value for matching
+        abs_offset = abs(days_until_billing)
+        matching_reminder = None
+        for reminder in reminder_days:
+            if not reminder.is_enabled:
+                continue
+            if reminder.day_offset == abs_offset:
+                matching_reminder = reminder
+                break
+
+        if not matching_reminder:
+            return []
+
+        # Determine the logical offset for notifications
+        # Negative = before billing, Positive = after billing, 0 = due day
+        logical_offset = -days_until_billing  # Convert: 7 days until → -7 offset, -3 days until → +3 offset
+
+        # Send the reminder notification
+        self._send_reminder_notification(logical_offset, matching_reminder)
+
+        # Set the flag to prevent duplicate reminders
+        frappe.db.set_value(
+            "Subscription",
+            self.name,
+            flag_field,
+            1,
+            update_modified=False
+        )
+
+        # Create activity log entry
+        if logical_offset < 0:
+            detail_msg = _("Subscription reminder sent: {0} days before billing date {1}").format(
+                abs(logical_offset), self.next_billing_date
+            )
+        elif logical_offset == 0:
+            detail_msg = _("Subscription reminder sent: billing due day {0}").format(
+                self.next_billing_date
+            )
+        else:
+            detail_msg = _("Subscription reminder sent: {0} days after billing date {1}").format(
+                logical_offset, self.next_billing_date
+            )
+
+        self._create_activity_log(
+            event_type="notification",
+            old_status=self.status,
+            new_status=self.status,
+            triggered_by="scheduler",
+            details=detail_msg,
+        )
+
+        return [logical_offset]
+
+    def _send_reminder_notification(self, day_offset, reminder_config):
+        """Send a subscription reminder notification to the subscriber.
+
+        Args:
+            day_offset: Logical offset from billing date (negative=before, 0=due day, positive=after)
+            reminder_config: The Subscription Reminder Day row with notification settings
+        """
+        try:
+            subscriber_email = None
+            subscriber_name = None
+
+            if self.subscriber_type == "Seller" and self.seller_profile:
+                subscriber_email = frappe.db.get_value("Seller Profile", self.seller_profile, "email")
+                subscriber_name = self.seller_name or self.seller_profile
+            elif self.subscriber_type == "Buyer" and self.buyer_profile:
+                subscriber_email = frappe.db.get_value("Buyer Profile", self.buyer_profile, "email")
+                subscriber_name = self.buyer_profile
+            elif self.subscriber_type == "Organization" and self.organization:
+                subscriber_email = frappe.db.get_value("Organization", self.organization, "email")
+                subscriber_name = self.organization
+
+            if not subscriber_email:
+                return
+
+            # Build subject and message based on offset
+            if day_offset < 0:
+                subject = _("Subscription Billing Reminder: {0} days until next billing").format(abs(day_offset))
+                message = _(
+                    "Dear {0},<br><br>"
+                    "This is a reminder that your subscription <b>{1}</b> (Package: {2}) "
+                    "will be billed in <b>{3} days</b> on {4}.<br><br>"
+                    "Please ensure your payment method is up to date.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    abs(day_offset),
+                    self.next_billing_date,
+                )
+            elif day_offset == 0:
+                subject = _("Subscription Billing Due Today")
+                message = _(
+                    "Dear {0},<br><br>"
+                    "Your subscription <b>{1}</b> (Package: {2}) billing is due today ({3}).<br><br>"
+                    "Please complete your payment to avoid service disruption.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    self.next_billing_date,
+                )
+            else:
+                subject = _("Subscription Payment Overdue: {0} days past due").format(day_offset)
+                message = _(
+                    "Dear {0},<br><br>"
+                    "Your subscription <b>{1}</b> (Package: {2}) payment is <b>{3} days overdue</b> "
+                    "(billing date: {4}).<br><br>"
+                    "Please make your payment immediately to avoid service suspension.<br><br>"
+                ).format(
+                    subscriber_name or _("Subscriber"),
+                    self.name,
+                    self.package_name or self.subscription_package or "",
+                    day_offset,
+                    self.next_billing_date,
+                )
+
+            # Only send email if notification type includes email
+            notification_type = getattr(reminder_config, "notification_type", "email")
+            if notification_type == "email":
+                frappe.sendmail(
+                    recipients=[subscriber_email],
+                    subject=subject,
+                    message=message,
+                    now=True,
+                )
+        except Exception as e:
+            frappe.log_error(
+                message=f"Error sending subscription reminder for {self.name}: {str(e)}",
+                title="Subscription Reminder Error"
+            )
+
     def check_and_transition_status(self):
         """
         Check if subscription status should transition based on current date.
+        Reads configurable settings from Subscription Billing Settings singleton.
         This is called by scheduled tasks to handle automatic transitions.
+
+        Transition rules:
+        (a) Active → Pending Payment: when end_date passed and auto_renew=1
+        (b) Pending Payment → Grace Period: after past_due_to_grace_days from Billing Settings
+        (c) Grace Period → Suspended: when grace_period_end_date passed
+        (d) Suspended → Cancelled: after auto_cancel_after_suspension_days
+
+        Each transition creates an activity log entry, sends notification,
+        updates status flags, and syncs premium profile API access.
 
         Returns:
             dict: Contains old_status, new_status, and whether a change occurred
@@ -262,17 +598,18 @@ class Subscription(Document):
         today = getdate(nowdate())
         old_status = self.status
         status_changed = False
+        billing_settings = self._get_billing_settings()
 
-        # Check if Active subscription has expired
+        # (a) Active → Pending Payment when end_date passed and auto_renew=1
         if self.status == "Active" and self.end_date:
             if getdate(self.end_date) < today:
                 if self.auto_renew:
-                    # Attempt renewal - if no payment method, go to pending
                     self.status = "Pending Payment"
+                    status_changed = True
                 else:
-                    # Start grace period
-                    self._start_grace_period_internal()
-                status_changed = True
+                    # No auto-renew: start grace period directly
+                    self._start_grace_period_internal(billing_settings)
+                    status_changed = True
 
         # Check if Trial has expired
         elif self.status == "Trial" and self.trial_end_date:
@@ -285,23 +622,65 @@ class Subscription(Document):
                     self.api_access_enabled = 0
                 status_changed = True
 
-        # Check if Pending Payment should enter grace period
+        # (b) Pending Payment → Grace Period after past_due_to_grace_days
         elif self.status == "Pending Payment":
-            # If payment has been pending for more than 3 days, start grace period
+            past_due_days = billing_settings["past_due_to_grace_days"]
+            # Use last_renewal_attempt if available, otherwise fall back to end_date
+            reference_date = None
             if self.last_renewal_attempt:
-                days_pending = date_diff(today, getdate(self.last_renewal_attempt))
-                if days_pending >= 3:
-                    self._start_grace_period_internal()
+                reference_date = getdate(self.last_renewal_attempt)
+            elif self.end_date:
+                reference_date = getdate(self.end_date)
+
+            if reference_date:
+                days_pending = date_diff(today, reference_date)
+                if days_pending >= past_due_days:
+                    self._start_grace_period_internal(billing_settings)
                     status_changed = True
 
-        # Check if Grace Period has expired
+        # (c) Grace Period → Suspended when grace_period_end_date passed
         elif self.status == "Grace Period" and self.grace_period_end_date:
             if getdate(self.grace_period_end_date) < today:
                 self._suspend_internal(_("Grace period expired without payment"))
                 status_changed = True
 
+        # (d) Suspended → Cancelled after auto_cancel_after_suspension_days
+        elif self.status == "Suspended" and self.suspended_at:
+            auto_cancel_days = billing_settings["auto_cancel_after_suspension_days"]
+            days_suspended = date_diff(today, getdate(self.suspended_at))
+            if days_suspended >= auto_cancel_days:
+                self.status = "Cancelled"
+                self.is_active = 0
+                self.api_access_enabled = 0
+                self.cancellation_date = nowdate()
+                self.auto_renew = 0
+                status_changed = True
+
         if status_changed:
+            # Update status flags
+            self.update_status_flags()
+
+            # Save the subscription
+            self.flags.ignore_guard = True
             self.save(ignore_permissions=True)
+
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
+
+            # Sync premium profile API access
+            self.sync_premium_profile_api_access()
+
+            # Create activity log entry
+            self._create_activity_log(
+                event_type="status_change",
+                old_status=old_status,
+                new_status=self.status,
+                triggered_by="scheduler",
+                details=_("Automatic status transition: {0} → {1}").format(old_status, self.status),
+            )
+
+            # Send status change notification
+            self.send_status_change_notification(old_status, self.status)
 
         return {
             "old_status": old_status,
@@ -309,10 +688,20 @@ class Subscription(Document):
             "changed": status_changed
         }
 
-    def _start_grace_period_internal(self):
-        """Internal method to start grace period without saving."""
+    def _start_grace_period_internal(self, billing_settings=None):
+        """Internal method to start grace period without saving.
+
+        Args:
+            billing_settings: Optional billing settings dict. If not provided,
+                              reads from Subscription Billing Settings singleton.
+        """
         today = getdate(nowdate())
-        grace_days = self.grace_period_days or 7
+
+        # Use billing settings grace_period_days, fall back to subscription-level, then default
+        if billing_settings:
+            grace_days = billing_settings.get("grace_period_days") or self.grace_period_days or 7
+        else:
+            grace_days = self.grace_period_days or 7
 
         self.status = "Grace Period"
         self.in_grace_period = 1
@@ -410,6 +799,9 @@ class Subscription(Document):
 
         self.save()
 
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
+
         frappe.msgprint(_("Subscription has been suspended. Reason: {0}").format(self.suspended_reason))
 
         # Notify subscriber
@@ -453,6 +845,9 @@ class Subscription(Document):
 
         self.save()
 
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
+
         frappe.msgprint(_("Subscription has been reactivated successfully"))
 
         return True
@@ -474,6 +869,9 @@ class Subscription(Document):
             self.internal_notes = (self.internal_notes or "") + _("\nCancellation Reason: {0}").format(reason)
 
         self.save()
+
+        # Invalidate subscription status cache
+        invalidate_subscription_cache(self.name)
 
         frappe.msgprint(_("Subscription has been cancelled"))
 
@@ -517,6 +915,9 @@ class Subscription(Document):
 
             self.save()
 
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
+
             frappe.msgprint(_("Subscription renewed successfully until {0}").format(new_end))
         else:
             self.status = "Pending Payment"
@@ -524,6 +925,9 @@ class Subscription(Document):
             self.failed_renewal_attempts = (self.failed_renewal_attempts or 0) + 1
             self.last_renewal_attempt = now_datetime()
             self.save()
+
+            # Invalidate subscription status cache
+            invalidate_subscription_cache(self.name)
 
         return True
 
@@ -655,6 +1059,119 @@ class Subscription(Document):
             0,
             update_modified=False
         )
+
+
+# ==================== Caching Functions ====================
+
+def get_cached_subscription_status(subscriber_type, subscriber_id):
+    """Get subscription status with caching.
+
+    Checks frappe.cache().hget('subscription_status', key) first,
+    falls back to DB query, stores with TTL 300s.
+
+    Args:
+        subscriber_type: Type of subscriber (Seller/Buyer/Organization)
+        subscriber_id: ID of the subscriber profile
+
+    Returns:
+        dict: Contains status, subscription_name, package, is_active, api_access_enabled
+    """
+    cache_key = f"{subscriber_type}:{subscriber_id}"
+    ttl_key = f"subscription_status_ttl:{cache_key}"
+
+    # Check cache first — verify TTL key still exists
+    if frappe.cache().get_value(ttl_key):
+        cached = frappe.cache().hget("subscription_status", cache_key)
+        if cached:
+            return cached
+
+    # Fall back to DB query
+    filters = {
+        "subscriber_type": subscriber_type,
+        "status": ["in", ["Draft", "Trial", "Active", "Pending Payment", "Grace Period", "Suspended"]],
+    }
+
+    if subscriber_type == "Seller":
+        filters["seller_profile"] = subscriber_id
+    elif subscriber_type == "Buyer":
+        filters["buyer_profile"] = subscriber_id
+    elif subscriber_type == "Organization":
+        filters["organization"] = subscriber_id
+    else:
+        return {
+            "status": None,
+            "subscription_name": None,
+            "package": None,
+            "is_active": 0,
+            "api_access_enabled": 0,
+        }
+
+    subscription = frappe.db.get_value(
+        "Subscription",
+        filters,
+        ["name", "status", "subscription_package", "package_name", "is_active", "api_access_enabled"],
+        as_dict=True,
+    )
+
+    if not subscription:
+        result = {
+            "status": None,
+            "subscription_name": None,
+            "package": None,
+            "is_active": 0,
+            "api_access_enabled": 0,
+        }
+    else:
+        result = {
+            "status": subscription.status,
+            "subscription_name": subscription.name,
+            "package": subscription.package_name or subscription.subscription_package,
+            "is_active": subscription.is_active,
+            "api_access_enabled": subscription.api_access_enabled,
+        }
+
+    # Store in cache with TTL 300s
+    frappe.cache().hset("subscription_status", cache_key, result)
+    frappe.cache().set_value(ttl_key, 1, expires_in_sec=300)
+
+    return result
+
+
+def invalidate_subscription_cache(subscription_name):
+    """Clear subscription status cache for the subscriber of a given subscription.
+
+    Looks up the subscriber type and ID from the subscription record,
+    then removes the corresponding cache entry.
+
+    Args:
+        subscription_name: Name of the Subscription document
+    """
+    subscriber_info = frappe.db.get_value(
+        "Subscription",
+        subscription_name,
+        ["subscriber_type", "seller_profile", "buyer_profile", "organization"],
+        as_dict=True,
+    )
+
+    if not subscriber_info:
+        return
+
+    subscriber_type = subscriber_info.subscriber_type
+    subscriber_id = None
+
+    if subscriber_type == "Seller":
+        subscriber_id = subscriber_info.seller_profile
+    elif subscriber_type == "Buyer":
+        subscriber_id = subscriber_info.buyer_profile
+    elif subscriber_type == "Organization":
+        subscriber_id = subscriber_info.organization
+
+    if not subscriber_id:
+        return
+
+    cache_key = f"{subscriber_type}:{subscriber_id}"
+    frappe.cache().hdel("subscription_status", cache_key)
+    frappe.cache().delete_key(f"subscription_status_ttl:{cache_key}")
 
 
 # ==================== API Methods ====================

@@ -17,6 +17,11 @@ from frappe import _
 from frappe.utils import flt, cint, now_datetime, add_days, nowdate
 from typing import Dict, Optional
 
+from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+    is_commission_enabled,
+    get_zero_commission_result,
+)
+
 
 # =================================================================
 # Order Completion to Balance Credit
@@ -211,6 +216,9 @@ def calculate_commission(
     Returns:
         dict: Commission calculation result
     """
+    if not is_commission_enabled():
+        return get_zero_commission_result(order_total)
+
     commission_rate = 0
     commission_plan = None
 

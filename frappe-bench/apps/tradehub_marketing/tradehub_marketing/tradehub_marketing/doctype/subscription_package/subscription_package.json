@@ -39,6 +39,7 @@
   "max_storage_mb",
   "max_api_calls_per_day",
   "max_team_members",
+  "max_rfq_views",
   "features_section",
   "has_analytics",
   "has_priority_support",
@@ -343,6 +344,13 @@
    "fieldtype": "Int",
    "label": "Max Team Members",
    "description": "Maximum team members allowed (0=unlimited)"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_rfq_views",
+   "fieldtype": "Int",
+   "label": "Max RFQ Views per Month",
+   "description": "Maximum RFQ views allowed per month (0=unlimited)"
   },
   {
    "fieldname": "features_section",

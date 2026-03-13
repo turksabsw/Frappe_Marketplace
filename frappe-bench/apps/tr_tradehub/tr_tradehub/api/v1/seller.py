@@ -1322,11 +1322,22 @@ def get_my_commission_plan() -> Dict[str, Any]:
     Get the commission plan for the current seller.
 
     Returns:
-        dict: Commission plan details
+        dict: Commission plan details including commission_enabled status
     """
+    from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+        is_commission_enabled,
+    )
+
     seller_name = get_current_seller()
     if not seller_name:
         frappe.throw(_("No seller profile found"))
+
+    commission_enabled = is_commission_enabled()
+    commission_status_message = (
+        _("Commission is active")
+        if commission_enabled
+        else _("Commission is currently disabled platform-wide")
+    )
 
     commission_plan = frappe.db.get_value("Seller Profile", seller_name, "commission_plan")
 
@@ -1342,13 +1353,22 @@ def get_my_commission_plan() -> Dict[str, Any]:
                 "has_plan": False,
                 "message": _("No plan assigned, using default"),
                 "default_plan": frappe.get_doc("Commission Plan", default).get_plan_summary(),
+                "commission_enabled": commission_enabled,
+                "commission_status_message": commission_status_message,
             }
-        return {"has_plan": False, "message": _("No commission plan assigned")}
+        return {
+            "has_plan": False,
+            "message": _("No commission plan assigned"),
+            "commission_enabled": commission_enabled,
+            "commission_status_message": commission_status_message,
+        }
 
     plan = frappe.get_doc("Commission Plan", commission_plan)
     return {
         "has_plan": True,
         **plan.get_plan_summary(),
+        "commission_enabled": commission_enabled,
+        "commission_status_message": commission_status_message,
     }
 
 
@@ -1362,6 +1382,9 @@ def calculate_commission(
     """
     Calculate commission for an order value.
 
+    When commission is globally disabled, returns a zero-commission result
+    with bypassed=True and bypass_reason.
+
     Args:
         order_value: Total order value
         category: Product category (optional)
@@ -1371,6 +1394,15 @@ def calculate_commission(
     Returns:
         dict: Commission calculation result
     """
+    from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+        get_zero_commission_result,
+        is_commission_enabled,
+    )
+
+    # Check global commission toggle
+    if not is_commission_enabled():
+        return get_zero_commission_result(order_value=flt(order_value))
+
     if not seller_name:
         seller_name = get_current_seller()
 
@@ -1401,6 +1433,57 @@ def calculate_commission(
         seller=seller_name,
         shipping_cost=flt(shipping_cost),
     )
+
+
+@frappe.whitelist()
+def get_commission_status() -> Dict[str, Any]:
+    """
+    Get the current commission toggle status for the platform.
+
+    Returns:
+        dict: Commission status with:
+            - commission_enabled (bool): Whether commission is active
+            - message (str): Human-readable status message
+            - disabled_since (date or None): Date when commission was last disabled
+            - enabled_since (date or None): Date when commission was last enabled
+    """
+    from tradehub_commerce.tradehub_commerce.utils.commission_utils import (
+        is_commission_enabled,
+    )
+
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw(_("You must be logged in"))
+
+    commission_enabled = is_commission_enabled()
+
+    # Retrieve toggle timestamps from settings
+    disabled_since = None
+    enabled_since = None
+    try:
+        disabled_since = frappe.db.get_single_value(
+            "TR TradeHub Settings", "commission_disabled_since"
+        )
+        enabled_since = frappe.db.get_single_value(
+            "TR TradeHub Settings", "commission_enabled_since"
+        )
+    except Exception:
+        pass
+
+    if commission_enabled:
+        message = _("Commission is active. Standard commission rates apply to all transactions.")
+    else:
+        message = _(
+            "Commission is currently disabled platform-wide. "
+            "No commission will be deducted from seller transactions."
+        )
+
+    return {
+        "commission_enabled": commission_enabled,
+        "message": message,
+        "disabled_since": str(disabled_since) if disabled_since else None,
+        "enabled_since": str(enabled_since) if enabled_since else None,
+    }
 
 
 # =============================================================================
@@ -1640,6 +1723,7 @@ Commission Plans:
 - get_commission_plans: Get available plans
 - get_my_commission_plan: Get current seller's plan
 - calculate_commission: Calculate commission for order
+- get_commission_status: Get platform commission toggle status
 
 Seller Tiers:
 - get_seller_tier: Get seller tier info

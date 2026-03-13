@@ -9,7 +9,7 @@ REST API for contract management with digital/wet signature support.
 
 import frappe
 from frappe import _
-from frappe.utils import now_datetime, add_days
+from frappe.utils import now_datetime, add_days, cint
 
 
 def _api_response(success=True, data=None, message=None, errors=None):
@@ -23,9 +23,13 @@ def _api_response(success=True, data=None, message=None, errors=None):
 
 
 @frappe.whitelist(allow_guest=False)
-def create_instance(template, party_type, party, signature_method=None, expiry_days=None):
+def create_instance(template, party_type, party, signature_method=None, expiry_days=None, seller_name=None):
     """
     Create a new contract instance from a template.
+
+    If the template has dynamic_rules_enabled, the contract content is compiled
+    via the rule engine using seller attributes. Otherwise, static template
+    content is used (backward compatibility).
 
     Args:
         template: Template name or code
@@ -33,6 +37,7 @@ def create_instance(template, party_type, party, signature_method=None, expiry_d
         party: Name/ID of the party
         signature_method: 'Digital' or 'Wet' (optional)
         expiry_days: Days until signature expires (optional)
+        seller_name: Seller Profile name for dynamic rule compilation (optional)
 
     Returns:
         dict: API response with contract instance details
@@ -53,8 +58,25 @@ def create_instance(template, party_type, party, signature_method=None, expiry_d
         # Get template details
         template_doc = frappe.get_doc("Contract Template", template_name)
 
+        # Check if dynamic rules are enabled on this template
+        dynamic_rules_enabled = cint(getattr(template_doc, "dynamic_rules_enabled", 0))
+        compiled_output_name = None
+
+        if dynamic_rules_enabled and seller_name:
+            # Dynamic compilation via rule engine
+            from tr_contract_center.rule_engine import compile_contract
+
+            compilation_result = compile_contract(template_name, seller_name)
+            compiled_content = compilation_result.get("compiled_content", "")
+            compiled_content_hash = compilation_result.get("content_hash")
+            compiled_output_name = compilation_result.get("compiled_output_name")
+        else:
+            # Static content (backward compatibility)
+            compiled_content = None
+            compiled_content_hash = None
+
         # Create instance
-        doc = frappe.get_doc({
+        instance_data = {
             "doctype": "Contract Instance",
             "template": template_name,
             "party_type": party_type,
@@ -63,7 +85,21 @@ def create_instance(template, party_type, party, signature_method=None, expiry_d
                 "Digital" if template_doc.signature_method in ["Any", "Digital Only"] else "Wet"
             ),
             "status": "Draft"
-        })
+        }
+
+        # If dynamic compilation was used, pre-set snapshot fields so that
+        # the controller's snapshot_template() uses compiled content instead
+        # of static template content
+        if compiled_content:
+            instance_data["template_version_snapshot"] = template_doc.version
+            instance_data["template_content_snapshot"] = compiled_content
+            instance_data["content_hash_snapshot"] = compiled_content_hash
+
+        # Link compiled output reference if dynamic compilation was used
+        if compiled_output_name:
+            instance_data["compiled_output"] = compiled_output_name
+
+        doc = frappe.get_doc(instance_data)
 
         # Set validity period
         if expiry_days:
@@ -72,16 +108,23 @@ def create_instance(template, party_type, party, signature_method=None, expiry_d
         doc.insert()
         frappe.db.commit()
 
+        response_data = {
+            "contract_instance": doc.name,
+            "title": doc.title,
+            "status": doc.status,
+            "template": doc.template,
+            "template_version": doc.template_version_snapshot,
+            "valid_until": str(doc.valid_until) if doc.valid_until else None
+        }
+
+        # Include dynamic compilation info if applicable
+        if compiled_output_name:
+            response_data["compiled_output"] = compiled_output_name
+            response_data["dynamic_compilation"] = True
+
         return _api_response(
             True,
-            data={
-                "contract_instance": doc.name,
-                "title": doc.title,
-                "status": doc.status,
-                "template": doc.template,
-                "template_version": doc.template_version_snapshot,
-                "valid_until": str(doc.valid_until) if doc.valid_until else None
-            },
+            data=response_data,
             message=_("Contract instance created successfully")
         )
 
@@ -398,4 +441,81 @@ def get_contract_detail(contract_instance):
 
     except Exception as e:
         frappe.log_error(f"get_contract_detail error: {str(e)}", "Contract Center API")
+        return _api_response(False, message=str(e), errors=[str(e)])
+
+
+@frappe.whitelist(allow_guest=False)
+def preview_compiled_contract(template_name, seller_name):
+    """
+    Preview a dynamically compiled contract for admin review.
+
+    Compiles the contract template using the rule engine for the specified
+    seller without creating a Contract Instance. Useful for administrators
+    to preview what a seller's contract would look like before sending.
+
+    Args:
+        template_name: Name of the Contract Template
+        seller_name: Name of the Seller Profile
+
+    Returns:
+        dict: API response with compiled content, compilation log, and rule stats
+    """
+    try:
+        # Validate inputs
+        if not frappe.db.exists("Contract Template", template_name):
+            return _api_response(
+                False,
+                message=_("Contract Template '{0}' not found").format(template_name)
+            )
+
+        if not frappe.db.exists("Seller Profile", seller_name):
+            return _api_response(
+                False,
+                message=_("Seller Profile '{0}' not found").format(seller_name)
+            )
+
+        # Check if dynamic rules are enabled
+        template_doc = frappe.get_doc("Contract Template", template_name)
+        dynamic_rules_enabled = cint(getattr(template_doc, "dynamic_rules_enabled", 0))
+
+        if not dynamic_rules_enabled:
+            # Return static content with a note
+            return _api_response(
+                True,
+                data={
+                    "template_name": template_name,
+                    "seller_name": seller_name,
+                    "compiled_content": template_doc.content or "",
+                    "dynamic_rules_enabled": False,
+                    "compilation_log": [],
+                    "rules_applied": 0,
+                    "rules_skipped": 0,
+                    "content_hash": template_doc.content_hash
+                },
+                message=_("Dynamic rules not enabled on this template. Showing static content.")
+            )
+
+        # Compile contract via rule engine
+        from tr_contract_center.rule_engine import compile_contract
+
+        result = compile_contract(template_name, seller_name)
+
+        return _api_response(
+            True,
+            data={
+                "template_name": template_name,
+                "seller_name": seller_name,
+                "compiled_content": result.get("compiled_content", ""),
+                "dynamic_rules_enabled": True,
+                "compilation_log": result.get("compilation_log", []),
+                "rules_applied": result.get("rules_applied", 0),
+                "rules_skipped": result.get("rules_skipped", 0),
+                "content_hash": result.get("content_hash"),
+                "compiled_output_name": result.get("compiled_output_name")
+            },
+            message=_("Contract compiled successfully for preview")
+        )
+
+    except Exception as e:
+        frappe.log_error(f"preview_compiled_contract error: {str(e)}", "Contract Center API")
         return _api_response(False, message=str(e), errors=[str(e)])
