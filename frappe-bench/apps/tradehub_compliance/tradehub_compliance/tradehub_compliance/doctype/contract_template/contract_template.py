@@ -5,20 +5,24 @@
 Contract Template DocType Controller
 
 Versioned contract templates with SHA256 hash verification.
-Similar pattern to Consent Text but for contracts.
+Supports dynamic rule-based contract compilation via rule_engine.
 """
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
 import hashlib
+
+from tr_contract_center.rule_engine import compile_contract, validate_markers
 
 
 class ContractTemplate(Document):
     """
     Controller for Contract Template DocType.
 
-    Implements versioning with SHA256 hash verification.
+    Implements versioning with SHA256 hash verification and
+    dynamic contract compilation with rule-based clause management.
     """
 
     def before_insert(self):
@@ -29,7 +33,7 @@ class ContractTemplate(Document):
         self.content_hash = self.calculate_content_hash()
 
     def before_save(self):
-        """Handle versioning on content change."""
+        """Handle versioning on content change and dynamic rules validation."""
         if self.has_value_changed("content"):
             self.handle_content_change()
 
@@ -39,6 +43,82 @@ class ContractTemplate(Document):
                 self.published_at = frappe.utils.now_datetime()
             if not self.published_by:
                 self.published_by = frappe.session.user
+
+        # Dynamic rules validation
+        self._validate_dynamic_rules_toggle()
+
+        if cint(self.dynamic_rules_enabled):
+            validate_markers(self)
+
+    def _validate_dynamic_rules_toggle(self):
+        """Validate dynamic_rules_enabled toggle transitions."""
+        if not self.has_value_changed("dynamic_rules_enabled"):
+            return
+
+        old_value = 0
+        if not self.is_new():
+            old_value = cint(
+                frappe.db.get_value("Contract Template", self.name, "dynamic_rules_enabled")
+            )
+
+        new_value = cint(self.dynamic_rules_enabled)
+
+        # Toggled from 0→1: validate that base_text is filled
+        if old_value == 0 and new_value == 1:
+            if not self.base_text or not self.base_text.strip():
+                frappe.throw(
+                    _("Base Text must be filled before enabling dynamic rules.")
+                )
+
+        # Toggled from 1→0: keep base_text but clear condition_rules warning
+        if old_value == 1 and new_value == 0:
+            frappe.msgprint(
+                _("Dynamic rules disabled. Base text has been preserved. "
+                  "Condition rules will not be evaluated until re-enabled."),
+                indicator="blue",
+            )
+
+    def generate_preview(self):
+        """
+        Generate a compiled preview using compile_contract().
+
+        Uses preview_seller if set on the template, compiles the contract
+        for that seller, and stores the result in compiled_preview.
+        """
+        if not cint(self.dynamic_rules_enabled):
+            frappe.msgprint(
+                _("Dynamic rules are not enabled on this template."),
+                indicator="orange",
+            )
+            return
+
+        if not self.preview_seller:
+            frappe.msgprint(
+                _("Please set a Preview Seller to generate a preview."),
+                indicator="orange",
+            )
+            return
+
+        try:
+            result = compile_contract(self.name, self.preview_seller)
+            self.compiled_preview = result.get("compiled_content", "")
+            self.save()
+
+            frappe.msgprint(
+                _("Preview generated successfully. {0} rules applied, {1} skipped.").format(
+                    result.get("rules_applied", 0),
+                    result.get("rules_skipped", 0),
+                ),
+                indicator="green",
+            )
+        except Exception as e:
+            frappe.log_error(
+                title=_("Contract Preview Generation Failed"),
+                message=str(e),
+            )
+            frappe.throw(
+                _("Failed to generate preview: {0}").format(str(e))
+            )
 
     def handle_content_change(self):
         """Handle content changes with versioning."""

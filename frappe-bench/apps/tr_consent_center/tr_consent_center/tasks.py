@@ -117,3 +117,43 @@ def generate_consent_reports():
     # TODO: Store in a reporting DocType or send via email
 
     frappe.db.commit()
+
+
+def refresh_consent_summaries():
+    """
+    Cron task (every 5 minutes): Refresh User Consent Summary cache for all users
+    with active or recently changed consent records.
+
+    This task ensures the User Consent Summary DocType stays in sync with
+    the underlying Consent Record data, providing fast lookups for consent status.
+    """
+    from tr_consent_center.tr_consent_center.doctype.user_consent_summary.user_consent_summary import (
+        refresh_user_consent_summary,
+    )
+
+    # Get distinct users who have consent records
+    users = frappe.get_all(
+        "Consent Record",
+        filters={"status": ["in", ["Active", "Pending Reacceptance"]]},
+        fields=["party"],
+        group_by="party"
+    )
+
+    refreshed = 0
+    for entry in users:
+        if entry.party:
+            try:
+                refresh_user_consent_summary(entry.party)
+                refreshed += 1
+            except Exception:
+                frappe.log_error(
+                    title="Consent Summary Refresh Error",
+                    message=f"Failed to refresh consent summary for user: {entry.party}"
+                )
+
+    if refreshed:
+        frappe.logger().info(
+            f"TR Consent Center: Refreshed consent summaries for {refreshed} users"
+        )
+
+    frappe.db.commit()

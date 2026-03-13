@@ -157,7 +157,12 @@ scheduler_events = {
     ],
     "weekly": [
         "tr_consent_center.tasks.generate_consent_reports"
-    ]
+    ],
+    "cron": {
+        "*/5 * * * *": [
+            "tr_consent_center.tasks.refresh_consent_summaries"
+        ]
+    }
 }
 
 # Testing
