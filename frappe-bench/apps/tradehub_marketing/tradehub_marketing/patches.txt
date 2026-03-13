@@ -1,0 +1,3 @@
+[post_model_sync]
+# Task 141: RFQ View Limits - Default package limits
+tradehub_marketing.patches.set_default_rfq_view_limits
