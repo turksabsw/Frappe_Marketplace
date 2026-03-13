@@ -127,7 +127,7 @@ def refresh_consent_summaries():
     This task ensures the User Consent Summary DocType stays in sync with
     the underlying Consent Record data, providing fast lookups for consent status.
     """
-    from tr_consent_center.tradehub_compliance.doctype.user_consent_summary.user_consent_summary import (
+    from tr_consent_center.tr_consent_center.doctype.user_consent_summary.user_consent_summary import (
         refresh_user_consent_summary,
     )
 

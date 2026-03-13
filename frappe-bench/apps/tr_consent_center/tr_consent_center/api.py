@@ -24,7 +24,7 @@ from frappe import _
 from frappe.utils import now_datetime, today, getdate
 import json
 
-from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+from tr_contract_center.tr_contract_center.doctype.legal_audit_trail.legal_audit_trail import (
     create_legal_audit_log,
 )
 

@@ -674,7 +674,7 @@ def bulk_sign_contracts(contract_list):
                 doc.save()
 
                 # Create Legal Audit Trail entry
-                from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+                from tr_contract_center.tr_contract_center.doctype.legal_audit_trail.legal_audit_trail import (
                     create_legal_audit_log,
                 )
 
@@ -775,7 +775,7 @@ def trigger_version_update(template_name):
                 message=_("No active signed contracts found for template '{0}'").format(template_name)
             )
 
-        from tr_contract_center.tradehub_compliance.doctype.legal_audit_trail.legal_audit_trail import (
+        from tr_contract_center.tr_contract_center.doctype.legal_audit_trail.legal_audit_trail import (
             create_legal_audit_log,
         )
 
