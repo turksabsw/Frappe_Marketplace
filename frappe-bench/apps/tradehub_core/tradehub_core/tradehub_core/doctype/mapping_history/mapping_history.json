@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "mapping_info_section",
+  "source_column",
+  "source_column_normalized",
+  "target_fieldname",
+  "column_break_mapping",
+  "target_doctype",
+  "import_type",
+  "confirmation_count",
+  "last_confirmed",
+  "context_section",
+  "tenant",
+  "tenant_name",
+  "column_break_context",
+  "seller",
+  "seller_name",
+  "system_section",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "mapping_info_section",
+   "fieldtype": "Section Break",
+   "label": "Mapping Information"
+  },
+  {
+   "description": "Original column name from the import file",
+   "fieldname": "source_column",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Source Column",
+   "length": 255,
+   "reqd": 1
+  },
+  {
+   "description": "Normalized version of source column for matching",
+   "fieldname": "source_column_normalized",
+   "fieldtype": "Data",
+   "label": "Source Column (Normalized)",
+   "length": 255
+  },
+  {
+   "description": "Target field name in the DocType",
+   "fieldname": "target_fieldname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Target Fieldname",
+   "length": 255,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_mapping",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The target DocType for this mapping",
+   "fieldname": "target_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Target DocType",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "default": "Listing",
+   "fieldname": "import_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Import Type",
+   "options": "Listing\nListing Variant\nSKU\nCategory\nMedia Asset\nInventory Update\nPrice Update",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Number of times this mapping has been confirmed by users",
+   "fieldname": "confirmation_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Confirmation Count"
+  },
+  {
+   "description": "Last time this mapping was confirmed",
+   "fieldname": "last_confirmed",
+   "fieldtype": "Datetime",
+   "label": "Last Confirmed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "context_section",
+   "fieldtype": "Section Break",
+   "label": "Context"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "description": "The tenant this mapping belongs to"
+  },
+  {
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Tenant Name",
+   "fetch_from": "tenant.tenant_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_context",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "seller",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Seller",
+   "options": "Seller Profile",
+   "description": "The seller this mapping belongs to"
+  },
+  {
+   "fieldname": "seller_name",
+   "fieldtype": "Data",
+   "label": "Seller Name",
+   "fetch_from": "seller.seller_name",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "system_section",
+   "fieldtype": "Section Break",
+   "label": "System Information"
+  },
+  {
+   "default": "MAP-HIST-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "MAP-HIST-.YYYY.-.#####"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-03-04 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Core",
+ "name": "Mapping History",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 0,
+   "export": 1,
+   "print": 0,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "source_column, target_fieldname, target_doctype, import_type",
+ "show_name_in_global_search": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "source_column",
+ "track_changes": 1
+}

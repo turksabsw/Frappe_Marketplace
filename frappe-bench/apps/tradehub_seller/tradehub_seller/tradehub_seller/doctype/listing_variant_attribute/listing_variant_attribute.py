@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -29,7 +30,7 @@ class ListingVariantAttribute(Document):
             valid_values = [av.attribute_value for av in attribute.attribute_values]
             if self.attribute_value not in valid_values:
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Value '{0}' is not valid for attribute '{1}'. "
                         "Valid values are: {2}"
                     ).format(
@@ -44,7 +45,7 @@ class ListingVariantAttribute(Document):
             valid_values = [av.attribute_value for av in attribute.attribute_values]
             if valid_values and self.attribute_value not in valid_values:
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Color '{0}' is not valid for attribute '{1}'. "
                         "Valid colors are: {2}"
                     ).format(
@@ -67,21 +68,21 @@ class ListingVariantAttribute(Document):
                 value = float(self.attribute_value)
             except (ValueError, TypeError):
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Attribute '{0}' requires a numeric value"
                     ).format(attribute.attribute_name)
                 )
 
             if attribute.numeric_min and value < attribute.numeric_min:
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Value {0} is below minimum {1} for attribute '{2}'"
                     ).format(value, attribute.numeric_min, attribute.attribute_name)
                 )
 
             if attribute.numeric_max and value > attribute.numeric_max:
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Value {0} is above maximum {1} for attribute '{2}'"
                     ).format(value, attribute.numeric_max, attribute.attribute_name)
                 )
@@ -91,7 +92,7 @@ class ListingVariantAttribute(Document):
             valid_bools = ["Yes", "No", "True", "False", "1", "0"]
             if self.attribute_value not in valid_bools:
                 frappe.throw(
-                    frappe._(
+                    _(
                         "Attribute '{0}' requires a boolean value (Yes/No)"
                     ).format(attribute.attribute_name)
                 )

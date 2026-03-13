@@ -82,14 +82,25 @@ required_apps = ["tradehub_core", "tradehub_commerce"]
 # -----------
 
 # Permissions evaluated in scripted ways
+# Tenant-based permission hooks for multi-tenant isolation
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Carrier": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Lead Time": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Marketplace Shipment": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Shipment": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Shipping Rule": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Tracking Event": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+}
+
+has_permission = {
+	"Carrier": "tradehub_core.permissions.has_tenant_permission",
+	"Lead Time": "tradehub_core.permissions.has_tenant_permission",
+	"Marketplace Shipment": "tradehub_core.permissions.has_tenant_permission",
+	"Shipment": "tradehub_core.permissions.has_tenant_permission",
+	"Shipping Rule": "tradehub_core.permissions.has_tenant_permission",
+	"Tracking Event": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------

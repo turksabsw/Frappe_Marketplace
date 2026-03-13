@@ -1,0 +1,228 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-03-13 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "delegation_section",
+  "delegator",
+  "delegator_full_name",
+  "delegatee",
+  "delegatee_full_name",
+  "column_break_delegation",
+  "status",
+  "approved_by",
+  "tenant",
+  "tenant_name",
+  "roles_section",
+  "delegated_roles",
+  "duration_section",
+  "start_date",
+  "column_break_duration",
+  "end_date",
+  "system_section",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "delegation_section",
+   "fieldtype": "Section Break",
+   "label": "Delegation Details"
+  },
+  {
+   "description": "User delegating their permissions",
+   "fieldname": "delegator",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Delegator",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "delegator.full_name",
+   "fieldname": "delegator_full_name",
+   "fieldtype": "Data",
+   "label": "Delegator Name",
+   "read_only": 1
+  },
+  {
+   "description": "User receiving the delegated permissions",
+   "fieldname": "delegatee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Delegatee",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "delegatee.full_name",
+   "fieldname": "delegatee_full_name",
+   "fieldtype": "Data",
+   "label": "Delegatee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_delegation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nActive\nExpired\nRevoked",
+   "reqd": 1
+  },
+  {
+   "description": "Manager or admin who approved this delegation",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "description": "The tenant this delegation belongs to",
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "tenant.tenant_name",
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Tenant Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "roles_section",
+   "fieldtype": "Section Break",
+   "label": "Delegated Roles"
+  },
+  {
+   "description": "Comma-separated list of role names to delegate (e.g. 'Seller Admin, Seller Finance'). System Manager role cannot be delegated.",
+   "fieldname": "delegated_roles",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Delegated Roles",
+   "reqd": 1
+  },
+  {
+   "fieldname": "duration_section",
+   "fieldtype": "Section Break",
+   "label": "Duration"
+  },
+  {
+   "description": "Start date of the delegation",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_duration",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "End date of the delegation (max 90 days from start date)",
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "End Date",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "system_section",
+   "fieldtype": "Section Break",
+   "label": "System Information"
+  },
+  {
+   "default": "PD-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "PD-.YYYY.-.#####"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Permission Delegation",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-03-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Core",
+ "name": "Permission Delegation",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "export": 1,
+   "print": 0,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 0,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "search_fields": "delegator, delegatee, status, start_date, end_date",
+ "show_name_in_global_search": 0,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "yellow",
+   "title": "Pending"
+  },
+  {
+   "color": "green",
+   "title": "Active"
+  },
+  {
+   "color": "gray",
+   "title": "Expired"
+  },
+  {
+   "color": "red",
+   "title": "Revoked"
+  }
+ ],
+ "track_changes": 1
+}

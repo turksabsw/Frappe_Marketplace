@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -43,7 +44,7 @@ class OrderItem(Document):
         """Ensure quantity is positive"""
         if self.quantity is None or self.quantity <= 0:
             frappe.throw(
-                frappe._("Quantity must be greater than 0 for item: {0}").format(
+                _("Quantity must be greater than 0 for item: {0}").format(
                     self.product_name or self.sku_product or "Unknown"
                 )
             )
@@ -52,7 +53,7 @@ class OrderItem(Document):
         """Ensure unit price is non-negative"""
         if self.unit_price is not None and self.unit_price < 0:
             frappe.throw(
-                frappe._("Unit Price cannot be negative for item: {0}").format(
+                _("Unit Price cannot be negative for item: {0}").format(
                     self.product_name or self.sku_product or "Unknown"
                 )
             )
@@ -67,7 +68,7 @@ class OrderItem(Document):
             )
             if variant_product and variant_product != self.sku_product:
                 frappe.throw(
-                    frappe._("Variant {0} does not belong to Product {1}").format(
+                    _("Variant {0} does not belong to Product {1}").format(
                         self.variant, self.sku_product
                     )
                 )
@@ -323,14 +324,14 @@ def validate_order_items(items):
         # Check required fields
         if not item.get("sku_product"):
             errors.append(
-                frappe._("Row {0}: Product is required").format(idx)
+                _("Row {0}: Product is required").format(idx)
             )
 
         # Check quantity
         quantity = item.get("quantity")
         if quantity is None or flt(quantity) <= 0:
             errors.append(
-                frappe._("Row {0}: Quantity must be greater than 0").format(idx)
+                _("Row {0}: Quantity must be greater than 0").format(idx)
             )
         else:
             total_quantity += flt(quantity)
@@ -339,7 +340,7 @@ def validate_order_items(items):
         unit_price = item.get("unit_price")
         if unit_price is None or flt(unit_price) < 0:
             errors.append(
-                frappe._("Row {0}: Unit Price cannot be negative").format(idx)
+                _("Row {0}: Unit Price cannot be negative").format(idx)
             )
 
         # Check variant-product match
@@ -351,7 +352,7 @@ def validate_order_items(items):
             )
             if variant_product and variant_product != item.get("sku_product"):
                 errors.append(
-                    frappe._("Row {0}: Variant does not belong to selected Product").format(idx)
+                    _("Row {0}: Variant does not belong to selected Product").format(idx)
                 )
 
         # Calculate item amount for total
@@ -427,9 +428,9 @@ def check_stock_availability(product_name, variant_name=None, quantity=1):
         "allow_negative_stock": allow_negative,
         "shortage": shortage,
         "message": (
-            frappe._("Stock available")
+            _("Stock available")
             if is_available
-            else frappe._("Insufficient stock: {0} units short").format(shortage)
+            else _("Insufficient stock: {0} units short").format(shortage)
         )
     }
 
@@ -462,7 +463,7 @@ def get_product_pricing(product_name, quantity=1, incoterm=None):
     )
 
     if not product:
-        return {"error": frappe._("Product not found")}
+        return {"error": _("Product not found")}
 
     result = {
         "base_price": flt(product.get("base_price")),

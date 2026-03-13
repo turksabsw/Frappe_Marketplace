@@ -10,8 +10,8 @@ frappe.ui.form.on('Media Library', {
         // =====================================================
         // Role-Based Field Authorization
         // =====================================================
-        var is_admin = frappe.user_roles.includes('Satici Admin')
-            || frappe.user_roles.includes('Alici Admin')
+        var is_admin = frappe.user_roles.includes('Seller Admin')
+            || frappe.user_roles.includes('Buyer Admin')
             || frappe.user_roles.includes('System Manager');
 
         if (!is_admin) {

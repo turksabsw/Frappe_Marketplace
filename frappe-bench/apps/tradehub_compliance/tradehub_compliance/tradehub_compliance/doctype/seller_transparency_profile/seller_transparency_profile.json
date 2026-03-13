@@ -238,7 +238,7 @@
    "print": 1,
    "read": 1,
    "report": 0,
-   "role": "Satici",
+   "role": "Seller Staff",
    "share": 0,
    "write": 1
   },
@@ -250,7 +250,7 @@
    "print": 1,
    "read": 1,
    "report": 0,
-   "role": "Alici Editor",
+   "role": "Buyer Procurement",
    "share": 0,
    "write": 0
   }

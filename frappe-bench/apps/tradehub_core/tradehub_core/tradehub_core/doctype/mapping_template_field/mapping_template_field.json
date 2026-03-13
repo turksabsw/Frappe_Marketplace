@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "source_column",
+  "target_fieldname",
+  "match_confidence",
+  "column_break_mapping",
+  "is_confirmed",
+  "match_strategy"
+ ],
+ "fields": [
+  {
+   "description": "Column name from the source file",
+   "fieldname": "source_column",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Source Column",
+   "length": 255,
+   "reqd": 1
+  },
+  {
+   "description": "Target DocType field name to map to",
+   "fieldname": "target_fieldname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Target Fieldname",
+   "length": 255,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Confidence level of the mapping match (0-100)",
+   "fieldname": "match_confidence",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Match Confidence"
+  },
+  {
+   "fieldname": "column_break_mapping",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Whether this mapping has been confirmed by the user",
+   "fieldname": "is_confirmed",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Confirmed"
+  },
+  {
+   "default": "Manual",
+   "description": "Strategy used to determine this mapping",
+   "fieldname": "match_strategy",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Match Strategy",
+   "options": "Historical\nExact\nNormalized\nFuzzy\nManual"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "TradeHub Core",
+ "name": "Mapping Template Field",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 0,
+ "sort_field": "idx",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 0
+}

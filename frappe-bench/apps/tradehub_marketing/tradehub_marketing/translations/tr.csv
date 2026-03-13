@@ -1,0 +1,155 @@
+# TradeHub Marketing Turkish Translations
+# Format: source,translated,context (optional)
+
+# Common Labels
+Basic Information,Temel Bilgiler,
+Status,Durum,
+Description,Aciklama,
+Details,Detaylar,
+Settings,Ayarlar,
+Notes,Notlar,
+Save,Kaydet,
+Cancel,Iptal,
+Submit,Gonder,
+Delete,Sil,
+Edit,Duzenle,
+
+# Actions
+Add,Ekle,
+Remove,Kaldir,
+Update,Guncelle,
+Search,Ara,
+Filter,Filtrele,
+
+# Campaign
+Campaign,Kampanya,
+Campaign Name,Kampanya Adi,
+Campaign Type,Kampanya Tipi,
+Campaign Status,Kampanya Durumu,
+Campaign Start Date,Kampanya Baslangic Tarihi,
+Campaign End Date,Kampanya Bitis Tarihi,
+Campaign Budget,Kampanya Butcesi,
+Campaign Target,Kampanya Hedefi,
+Campaign Description,Kampanya Aciklamasi,
+
+# Promotion
+Promotion,Promosyon,
+Promotion Name,Promosyon Adi,
+Promotion Type,Promosyon Tipi,
+Promotion Code,Promosyon Kodu,
+Promotion Discount,Promosyon Indirimi,
+Promotion Start,Promosyon Baslangici,
+Promotion End,Promosyon Bitisi,
+Active Promotions,Aktif Promosyonlar,
+
+# Coupon
+Coupon,Kupon,
+Coupon Code,Kupon Kodu,
+Coupon Name,Kupon Adi,
+Coupon Type,Kupon Tipi,
+Coupon Value,Kupon Degeri,
+Coupon Discount,Kupon Indirimi,
+Max Uses,Maksimum Kullanim,
+Used Count,Kullanim Sayisi,
+Single Use,Tek Kullanimlik,
+Multi Use,Cok Kullanimlik,
+Per User Limit,Kullanici Basina Limit,
+Minimum Order Amount,Minimum Siparis Tutari,
+Maximum Discount Amount,Maksimum Indirim Tutari,
+Valid From,Gecerlilik Baslangici,
+Valid Until,Gecerlilik Bitisi,
+
+# Discount
+Discount,Indirim,
+Discount Type,Indirim Tipi,
+Discount Amount,Indirim Tutari,
+Discount Percentage,Indirim Yuzdesi,
+Flat Discount,Sabit Indirim,
+Percentage Discount,Yuzde Indirim,
+Buy X Get Y,X Al Y Odemez,
+Free Shipping Discount,Ucretsiz Kargo Indirimi,
+Bundle Discount,Paket Indirimi,
+
+# Sale
+Sale,Indirim,
+On Sale,Indirimde,
+Sale Price,Indirimli Fiyat,
+Sale Start Date,Indirim Baslangici,
+Sale End Date,Indirim Bitisi,
+Flash Sale,Anlik Indirim,
+Clearance Sale,Stok Eritme,
+Seasonal Sale,Sezon Indirimi,
+
+# Featured & Spotlight
+Featured,One Cikan,
+Featured Products,One Cikan Urunler,
+Featured Sellers,One Cikan Saticilar,
+Spotlight,Vitrin,
+Banner,Afisin,
+Banner Image,Afis Resmi,
+Banner URL,Afis Baglantisi,
+Display Position,Gosterim Pozisyonu,
+Display Priority,Gosterim Onceligi,
+
+# Email Marketing
+Email Marketing,E-posta Pazarlama,
+Newsletter,Bulten,
+Email Template,E-posta Sablonu,
+Email Subject,E-posta Konusu,
+Email Body,E-posta Icerik,
+Subscriber,Abone,
+Subscribers,Aboneler,
+Subscribe,Abone Ol,
+Unsubscribe,Abonelikten Cik,
+Mailing List,Gonderim Listesi,
+Open Rate,Acilma Orani,
+Click Rate,Tiklanma Orani,
+
+# Push Notifications
+Push Notification,Anlik Bildirim,
+Notification Title,Bildirim Basligi,
+Notification Body,Bildirim Icerigi,
+Target Audience,Hedef Kitle,
+Send Now,Simdi Gonder,
+Schedule,Zamanla,
+Scheduled At,Zamanlanan Tarih,
+
+# Analytics
+Analytics,Analitik,
+Impressions,Goruntulenme,
+Clicks,Tiklamalar,
+Conversions,Donusumler,
+Conversion Rate,Donusum Orani,
+Revenue,Gelir,
+ROI,Yatirim Getirisi,
+Performance Report,Performans Raporu,
+
+# Wishlist
+Wishlist,Istek Listesi,
+Add to Wishlist,Istek Listesine Ekle,
+Remove from Wishlist,Istek Listesinden Kaldir,
+
+# Referral
+Referral,Yonlendirme,
+Referral Code,Yonlendirme Kodu,
+Referral Program,Yonlendirme Programi,
+Referred By,Yonlendiren,
+Referral Bonus,Yonlendirme Bonusu,
+
+# Loyalty
+Loyalty,Sadakat,
+Loyalty Program,Sadakat Programi,
+Loyalty Points,Sadakat Puanlari,
+Points Earned,Kazanilan Puan,
+Points Redeemed,Harcanan Puan,
+Points Balance,Puan Bakiyesi,
+
+# Status Values
+Active,Aktif,
+Inactive,Pasif,
+Scheduled,Zamanlanmis,
+Running,Devam Ediyor,
+Paused,Duraklatildi,
+Completed,Tamamlandi,
+Expired,Suresi Dolmus,
+Draft,Taslak,

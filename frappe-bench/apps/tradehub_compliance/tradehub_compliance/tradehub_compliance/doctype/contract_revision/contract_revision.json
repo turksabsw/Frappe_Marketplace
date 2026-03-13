@@ -63,13 +63,13 @@
    "fieldname": "content_snapshot",
    "fieldtype": "Text Editor",
    "label": "Content Snapshot",
-   "read_only": 0
+   "read_only": 1
   },
   {
    "fieldname": "content_hash",
    "fieldtype": "Data",
    "label": "Content Hash",
-   "read_only": 0
+   "read_only": 1
   },
   {
    "fieldname": "notes_section",

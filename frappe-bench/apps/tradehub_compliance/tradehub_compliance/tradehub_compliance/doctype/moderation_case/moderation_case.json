@@ -27,6 +27,7 @@
   "content_owner_type",
   "content_created_at",
   "content_snapshot",
+  "snapshot_timestamp",
   "report_tab",
   "report_info_section",
   "report_source",
@@ -260,9 +261,16 @@
   },
   {
    "fieldname": "content_snapshot",
-   "fieldtype": "JSON",
-   "label": "Content Snapshot",
+   "fieldtype": "Code",
+   "label": "Content Snapshot (Immutable)",
+   "options": "JSON",
    "description": "Snapshot of content at time of case creation (for audit purposes)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "snapshot_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Snapshot Taken At",
    "read_only": 1
   },
   {

@@ -86,14 +86,39 @@ app_include_js = ["/assets/tradehub_core/js/tenant_seller_filter.js"]
 # -----------
 
 # Permissions evaluated in scripted ways
+# Tenant-based permission hooks for multi-tenant isolation
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Buyer Feedback": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Buyer KPI Score Log": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Buyer Profile": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Customer Grade": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"ERPNext Integration Settings": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Import Job": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Keycloak Settings": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"KYC Profile": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Notification Template": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Organization": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Premium Buyer": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Customer Grade": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"User Segment": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+}
+
+has_permission = {
+	"Buyer Feedback": "tradehub_core.permissions.has_tenant_permission",
+	"Buyer KPI Score Log": "tradehub_core.permissions.has_tenant_permission",
+	"Buyer Profile": "tradehub_core.permissions.has_tenant_permission",
+	"Customer Grade": "tradehub_core.permissions.has_tenant_permission",
+	"ERPNext Integration Settings": "tradehub_core.permissions.has_tenant_permission",
+	"Import Job": "tradehub_core.permissions.has_tenant_permission",
+	"Keycloak Settings": "tradehub_core.permissions.has_tenant_permission",
+	"KYC Profile": "tradehub_core.permissions.has_tenant_permission",
+	"Notification Template": "tradehub_core.permissions.has_tenant_permission",
+	"Organization": "tradehub_core.permissions.has_tenant_permission",
+	"Premium Buyer": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Customer Grade": "tradehub_core.permissions.has_tenant_permission",
+	"User Segment": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------
@@ -227,3 +252,16 @@ scheduler_events = {
 # auth_hooks = [
 # 	"tradehub_core.auth.validate"
 # ]
+
+# Fixtures
+# --------
+
+# RBAC role hierarchy fixtures — 13 roles in 3 tiers:
+# Platform Provider: Platform Admin, Platform Finance, Compliance Officer, Support Agent
+# Seller: Seller Owner, Seller Admin, Seller Finance, Seller Staff, Seller Viewer
+# Buyer: Buyer Admin, Buyer Procurement, Buyer Finance, Buyer Viewer
+# Role Profile fixtures — 11 pre-configured role bundles for quick user provisioning
+fixtures = [
+	"Role",
+	"Role Profile",
+]

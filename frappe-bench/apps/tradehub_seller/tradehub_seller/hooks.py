@@ -84,12 +84,48 @@ after_install = "tradehub_seller.tradehub_seller.doctype.seller_profile.seller_p
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
+	# App-specific permission handler
 	"Seller Tag": "tradehub_seller.tradehub_seller.doctype.seller_tag.seller_tag.get_permission_query_conditions",
+	# Tenant-based permission hooks for multi-tenant isolation
+	"Buy Box Entry": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Buy Box Log": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Listing": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Listing Variant": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Premium Seller": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Application": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Balance": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Feedback": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller KPI": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Metrics": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Profile": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Score": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Store": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Tag Rule": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Tier": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"SKU": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"SKU Product": "tradehub_core.permissions.get_tenant_permission_query_conditions",
 }
 
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+has_permission = {
+	"Buy Box Entry": "tradehub_core.permissions.has_tenant_permission",
+	"Buy Box Log": "tradehub_core.permissions.has_tenant_permission",
+	"Listing": "tradehub_core.permissions.has_tenant_permission",
+	"Listing Variant": "tradehub_core.permissions.has_tenant_permission",
+	"Premium Seller": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Application": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Balance": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Feedback": "tradehub_core.permissions.has_tenant_permission",
+	"Seller KPI": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Metrics": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Profile": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Score": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Store": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Tag": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Tag Rule": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Tier": "tradehub_core.permissions.has_tenant_permission",
+	"SKU": "tradehub_core.permissions.has_tenant_permission",
+	"SKU Product": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------

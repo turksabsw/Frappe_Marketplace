@@ -1,0 +1,156 @@
+# TradeHub Marketing English Translations
+# Format: source,translated,context (optional)
+# This file serves as the English language fallback and documentation
+
+# Common Labels
+Basic Information,Basic Information,
+Status,Status,
+Description,Description,
+Details,Details,
+Settings,Settings,
+Notes,Notes,
+Save,Save,
+Cancel,Cancel,
+Submit,Submit,
+Delete,Delete,
+Edit,Edit,
+
+# Actions
+Add,Add,
+Remove,Remove,
+Update,Update,
+Search,Search,
+Filter,Filter,
+
+# Campaign
+Campaign,Campaign,
+Campaign Name,Campaign Name,
+Campaign Type,Campaign Type,
+Campaign Status,Campaign Status,
+Campaign Start Date,Campaign Start Date,
+Campaign End Date,Campaign End Date,
+Campaign Budget,Campaign Budget,
+Campaign Target,Campaign Target,
+Campaign Description,Campaign Description,
+
+# Promotion
+Promotion,Promotion,
+Promotion Name,Promotion Name,
+Promotion Type,Promotion Type,
+Promotion Code,Promotion Code,
+Promotion Discount,Promotion Discount,
+Promotion Start,Promotion Start,
+Promotion End,Promotion End,
+Active Promotions,Active Promotions,
+
+# Coupon
+Coupon,Coupon,
+Coupon Code,Coupon Code,
+Coupon Name,Coupon Name,
+Coupon Type,Coupon Type,
+Coupon Value,Coupon Value,
+Coupon Discount,Coupon Discount,
+Max Uses,Max Uses,
+Used Count,Used Count,
+Single Use,Single Use,
+Multi Use,Multi Use,
+Per User Limit,Per User Limit,
+Minimum Order Amount,Minimum Order Amount,
+Maximum Discount Amount,Maximum Discount Amount,
+Valid From,Valid From,
+Valid Until,Valid Until,
+
+# Discount
+Discount,Discount,
+Discount Type,Discount Type,
+Discount Amount,Discount Amount,
+Discount Percentage,Discount Percentage,
+Flat Discount,Flat Discount,
+Percentage Discount,Percentage Discount,
+Buy X Get Y,Buy X Get Y,
+Free Shipping Discount,Free Shipping Discount,
+Bundle Discount,Bundle Discount,
+
+# Sale
+Sale,Sale,
+On Sale,On Sale,
+Sale Price,Sale Price,
+Sale Start Date,Sale Start Date,
+Sale End Date,Sale End Date,
+Flash Sale,Flash Sale,
+Clearance Sale,Clearance Sale,
+Seasonal Sale,Seasonal Sale,
+
+# Featured & Spotlight
+Featured,Featured,
+Featured Products,Featured Products,
+Featured Sellers,Featured Sellers,
+Spotlight,Spotlight,
+Banner,Banner,
+Banner Image,Banner Image,
+Banner URL,Banner URL,
+Display Position,Display Position,
+Display Priority,Display Priority,
+
+# Email Marketing
+Email Marketing,Email Marketing,
+Newsletter,Newsletter,
+Email Template,Email Template,
+Email Subject,Email Subject,
+Email Body,Email Body,
+Subscriber,Subscriber,
+Subscribers,Subscribers,
+Subscribe,Subscribe,
+Unsubscribe,Unsubscribe,
+Mailing List,Mailing List,
+Open Rate,Open Rate,
+Click Rate,Click Rate,
+
+# Push Notifications
+Push Notification,Push Notification,
+Notification Title,Notification Title,
+Notification Body,Notification Body,
+Target Audience,Target Audience,
+Send Now,Send Now,
+Schedule,Schedule,
+Scheduled At,Scheduled At,
+
+# Analytics
+Analytics,Analytics,
+Impressions,Impressions,
+Clicks,Clicks,
+Conversions,Conversions,
+Conversion Rate,Conversion Rate,
+Revenue,Revenue,
+ROI,ROI,
+Performance Report,Performance Report,
+
+# Wishlist
+Wishlist,Wishlist,
+Add to Wishlist,Add to Wishlist,
+Remove from Wishlist,Remove from Wishlist,
+
+# Referral
+Referral,Referral,
+Referral Code,Referral Code,
+Referral Program,Referral Program,
+Referred By,Referred By,
+Referral Bonus,Referral Bonus,
+
+# Loyalty
+Loyalty,Loyalty,
+Loyalty Program,Loyalty Program,
+Loyalty Points,Loyalty Points,
+Points Earned,Points Earned,
+Points Redeemed,Points Redeemed,
+Points Balance,Points Balance,
+
+# Status Values
+Active,Active,
+Inactive,Inactive,
+Scheduled,Scheduled,
+Running,Running,
+Paused,Paused,
+Completed,Completed,
+Expired,Expired,
+Draft,Draft,

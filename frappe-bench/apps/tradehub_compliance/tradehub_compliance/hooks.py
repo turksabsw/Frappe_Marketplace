@@ -82,14 +82,63 @@ required_apps = ["tradehub_core"]
 # -----------
 
 # Permissions evaluated in scripted ways
+# Tenant-based permission hooks for multi-tenant isolation
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Audience Segment": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Buyer Transparency Profile": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Buyer Visibility Rule": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Certificate": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Certificate Type": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Consent Channel": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Consent Method": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Consent Record": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Consent Text": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Consent Topic": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Contract Instance": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Contract Rule": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Contract Template": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Data Sharing Preference": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Marketplace Consent Record": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Marketplace Contract Instance": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Marketplace Contract Template": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Masked Message": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Message": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Message Thread": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Moderation Case": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Review": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Risk Score": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Sample Request": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+	"Seller Transparency Profile": "tradehub_core.permissions.get_tenant_permission_query_conditions",
+}
+
+has_permission = {
+	"Audience Segment": "tradehub_core.permissions.has_tenant_permission",
+	"Buyer Transparency Profile": "tradehub_core.permissions.has_tenant_permission",
+	"Buyer Visibility Rule": "tradehub_core.permissions.has_tenant_permission",
+	"Certificate": "tradehub_core.permissions.has_tenant_permission",
+	"Certificate Type": "tradehub_core.permissions.has_tenant_permission",
+	"Consent Channel": "tradehub_core.permissions.has_tenant_permission",
+	"Consent Method": "tradehub_core.permissions.has_tenant_permission",
+	"Consent Record": "tradehub_core.permissions.has_tenant_permission",
+	"Consent Text": "tradehub_core.permissions.has_tenant_permission",
+	"Consent Topic": "tradehub_core.permissions.has_tenant_permission",
+	"Contract Instance": "tradehub_core.permissions.has_tenant_permission",
+	"Contract Rule": "tradehub_core.permissions.has_tenant_permission",
+	"Contract Template": "tradehub_core.permissions.has_tenant_permission",
+	"Data Sharing Preference": "tradehub_core.permissions.has_tenant_permission",
+	"Marketplace Consent Record": "tradehub_core.permissions.has_tenant_permission",
+	"Marketplace Contract Instance": "tradehub_core.permissions.has_tenant_permission",
+	"Marketplace Contract Template": "tradehub_core.permissions.has_tenant_permission",
+	"Masked Message": "tradehub_core.permissions.has_tenant_permission",
+	"Message": "tradehub_core.permissions.has_tenant_permission",
+	"Message Thread": "tradehub_core.permissions.has_tenant_permission",
+	"Moderation Case": "tradehub_core.permissions.has_tenant_permission",
+	"Review": "tradehub_core.permissions.has_tenant_permission",
+	"Risk Score": "tradehub_core.permissions.has_tenant_permission",
+	"Sample Request": "tradehub_core.permissions.has_tenant_permission",
+	"Seller Transparency Profile": "tradehub_core.permissions.has_tenant_permission",
+}
 
 # DocType Class
 # -------------
@@ -115,7 +164,18 @@ required_apps = ["tradehub_core"]
 #   - AudienceSegment.on_trash: cleans up segment members
 # Frappe automatically invokes these class methods during document lifecycle.
 
-doc_events = {}
+doc_events = {
+	# Contract automation hooks - auto-generate contracts on key document events
+	"Seller Application": {
+		"on_submit": "tradehub_compliance.utils.contract_automation.handle_seller_application_approval"
+	},
+	"Marketplace Order": {
+		"on_submit": "tradehub_compliance.utils.contract_automation.handle_marketplace_order_submit"
+	},
+	"Seller Profile": {
+		"after_insert": "tradehub_compliance.utils.contract_automation.handle_seller_profile_created"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -126,7 +186,8 @@ doc_events = {}
 # - Audience tasks: compute_all_audience_segments, compute_segment_metrics, cleanup_expired_masked_messages, pii_audit_scan
 scheduler_events = {
 	"daily": [
-		"tradehub_compliance.tasks.certificate_alerts"
+		"tradehub_compliance.tasks.certificate_alerts",
+		"tradehub_compliance.utils.contract_automation.expire_unsigned_contracts"
 	],
 	"weekly": [
 		"tradehub_compliance.tradehub_compliance.transparency.tasks.anonymize_inactive_consent_data",
